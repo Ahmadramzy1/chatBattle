@@ -49,6 +49,84 @@
 @media(max-width:1000px){.video-actions{grid-template-columns:1fr 1fr}.fullscreen-action{grid-column:1/-1;grid-row:2}.cb-fit.portrait iframe{width:min(100%,calc(clamp(270px,34vw,510px) * .5625))}}
 @media(max-width:650px){.cb-time{display:none}.cb-controls{gap:3px;padding:5px}.cb-controls button{padding:5px;min-width:26px}}
 
+
+/* Quick winner shake + celebratory spark fountains. Scoped to the advancement action. */
+.video-frame.cb-winning{
+  z-index:5;
+  outline:2px solid #f4ffb1;
+  animation:cb-frame-victory-shake 650ms cubic-bezier(.26,.1,.22,1) both;
+  box-shadow:0 0 0 3px #d7ff7626,0 0 40px #d7ff7688,0 0 90px #d7ff7633;
+}
+.video-card.cb-winning-card{
+  border-color:#e5ff96;
+  box-shadow:0 0 38px #d7ff7645,inset 0 0 25px #d7ff760c;
+}
+@keyframes cb-frame-victory-shake{
+  0%{transform:translate3d(0,0,0) scale(1)}
+  12%{transform:translate3d(-7px,2px,0) scale(1.015)}
+  25%{transform:translate3d(8px,-2px,0) scale(1.025)}
+  37%{transform:translate3d(-6px,1px,0) scale(1.027)}
+  50%{transform:translate3d(5px,-1px,0) scale(1.023)}
+  65%{transform:translate3d(-3px,0,0) scale(1.018)}
+  85%{transform:translate3d(1px,0,0) scale(1.01)}
+  100%{transform:translate3d(0,0,0) scale(1)}
+}
+.cb-victory-layer{
+  position:fixed;inset:0;z-index:400;pointer-events:none;overflow:hidden;
+  contain:layout style;isolation:isolate;
+}
+.cb-victory-glow{
+  position:absolute;left:var(--center-x);top:var(--center-y);
+  width:min(55vw,600px);height:min(60vh,430px);
+  transform:translate(-50%,-50%);border-radius:50%;
+  background:radial-gradient(ellipse,#e6ffab36 0%,#dbff7621 26%,transparent 69%);
+  animation:cb-glow-burst 1100ms ease-out both;
+}
+@keyframes cb-glow-burst{
+  0%{opacity:0;transform:translate(-50%,-50%) scale(.4)}
+  25%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(1.5)}
+}
+.cb-victory-label{
+  position:absolute;left:var(--center-x);top:var(--label-y);
+  padding:8px 27px;border:1px solid #f5ffb0a8;border-radius:999px;
+  background:linear-gradient(125deg,#253915f2,#11191af5);
+  color:#edffb6;font:900 clamp(23px,3.3vw,46px)/1.3 'Space Grotesk',Arial,sans-serif;
+  letter-spacing:4px;white-space:nowrap;
+  text-shadow:0 0 20px #cfff6f8a;
+  box-shadow:0 0 48px #cfff6f51,0 10px 35px #000a;
+  animation:cb-label-appear 1250ms cubic-bezier(.16,1,.3,1) both;
+}
+@keyframes cb-label-appear{
+  0%{opacity:0;transform:translate(-50%,-50%) scale(.65)}
+  20%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}
+  35%{transform:translate(-50%,-50%) scale(1)}
+  78%{opacity:1}
+  100%{opacity:0;transform:translate(-50%,-60%) scale(.96)}
+}
+.cb-victory-spark{
+  position:absolute;left:var(--start-x);top:var(--start-y);
+  width:var(--size);height:calc(var(--size) * 2.7);border-radius:2px;
+  background:var(--spark-color);
+  box-shadow:0 0 11px var(--spark-color);
+  animation:cb-spark-fountain 1100ms cubic-bezier(.21,.4,.28,1) var(--delay) both;
+}
+.cb-victory-spark.cb-star{
+  height:var(--size);border-radius:50%;
+  box-shadow:0 0 14px 3px var(--spark-color);
+}
+@keyframes cb-spark-fountain{
+  0%{opacity:0;transform:translate3d(0,0,0) scale(.35) rotate(0)}
+  10%{opacity:1}
+  55%{opacity:1;transform:translate3d(var(--mid-x),var(--mid-y),0) scale(1) rotate(var(--rotation))}
+  100%{opacity:0;transform:translate3d(var(--end-x),var(--end-y),0) scale(.55) rotate(var(--rotation))}
+}
+@media(prefers-reduced-motion:reduce){
+  .video-frame.cb-winning{animation:none}
+  .cb-victory-glow,.cb-victory-spark{display:none}
+  .cb-victory-label{animation:none;opacity:1}
+}
+
 </style>
 </head>
 <body>
@@ -416,8 +494,81 @@
  function tick(){if(game?.phase!=='battle')return;const changed=Core.maybeExpire(game,Date.now());if(changed){save();refreshBattleControls();toast('⏱️ زمان رأی‌گیری تمام شد؛ برنده را انتخاب کنید.')}else updateClock();}
  function startVoting(){if(!game||!Core.startVote(game))return;save();refreshBattleControls();toast('⚡ رأی‌گیری آغاز شد! فقط 1 یا 2 بفرستید.')}
  function stopVoting(){if(!game||!Core.endVote(game))return;save();refreshBattleControls();toast('رأی‌گیری بسته شد. حالا صعود را انتخاب کنید.')}
- function advanceSide(side){if(!game)return;const res=Core.advance(game,side-1);if(!res.ok){toast('اول رأی‌گیری رو به پایان برسون.');return}
-  window.ChatBattlePlayer?.destroyAll();$('player-1').replaceChildren();$('player-2').replaceChildren();lastBattleKey='';save();render();if(res.finished){disconnect();toast('🏆 قهرمان Chat Battle مشخص شد!')}else toast('🎉 ویدیو '+side+' صعود کرد!')
+
+ let winPending=false,winTimer=null,winOverlay=null;
+ const winFXDuration=1450;
+ function cancelWinFX(){
+  if(winTimer!==null){clearTimeout(winTimer);winTimer=null}
+  winPending=false;
+  winOverlay?.remove();winOverlay=null;
+  for(const el of document.querySelectorAll('.cb-winning,.cb-winning-card'))el.classList.remove('cb-winning','cb-winning-card');
+ }
+ function celebrateWinner(side){
+  const frame=$('frame-'+side),card=$('card-'+side);
+  if(!frame||!card)return;
+  frame.classList.add('cb-winning');card.classList.add('cb-winning-card');
+  const rect=frame.getBoundingClientRect();
+  const screenWidth=window.innerWidth,screenHeight=window.innerHeight;
+  const cx=Math.max(65,Math.min(screenWidth-65,rect.left+rect.width/2));
+  const cy=Math.max(60,Math.min(screenHeight-60,rect.top+rect.height/2));
+  const layer=document.createElement('div');
+  layer.className='cb-victory-layer';layer.setAttribute('aria-hidden','true');
+  layer.style.setProperty('--center-x',cx+'px');
+  layer.style.setProperty('--center-y',cy+'px');
+  layer.style.setProperty('--label-y',Math.max(80,Math.min(screenHeight-65,rect.top+rect.height*.36))+'px');
+  const glow=document.createElement('div');glow.className='cb-victory-glow';layer.append(glow);
+  const label=document.createElement('div');label.className='cb-victory-label';label.textContent='WINNER!';layer.append(label);
+  if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+   const colors=['#d7ff76','#f3ffda','#ffe080','#ffb087','#9dc8ff','#ffffff'];
+   // Sparks erupt from two points along the winning video frame, rather than from page center.
+   const fragment=document.createDocumentFragment();
+   for(let i=0;i<60;i++){
+    const left=i%2===0;
+    const x=rect.left+rect.width*(left?.21:.79);
+    const y=Math.min(screenHeight-25,rect.top+rect.height*.72);
+    const direction=left?-1:1;
+    const horizontal=direction*(35+Math.random()*185)+(Math.random()-.5)*95;
+    const rise=90+Math.random()*260;
+    const spark=document.createElement('i');spark.className='cb-victory-spark'+(i%4===0?' cb-star':'');
+    spark.style.setProperty('--start-x',x+'px');spark.style.setProperty('--start-y',y+'px');
+    spark.style.setProperty('--mid-x',(horizontal*.68).toFixed(1)+'px');
+    spark.style.setProperty('--mid-y',(-rise).toFixed(1)+'px');
+    spark.style.setProperty('--end-x',horizontal.toFixed(1)+'px');
+    spark.style.setProperty('--end-y',(-rise+70+Math.random()*85).toFixed(1)+'px');
+    spark.style.setProperty('--rotation',(direction*(240+Math.random()*480)).toFixed(0)+'deg');
+    spark.style.setProperty('--size',(3+Math.random()*5).toFixed(1)+'px');
+    spark.style.setProperty('--spark-color',colors[i%colors.length]);
+    spark.style.setProperty('--delay',(Math.random()*170).toFixed(0)+'ms');
+    fragment.append(spark);
+   }
+   layer.append(fragment);
+  }
+  document.body.append(layer);winOverlay=layer;
+ }
+ function advanceSide(side){
+  if(winPending)return;
+  if(!game||game.phase!=='battle'||game.matchStatus!=='closed'||!Core.currentMatch(game)){
+   toast('اول رأی‌گیری رو به پایان برسون.');return;
+  }
+  if(side!==1&&side!==2)return;
+  const originalGame=game, originalMatch=Core.currentMatch(game).id;
+  winPending=true;
+  celebrateWinner(side);
+  const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  winTimer=setTimeout(()=>{
+   winTimer=null;
+   if(game!==originalGame||game.phase!=='battle'||Core.currentMatch(game)?.id!==originalMatch){
+    cancelWinFX();return;
+   }
+   const res=Core.advance(game,side-1);
+   cancelWinFX();
+   if(!res.ok){toast('امکان ثبت صعود وجود ندارد.');return}
+   window.ChatBattlePlayer?.destroyAll();
+   $('player-1').replaceChildren();$('player-2').replaceChildren();
+   lastBattleKey='';save();render();
+   if(res.finished){disconnect();toast('🏆 قهرمان Chat Battle مشخص شد!')}
+   else toast('🎉 ویدیو '+side+' صعود کرد!');
+  },reduced?250:winFXDuration);
  }
  function entryLabel(id){if(!id)return 'TBD';const n=game.entries.findIndex(e=>e.id===id);return n<0?'TBD':'VIDEO #'+pad(n+1)}
  function renderBracket(){if(game?.phase!=='battle')return;const root=$('bracket');root.replaceChildren();
@@ -453,7 +604,7 @@
   const result={app:'Chat Battle',topic:game.settings.topic,finishedAt:new Date(game.completedAt).toISOString(),capacity:game.settings.capacity,rankingRule:'Champion, elimination round, final vote share, votes',rankings:Core.rankings(game).map((e,i)=>({position:i+1,platform:e.video.platform,url:e.video.url,sender:e.sender,eliminatedRound:e.eliminatedRound,finalVoteShare:e.lastShare,finalVotes:e.lastVotes}))};
   const blob=new Blob([JSON.stringify(result,null,2)],{type:'application/json;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='chat-battle-results.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);
  }
- function reset(){window.ChatBattlePlayer?.destroyAll();disconnect();game=null;fallback=false;lastBattleKey='';idsSeen.clear();recentMessageKeys.clear();safeStorage.remove(STORE);$('confirmDialog').classList.add('hidden');render();window.scrollTo({top:0,behavior:'smooth'});}
+ function reset(){cancelWinFX();window.ChatBattlePlayer?.destroyAll();disconnect();game=null;fallback=false;lastBattleKey='';idsSeen.clear();recentMessageKeys.clear();safeStorage.remove(STORE);$('confirmDialog').classList.add('hidden');render();window.scrollTo({top:0,behavior:'smooth'});}
  function showReset(){if(!game){toast('هنوز مسابقه‌ای ساخته نشده.');return}$('confirmDialog').classList.remove('hidden')}
  $('setupForm').addEventListener('submit',submitSettings);$('demoSubmissionForm').addEventListener('submit',demoSubmit);
  $('fillDemoBtn').addEventListener('click',fillDemo);$('launchBtn').addEventListener('click',()=>{if(!game)return;const result=Core.startTournament(game);if(!result.ok){toast('برای شروع باید ظرفیت مسابقه کامل بشه.');return}save();render();toast('⚔️ مسابقه شروع شد! '+(result.byes?' | '+result.byes+' صعود خودکار':''));});
