@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="theme-color" content="#0c0e13">
+<meta name="description" content="Chat Battle — مسابقه حذفی ویدیوهای ارسالی در چت Kick با رأی‌گیری زنده">
+<title>Chat Battle — Live Video Tournament</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--bg:#090b0f;--panel:#151820;--panel2:#1a1e27;--border:#2e343f;--muted:#8b96a8;--text:#f5f5f0;--lime:#d7ff76;--salmon:#ff8e82;--blue:#9cc2ff;--r:20px;--f:'Vazirmatn',Tahoma,Arial,sans-serif;--latin:'Space Grotesk',Arial,sans-serif}
+*{box-sizing:border-box}html{min-height:100%;scroll-behavior:smooth}body{background:var(--bg);color:var(--text);margin:0;font:14px/1.8 var(--f);min-height:100vh;overflow-x:hidden}button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.36!important;filter:grayscale(.4)}input,select,textarea{outline:none;background:#0e1118;border:1px solid #333946;border-radius:10px;color:#fff;width:100%;padding:12px 14px}input:focus,select:focus,textarea:focus{border-color:var(--lime);box-shadow:0 0 0 3px #d7ff7616}label{display:block}a{color:inherit;text-decoration:none}::selection{background:#d7ff7670;color:#0a0d10}.hidden{display:none!important}.ambient{position:fixed;pointer-events:none;z-index:-1;filter:blur(100px);opacity:.13;border-radius:50%}.ambient-one{width:540px;height:540px;background:#4d718d;top:-320px;left:-200px}.ambient-two{width:400px;height:400px;background:#849c31;right:-290px;top:350px}.app-shell{min-height:100vh;display:flex;flex-direction:column;max-width:1800px;margin:auto}.topbar{height:88px;border-bottom:1px solid #ffffff10;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(20px,4.3vw,68px);gap:18px}.brand{display:flex;align-items:center;gap:13px;direction:ltr;flex-shrink:0}.brand-icon{width:47px;height:47px;background:#1b2220;border:1px solid #516237;border-radius:15px;display:grid;place-items:center;box-shadow:0 0 30px #d7ff760a}.brand-icon svg{width:30px}.brand strong{font:700 22px var(--latin);letter-spacing:-1px;display:block;line-height:1.2}.brand strong span{color:var(--lime)}.brand small{font:600 9px var(--latin);letter-spacing:2.3px;color:#b7c2c6}.header-mid{display:flex;align-items:center;gap:9px;color:#aeb6c3;font-size:12px;white-space:nowrap;overflow:hidden}.header-mid #headerTopic{direction:rtl;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;max-width:280px}.header-sep{color:#3d434e}.live-dot{height:8px;width:8px;background:var(--lime);border-radius:50%;box-shadow:0 0 12px #d7ff765e}.header-actions{display:flex;align-items:center;gap:16px;flex-shrink:0}.connection-indicator{border:1px solid #3b4540;background:#161e19;border-radius:30px;padding:5px 12px;display:flex;align-items:center;gap:7px;font-size:11px}.connection-indicator i{display:block;width:7px;height:7px;border-radius:50%;background:#a6b1ae}.connection-indicator.connected i{background:var(--lime);box-shadow:0 0 10px var(--lime)}.connection-indicator.error i{background:var(--salmon)}.icon-btn{background:#171b22;color:#b8c0ce;border:1px solid #343942;padding:9px 13px;border-radius:10px;display:flex;align-items:center;gap:8px}.icon-btn:hover,.secondary-btn:hover{background:#252b34;border-color:#5e6874}.page{display:none;flex:1;padding:52px clamp(20px,4.3vw,68px) 74px}.page.active{display:block;animation:fadeIn .45s both}@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}.glass{background:linear-gradient(155deg,#1a1e26dd,#11151ccc);border:1px solid #ffffff18;box-shadow:0 20px 55px #00000020;border-radius:var(--r)}.eyebrow,.section-number{font:700 11px var(--latin);color:var(--lime);letter-spacing:2.4px;direction:ltr}.eyebrow{display:flex;align-items:center;justify-content:flex-start;gap:9px}.eyebrow-rule{height:1px;width:16px;background:var(--lime)}.setup-layout{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(360px,.9fr);gap:clamp(30px,6vw,92px);align-items:start;direction:ltr}.setup-hero{position:relative;direction:ltr;padding:20px 0}.setup-hero h1{font:700 clamp(56px,5.5vw,102px)/1.04 var(--latin);margin:26px 0 25px;letter-spacing:-4px}.setup-hero h1 em,.page-title h1 em,.results-top h1 em{font-style:normal;color:var(--lime)}.setup-hero p{direction:rtl;text-align:left;max-width:410px;font-size:15px;color:#a4adbd;line-height:2;margin:0}.hero-orbit{height:285px;position:relative;display:flex;align-items:center;justify-content:center;gap:30px;margin-top:26px;isolation:isolate}.ring{position:absolute;top:50%;left:50%;width:390px;height:195px;border:1px solid #d7ff761e;border-radius:50%;transform:translate(-50%,-50%) rotate(-17deg);z-index:-1}.ring-two{width:470px;height:240px;border-color:#ffffff0d;transform:translate(-50%,-50%) rotate(18deg)}.orb-card{width:158px;height:207px;border:1px solid #697c46;background:linear-gradient(160deg,#394233,#101614 88%);border-radius:17px;transform:rotate(-9deg);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;box-shadow:0 25px 80px #000}.orb-card b{font:700 82px var(--latin);line-height:1;color:var(--lime)}.orb-card span{font:700 10px var(--latin);letter-spacing:3px;color:#a9b99f}.orb-two{transform:rotate(10deg);background:linear-gradient(160deg,#4b363c,#161115 88%);border-color:#915e62}.orb-two b{color:var(--salmon)}.orb-two span{color:#d6acaa}.versus{font:700 32px var(--latin);color:#fff;letter-spacing:-3px;z-index:2;text-shadow:0 0 25px #fff8}.hero-pills{display:flex;gap:11px;flex-wrap:wrap;margin-top:17px}.hero-pills span{padding:8px 11px;border:1px solid #2e343e;border-radius:100px;font:700 10px var(--latin);color:#a7b2be}.setup-panel{direction:rtl;padding:33px 35px}.panel-heading h2{font-size:29px;margin:8px 0 3px;line-height:1.5}.panel-heading p{margin:0;color:#96a0ae}.form-field{margin-top:22px}.form-field>label{font-size:12px;color:#d3d8de;font-weight:700;margin-bottom:8px}.prefix-input{display:flex;direction:ltr;align-items:center;border:1px solid #333946;background:#0e1118;border-radius:10px;overflow:hidden}.prefix-input span{padding:0 13px;color:#768491;font:500 13px var(--latin)}.prefix-input input{border:none;background:transparent;border-radius:0;padding-left:0}.prefix-input:focus-within{border-color:var(--lime)}.segment,.capacity-select{display:flex;gap:7px}.segment label,.capacity-select label{flex:1;cursor:pointer}.segment input,.capacity-select input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}.segment span,.capacity-select span{display:flex;align-items:center;justify-content:center;background:#131821;border:1px solid #343b47;border-radius:9px;padding:10px 6px;transition:.18s;font-size:12px;text-align:center}.capacity-select span{font:700 20px var(--latin)}.segment input:checked+span,.capacity-select input:checked+span{background:#d7ff761a;color:var(--lime);border-color:#b2e64a}.segment input:focus-visible+span,.capacity-select input:focus-visible+span{outline:2px solid var(--lime)}.hint{font-size:11px;color:#8a96a5;line-height:1.8;margin:7px 0 0}.form-double{display:grid;grid-template-columns:1fr 1fr;gap:14px}.toggle-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:23px;cursor:pointer}.toggle-row span{display:flex;flex-direction:column;line-height:1.7}.toggle-row b{font-size:12px}.toggle-row small{font-size:10px;color:#8c97a7}.toggle-row input{position:absolute;opacity:0;width:1px}.toggle-row i{position:relative;width:40px;height:22px;background:#454b55;border-radius:20px;flex:none;transition:.2s}.toggle-row i:after{content:"";position:absolute;width:16px;height:16px;background:white;border-radius:50%;top:3px;right:3px;transition:.2s}.toggle-row input:checked+i{background:#97be43}.toggle-row input:checked+i:after{transform:translateX(-18px)}.advanced{padding:15px 0;margin-top:15px;border-top:1px solid #ffffff12}.advanced summary{cursor:pointer;color:#9ba9b7;font-size:11px;display:flex;justify-content:space-between}.advanced>label{margin-top:12px;font-size:12px}.advanced input{margin-top:7px}.primary-btn,.secondary-btn{display:inline-flex;align-items:center;justify-content:center;gap:12px;border-radius:11px;padding:12px 18px;font-size:13px;font-weight:800;transition:transform .15s,background .2s,border .2s;text-align:center}.primary-btn{border:1px solid var(--lime);background:var(--lime);color:#141b0e;box-shadow:0 6px 32px #d7ff761c}.primary-btn:not(:disabled):hover{background:#e7ffaf;transform:translateY(-1px)}.primary-btn span{font:700 21px var(--latin)}.secondary-btn{border:1px solid #444c59;background:#1d222b;color:#e0e6ef}.main-start{width:100%;margin-top:18px;font-size:15px;padding:14px}.site-footer{border-top:1px solid #ffffff11;min-height:68px;padding:0 clamp(20px,4.3vw,68px);display:flex;align-items:center;justify-content:space-between;gap:12px;color:#75808d;font:600 10px var(--latin);letter-spacing:1.2px}.site-footer a:hover{color:var(--lime)}.page-title,.battle-intro{display:flex;align-items:end;justify-content:space-between;gap:18px;margin-bottom:30px}.page-title h1,.battle-intro h1{font-size:clamp(26px,3vw,42px);margin:6px 0 5px;line-height:1.5}.page-title p{color:#98a2b0;margin:0}.lobby-counter{display:flex;align-items:baseline;gap:8px;direction:ltr}.lobby-counter strong{font:700 58px var(--latin);color:var(--lime);letter-spacing:-4px}.lobby-counter>span{font:500 21px var(--latin);color:#637080}.lobby-counter small{display:block;font:600 9px var(--latin);letter-spacing:2px;color:#8b96a7}.progress-track{height:6px;background:#242a32;border-radius:100px;margin-bottom:30px;overflow:hidden}.progress-track>div{width:0;background:var(--lime);height:100%;transition:width .5s}.lobby-grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:20px}.lobby-main{padding:24px;min-height:480px}.inside-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}.inside-heading h2{margin:0;font-size:18px}.pill{font-size:11px;color:#c1cbd5;border:1px solid #3d4550;border-radius:100px;padding:5px 11px;white-space:nowrap}.entry-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(135px,1fr));gap:12px}.entry-tile{background:#11161e;border:1px solid #303742;border-radius:13px;overflow:hidden;animation:popIn .3s both}.entry-photo{aspect-ratio:1.42;position:relative;background:radial-gradient(circle at 30% 25%,#343e43,#0e1118 80%);display:grid;place-items:center;overflow:hidden}.entry-photo img,.ranking-photo img{width:100%;height:100%;object-fit:cover}.entry-photo .placeholder-symbol{font:700 34px var(--latin);color:#a8bab4}.entry-photo span{position:absolute;top:7px;left:8px;direction:ltr;font:700 9px var(--latin);color:#fff;background:#000a;border:1px solid #ffffff25;border-radius:4px;padding:3px 6px}.entry-details{display:flex;align-items:center;justify-content:space-between;padding:9px;gap:6px}.entry-details small{color:#94a2b4;font:600 10px var(--latin)}.entry-details b{font:700 10px var(--latin)}.empty-entries{text-align:center;margin:60px auto;color:#8996a5;max-width:340px}.empty-entries>span{display:block;font-size:50px;color:var(--lime)}.empty-entries strong{color:#d0d9e5;display:block;font-size:18px}.empty-entries p{font-size:12px}.lobby-side{display:flex;flex-direction:column;gap:16px}.side-card{padding:21px}.side-card h3{margin:7px 0;font-size:17px}.side-card p{font-size:12px;color:#a3adba;line-height:1.9}.connection-detail{border:1px solid #3e4b40;color:var(--lime);background:#1c2920;padding:10px;border-radius:9px;font-size:11px;margin:14px 0}.side-card .secondary-btn{width:100%;font-size:11px}.side-card form{display:flex;flex-direction:column;gap:9px;margin:12px 0}.side-card textarea{resize:vertical}.side-card .subtle-btn{margin-top:8px;background:#202a1d;border-color:#425437;color:#d7ff76}.three-platforms{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}.three-platforms span{font:600 10px var(--latin);padding:5px 8px;border:1px solid #444750;border-radius:8px;color:#c2cad1}.lobby-side>.primary-btn{width:100%;padding:16px}.battle-intro h1{font-weight:900;font-size:clamp(25px,2.6vw,36px);max-width:850px}.battle-progress{text-align:left;direction:ltr}.battle-progress b{font:700 29px var(--latin);display:block;color:var(--lime)}.battle-progress span{font-size:10px;color:#9da8b5}.stage{display:grid;grid-template-columns:minmax(0,1fr) 66px minmax(0,1fr);direction:ltr;gap:8px;align-items:center}.video-card{min-width:0;border:1px solid #40513c;background:linear-gradient(155deg,#1e2921,#11161a 70%);border-radius:18px;padding:15px;transition:box-shadow .2s,border-color .2s}.right-card{border-color:#564347;background:linear-gradient(155deg,#291d22,#171217 70%)}.video-card.leading{box-shadow:0 0 30px #d7ff7625;border-color:#cfff77}.right-card.leading{box-shadow:0 0 30px #ff8e8228;border-color:#ff8e82}.card-heading{display:flex;align-items:center;justify-content:space-between;padding:0 5px 10px}.video-side-id{font:700 26px var(--latin);display:flex;align-items:center;gap:9px;letter-spacing:-1px}.video-side-id span{font:700 9px var(--latin);letter-spacing:2px;color:#a0acb8}.platform-tag{font:700 11px var(--latin);padding:5px 9px;border:1px solid #ffffff30;color:#c5d0dc;border-radius:6px}.video-frame{height:clamp(270px,34vw,510px);background:#06070a;border:1px solid #3e4650;border-radius:11px;position:relative;overflow:hidden}.video-cover{position:absolute;inset:0;z-index:3;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 30% 20%,#3d4656,#070910 75%)}.right-card .video-cover{background:radial-gradient(circle at 65% 25%,#593b43,#0b0709 75%)}.cover-light{position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 28px,#ffffff05 29px 30px);opacity:.4}.cover-thumb{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(22px) brightness(.27);transform:scale(1.11)}.video-lock{position:relative;z-index:2;display:flex;align-items:center;flex-direction:column;gap:5px;color:#cfd8e3}.lock-symbol{font:700 66px var(--latin);color:#e2ecf3}.video-lock>span:nth-child(2){font-size:19px;font-weight:800}.video-lock small{font-size:12px;color:#a8b2c1}.frame-player{position:absolute;inset:0;z-index:1;display:grid;place-items:center}.frame-player iframe{width:100%;height:100%;border:0;background:#07080a}.frame-player .unsupported{padding:30px;text-align:center;font-size:12px;color:#bac3ce}.number-corner{position:absolute;left:12px;bottom:12px;z-index:4;font:700 40px var(--latin);pointer-events:none;color:#fff;background:#06080bbd;border-radius:11px;padding:0 15px}.video-frame.is-open .video-cover{display:none}.video-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:11px 0}.play-action,.external-action,.advance-action{padding:10px 8px;border:1px solid #4d5b4e;border-radius:9px;font-size:11px;color:#e7eddf;text-align:center;transition:.2s;background:#293529;display:flex;justify-content:center;align-items:center}.play-action:hover{background:#3c5235}.external-action{border-color:#414959;background:#151b22;color:#ced5dd}.external-action:hover{background:#283244;color:#fff}.vote-display{background:#090d10b3;border-radius:10px;padding:12px 13px}.votes-top{display:flex;justify-content:space-between;align-items:center;direction:ltr}.votes-top span{font:700 10px var(--latin);color:#a4b0b7;letter-spacing:1.5px}.votes-top strong{font:700 clamp(25px,2.9vw,44px) var(--latin);color:var(--lime);line-height:1.2;font-variant-numeric:tabular-nums}.right-card .votes-top strong{color:var(--salmon)}.votes-top strong.bump{animation:bump .34s ease}.votes-meter{height:8px;border-radius:100px;background:#303d36;margin:10px 0 13px;overflow:hidden;direction:ltr}.votes-meter>div{height:100%;width:50%;background:linear-gradient(90deg,#9bce45,var(--lime));transition:width .35s cubic-bezier(.22,.9,.27,1)}.right-card .votes-meter>div{background:linear-gradient(90deg,#a45756,var(--salmon))}.advance-action{width:100%;border-style:dashed;border-color:#778766;color:#d7ff76;background:#d7ff7609;font-size:12px;font-weight:800}.right-card .advance-action{color:#ffc0b4;border-color:#875e59;background:#ff8e820a}.advance-action:not(:disabled):hover{background:#d7ff7627}.right-card .advance-action:not(:disabled):hover{background:#ff8e8227}.stage-center{display:flex;align-items:center;flex-direction:column;justify-content:center;height:450px;gap:25px}.vertical-line{width:1px;flex:1;background:linear-gradient(transparent,#54615a,transparent)}.versus-medal{background:#d8ff76;color:#0e130c;border:5px solid #111713;box-shadow:0 0 0 1px #748a41,0 0 30px #d7ff7633;width:64px;height:64px;display:grid;place-items:center;border-radius:50%;font:700 23px var(--latin);transform:rotate(-12deg)}.battle-controls{display:flex;align-items:center;gap:20px;justify-content:space-between;margin-top:18px;padding:19px 23px;flex-wrap:wrap}.controls-text{min-width:250px;display:flex;flex-direction:column;gap:6px}.controls-text strong{font-size:16px;line-height:1.6}.vote-command{color:#a2afbc;font-size:11px}.vote-command kbd{font:700 14px var(--latin);color:var(--lime);border:1px solid #53613d;padding:0 6px;border-radius:5px}.timer-block{text-align:center;min-width:140px}.timer-block>span{font:700 9px var(--latin);color:#abb6c3;letter-spacing:2px}.timer-block strong{display:block;font:700 37px var(--latin);font-variant-numeric:tabular-nums;line-height:1.5}.timer-block.urgent strong{color:var(--salmon);animation:urgentPulse .65s infinite}.timer-track{height:5px;background:#303940;border-radius:6px;overflow:hidden}.timer-track>div{width:100%;height:100%;background:var(--lime);transition:width .2s linear}.control-buttons{display:flex;gap:9px}.control-buttons .primary-btn,.control-buttons .secondary-btn{white-space:nowrap}.demo-voting{margin-top:14px;padding:12px 17px;display:flex;flex-wrap:wrap;gap:9px;align-items:center}.demo-voting label{font-size:12px}.demo-voting input{width:145px;padding:8px 9px}.demo-voting button{background:#2b3544;border:1px solid #52627b;border-radius:8px;padding:8px 12px;color:#fff;font-size:12px}.demo-voting button:hover{background:#3b4f68}.demo-voting small{color:#9faebf}.bracket-section{margin-top:22px;padding:22px 25px}.inside-heading .section-number{display:block;margin-bottom:8px}.bracket-scroller{overflow-x:auto;direction:ltr;scrollbar-color:#4d5962 transparent;padding-bottom:15px}.bracket{display:flex;gap:15px;min-width:max-content}.round-col{width:195px;display:flex;flex-direction:column;gap:10px}.round-title{display:flex;justify-content:space-between;color:#9aa5b5;padding-bottom:8px;border-bottom:1px solid #343d46;font:700 11px var(--latin)}.round-title span{color:var(--lime)}.bracket-list{display:flex;flex-direction:column;gap:6px;max-height:318px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#475560 transparent}.mini-match{background:#10151c;border:1px solid #303944;border-radius:9px;padding:7px}.mini-match.current{border-color:var(--lime);box-shadow:0 0 10px #d7ff761c}.mini-match.bye{opacity:.66}.mini-contender{display:flex;align-items:center;gap:6px;padding:4px;font:600 10px var(--latin);color:#a6b2bb;direction:ltr}.mini-contender b{color:#e8ecf3;min-width:19px;font:700 10px var(--latin)}.mini-contender.win{color:var(--lime)}.mini-contender span{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:126px}.mini-contender:nth-child(2){border-top:1px solid #292f3a}.results-top{text-align:center;position:relative;padding-top:25px}.results-top h1{font:700 clamp(42px,5.7vw,78px)/1.2 var(--latin);letter-spacing:-3px;margin:8px 0}.results-top>p{color:#a4b1c1}.confetti-star{font:700 65px var(--latin);color:var(--lime);line-height:1}.winner-card{display:flex;align-items:center;justify-content:center;gap:22px;margin:38px auto 30px;max-width:630px;border:1px solid #8eab55;background:linear-gradient(120deg,#2f3c26,#131b16);padding:22px;border-radius:19px;direction:ltr}.winner-image{width:130px;height:115px;background:#111;display:grid;place-items:center;overflow:hidden;border-radius:13px;flex-shrink:0}.winner-image img{width:100%;height:100%;object-fit:cover}.winner-data{text-align:left;flex:1;min-width:0}.winner-data small{font:700 11px var(--latin);color:var(--lime);letter-spacing:2px}.winner-data h2{font:700 32px var(--latin);margin:8px 0}.winner-data p{margin:0;color:#c3cab6}.result-subtitle{margin:40px 0 20px;font-size:18px;font-weight:800}.result-subtitle span{color:var(--lime)}.ranking-list{max-width:970px;margin:0 auto;display:grid;gap:10px}.ranking-row{display:flex;align-items:center;gap:20px;padding:11px 20px;background:#151a21;border:1px solid #333c47;border-radius:12px;direction:ltr}.ranking-row:first-child{border-color:#9eba5b;background:#1c271e}.ranking-rank{width:46px;text-align:center;font:700 25px var(--latin);color:#a6b4c2}.ranking-row:first-child .ranking-rank{color:var(--lime)}.ranking-photo{width:83px;height:58px;background:#243039;border-radius:7px;flex-shrink:0;display:grid;place-items:center;overflow:hidden}.ranking-meta{flex:1;min-width:0;text-align:left}.ranking-meta strong{font:700 14px var(--latin);display:block;word-break:break-word}.ranking-meta small{color:#8c9aab;font:500 10px var(--latin)}.ranking-user{color:#d7ff76;font:600 13px var(--latin);max-width:38%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.result-actions{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:31px}.ranking-note{max-width:870px;margin:21px auto;color:#91a0b1;text-align:center;font-size:11px}.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);border:1px solid #63754e;background:#192217;color:#ecffdb;padding:12px 22px;border-radius:11px;box-shadow:0 15px 45px #000a;max-width:min(90vw,500px);z-index:1000;text-align:center;opacity:0;pointer-events:none;transition:.25s}.toast.visible{opacity:1;transform:translate(-50%,0)}.modal-backdrop{position:fixed;inset:0;background:#000b;backdrop-filter:blur(7px);z-index:500;display:grid;place-items:center;padding:20px}.confirm-card{padding:30px;max-width:450px;width:100%}.confirm-card h2{font-size:26px}.confirm-card p{color:#b2bfcb}.confirm-card>div{display:flex;gap:9px;margin-top:22px}.confirm-card button{flex:1}@keyframes bump{0%{transform:scale(1)}45%{transform:scale(1.35);text-shadow:0 0 20px currentColor}100%{transform:scale(1)}}@keyframes urgentPulse{50%{opacity:.4}}@keyframes popIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+@media(max-width:1050px){.setup-layout{grid-template-columns:minmax(0,1fr) minmax(360px,1fr);gap:25px}.setup-hero h1{font-size:62px}.lobby-grid{grid-template-columns:minmax(0,1fr) 275px}.video-actions{grid-template-columns:1fr}.video-frame{height:360px}.battle-controls{justify-content:center}.controls-text{flex:1}.header-mid{display:none}}
+@media(max-width:800px){.page{padding:28px 18px 50px}.topbar{padding:0 18px;height:76px}.setup-layout{display:flex;flex-direction:column}.setup-hero{width:100%;text-align:center}.setup-hero h1{font-size:clamp(44px,11vw,72px);letter-spacing:-2.5px}.setup-hero p{text-align:center;margin:auto}.hero-orbit{height:210px;margin:0}.orb-card{height:150px;width:120px}.orb-card b{font-size:55px}.hero-pills{justify-content:center}.setup-panel{width:100%;max-width:680px;margin:auto}.lobby-grid{grid-template-columns:1fr}.lobby-side{display:grid;grid-template-columns:1fr 1fr}.lobby-side>.primary-btn{grid-column:1/-1}.stage{grid-template-columns:1fr 45px 1fr;gap:0}.video-card{padding:7px}.video-frame{height:300px}.stage-center{height:300px}.versus-medal{width:43px;height:43px;font-size:17px}.video-actions{gap:4px}.video-actions>*{padding:9px 2px;font-size:10px}.vote-display{padding:9px}.card-heading{padding:0 0 7px}.video-side-id{font-size:19px}.video-side-id span{font-size:7px}.battle-intro{align-items:start}.site-footer>span:nth-child(2){display:none}}
+@media(max-width:540px){.brand-icon{width:39px;height:39px}.brand strong{font-size:18px}.brand small{font-size:7px}.header-actions{gap:7px}.icon-btn span{display:none}.icon-btn{padding:8px 12px}.setup-panel{padding:24px 17px}.form-double{gap:9px}.segment span{font-size:10px}.page-title{flex-direction:column;align-items:start}.lobby-counter{align-self:end}.lobby-main{padding:13px}.entry-grid{grid-template-columns:repeat(2,1fr)}.lobby-side{display:flex}.stage{display:flex;flex-direction:column;gap:10px}.video-card{width:100%;padding:10px}.stage-center{height:45px;width:100%;flex-direction:row;gap:13px}.vertical-line{width:auto;height:1px;flex:1}.video-frame{height:360px}.video-actions{grid-template-columns:1fr 1fr}.video-actions>*{font-size:11px}.battle-controls{padding:14px}.control-buttons{width:100%;justify-content:center}.control-buttons button{flex:1;font-size:11px;padding:10px}.battle-intro h1{font-size:24px}.video-lock>span:nth-child(2){font-size:16px}.vote-display .votes-top strong{font-size:36px}.ranking-row{gap:8px;padding:9px}.ranking-rank{width:26px;font-size:18px}.ranking-photo{width:60px;height:48px}.ranking-user{font-size:10px}.winner-card{gap:10px;padding:12px}.winner-image{width:90px;height:80px}.winner-data h2{font-size:21px}.result-actions{flex-direction:column}.result-actions button{width:100%}}
+/* Keep English winner headline punctuation in the correct reading direction. */
+.results-top h1{direction:ltr}
+
+
+/* Chat Battle hosted player improvements */
+.video-actions{grid-template-columns:1fr 1fr 1fr}
+.fullscreen-action{border:1px solid #465562;color:#e4eaf2;background:#1b252c;border-radius:9px;font:700 11px Vazirmatn,Tahoma,sans-serif;padding:9px 6px;cursor:pointer}
+.fullscreen-action:hover{background:#31414f}
+.frame-player{display:block;background:#05060a;overflow:hidden}
+.frame-player>div{width:100%;height:100%}
+.cb-fit{width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#050505;overflow:hidden}
+.cb-fit iframe{display:block;border:0;background:#000}
+.cb-fit.landscape iframe{width:100%;height:100%}
+.cb-fit.portrait iframe{width:min(100%,calc(clamp(270px,34vw,510px) * .5625));height:100%}
+.cb-instagram{position:absolute;inset:0;overflow:hidden;background:#060608}
+.cb-instagram iframe{position:absolute;top:50%;left:50%;display:block;max-width:none!important;max-height:none!important;border:0;transform-origin:center center}
+.cb-native{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#020204}
+.cb-native video{width:100%;height:100%;object-fit:contain;background:#000}
+.cb-controls{position:absolute;z-index:10;bottom:8px;left:8px;right:8px;border:1px solid #ffffff25;border-radius:10px;background:#111922dc;backdrop-filter:blur(15px);display:flex;align-items:center;gap:6px;padding:8px;color:white;direction:ltr;transition:opacity .15s}
+.cb-controls button{flex:none;border:0;border-radius:6px;background:#27313c;color:#fff;padding:5px 7px;min-width:30px;font:700 11px Arial,sans-serif}
+.cb-controls button:hover{background:#42556a}
+.cb-controls input[type=range]{flex:1;min-width:20px;width:auto;padding:0;background:transparent;box-shadow:none;accent-color:#d7ff76;cursor:pointer}
+.cb-time{font:700 10px Arial,sans-serif;white-space:nowrap}
+.cb-message{display:grid;place-content:center;height:100%;padding:22px;color:#c4d2df;text-align:center;font-size:12px;gap:12px}
+.cb-message a{color:#d7ff76;text-decoration:underline}
+.video-frame:fullscreen{height:100vh!important;width:100vw!important;max-height:none!important;border:none!important;border-radius:0!important;background:#000}
+.video-frame:fullscreen .cb-fit.portrait iframe{width:min(100%,calc(100vh * .5625))}
+.video-frame:fullscreen .cb-controls{bottom:18px;left:50%;right:auto;transform:translateX(-50%);width:min(92vw,1050px)}
+.video-frame:fullscreen .number-corner{top:15px;bottom:auto}
+@media(max-width:1000px){.video-actions{grid-template-columns:1fr 1fr}.fullscreen-action{grid-column:1/-1;grid-row:2}.cb-fit.portrait iframe{width:min(100%,calc(clamp(270px,34vw,510px) * .5625))}}
+@media(max-width:650px){.cb-time{display:none}.cb-controls{gap:3px;padding:5px}.cb-controls button{padding:5px;min-width:26px}}
+
+</style>
+</head>
+<body>
+<div class="ambient ambient-one" aria-hidden="true"></div><div class="ambient ambient-two" aria-hidden="true"></div>
+<div class="app-shell">
+ <header class="topbar">
+  <a class="brand" href="./" aria-label="Chat Battle — خانه">
+   <span class="brand-icon"><svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="m13 8 27 27-5 5L8 13z" fill="#d7ff76"/><path d="M35 8 8 35l5 5L40 13z" fill="#fff"/><path d="m7 7 8 2-6 6zM41 7l-8 2 6 6z" fill="#ff8f80"/></svg></span>
+   <span><strong>CHAT<span>BATTLE</span></strong><small>THE CHAT DECIDES.</small></span>
+  </a>
+  <div class="header-mid"><span class="live-dot"></span><span id="headerPhase">آماده برای مسابقه</span><span class="header-sep">/</span><span id="headerTopic">YOUR NEXT BIG BATTLE</span></div>
+  <div class="header-actions"><span class="connection-indicator disconnected" id="connectionStatus"><i></i><span>قطع</span></span><button class="icon-btn" id="resetBtn" title="مسابقه جدید" type="button">↻ <span>مسابقه جدید</span></button></div>
+ </header>
+ <main>
+  <section class="page active" id="page-setup" aria-label="تنظیم مسابقه">
+   <div class="setup-layout">
+    <div class="setup-hero">
+     <span class="eyebrow"><span class="eyebrow-rule"></span> INTERACTIVE STREAM EXPERIENCE <span class="eyebrow-rule"></span></span>
+     <h1>ONE CHAT.<br><em>ONE CHAMPION.</em></h1>
+     <p>بیننده‌ها ویدیوهاشون رو می‌فرستن، رو‌به‌روی هم قرار می‌گیرن و این چته که قهرمان مسابقه رو انتخاب می‌کنه.</p>
+     <div class="hero-orbit" aria-hidden="true"><div class="ring ring-one"></div><div class="ring ring-two"></div><div class="orb-card orb-one"><b>01</b><span>VIDEO A</span></div><span class="versus">VS</span><div class="orb-card orb-two"><b>02</b><span>VIDEO B</span></div></div>
+     <div class="hero-pills"><span>⚡ LIVE VOTING</span><span>🏆 KNOCKOUT FORMAT</span><span>🔒 ANONYMOUS SUBMISSIONS</span></div>
+    </div>
+    <form id="setupForm" class="setup-panel glass" autocomplete="off">
+     <div class="panel-heading"><span class="section-number">01 / SETUP</span><h2>مسابقه‌ات رو بساز</h2><p>چندتا انتخاب کوچیک تا شروع یک رقابت بزرگ.</p></div>
+     <div class="form-field"><label for="topicInput">عنوان مسابقه</label><input id="topicInput" name="topic" maxlength="110" placeholder="مثلاً: خنده‌دارترین ویدیوی اینترنت" value="خنده‌دارترین ویدیوی اینترنت" required></div>
+     <div class="form-field"><label for="channelInput">یوزرنیم کانال Kick</label><div class="prefix-input"><span>kick.com/</span><input id="channelInput" name="channel" dir="ltr" placeholder="channel_name" spellcheck="false"></div></div>
+     <div class="form-field"><label>روش دریافت پیام‌ها</label><div class="segment" id="modeSelector"><label><input type="radio" name="mode" value="kick" checked><span>● چت واقعی Kick</span></label><label><input type="radio" name="mode" value="demo"><span>◉ حالت آزمایشی</span></label></div><p class="hint">حالت آزمایشی بدون نیاز به اتصال برای تست کامل مسابقه است.</p></div>
+     <div class="form-field"><label>تعداد شرکت‌کننده</label><div class="capacity-select"><label><input type="radio" name="capacity" value="16" checked><span>16</span></label><label><input type="radio" name="capacity" value="24"><span>24</span></label><label><input type="radio" name="capacity" value="32"><span>32</span></label><label><input type="radio" name="capacity" value="48"><span>48</span></label></div></div>
+     <div class="form-double"><div class="form-field"><label for="perUserInput">لینک مجاز هر نفر</label><select id="perUserInput"><option value="1">۱ لینک</option><option value="2" selected>۲ لینک</option><option value="3">۳ لینک</option><option value="5">۵ لینک</option><option value="10">۱۰ لینک</option></select></div><div class="form-field"><label for="secondsInput">زمان هر رأی‌گیری</label><select id="secondsInput"><option value="15">۱۵ ثانیه</option><option value="20">۲۰ ثانیه</option><option value="30" selected>۳۰ ثانیه</option><option value="45">۴۵ ثانیه</option><option value="60">۶۰ ثانیه</option><option value="90">۹۰ ثانیه</option><option value="120">۱۲۰ ثانیه</option></select></div></div>
+     <label class="toggle-row"><span><b>امکان تغییر رأی</b><small>آخرین 1 یا 2 هر نفر ملاک باشد؛ نه رأی اضافه</small></span><input type="checkbox" id="allowChangeInput"><i></i></label>
+     <details class="advanced"><summary>تنظیمات پیشرفته اتصال <span>⌄</span></summary><label for="pusherInput">Kick Pusher app key (اختیاری)</label><input id="pusherInput" dir="ltr" spellcheck="false" value="32cbd69e4b950bf97679"><p class="hint">اتصال مستقیم به چت مشابه instaQ است؛ اگر Kick روش اتصالش را تغییر دهد، ممکن است نیاز به کلید جدید باشد.</p></details>
+     <button type="submit" class="primary-btn main-start">ساخت مسابقه <span>←</span></button>
+    </form>
+   </div>
+  </section>
+  <section class="page" id="page-collecting" aria-label="جمع‌آوری ویدیوها">
+   <div class="page-title"><div><span class="section-number">02 / THE LOBBY</span><h1>لینک‌ها رو <em>جمع کنیم!</em></h1><p id="lobbySubtitle">ویدیوها به ترتیب ورود اضافه می‌شن. هویت ارسال‌کننده تا پایان پنهانه.</p></div><div class="lobby-counter"><strong id="lobbyCount">00</strong><span>/ <b id="lobbyCapacity">16</b><small>VIDEOS COLLECTED</small></span></div></div>
+   <div class="progress-track"><div id="collectionProgress"></div></div>
+   <div class="lobby-grid">
+    <section class="glass lobby-main"><div class="inside-heading"><h2>ورودی‌های مسابقه</h2><span id="lobbyAvailable" class="pill">16 جای خالی</span></div><div id="entryGrid" class="entry-grid"></div><div id="emptyEntries" class="empty-entries"><span>⤴</span><strong>منتظر اولین ویدیو هستیم</strong><p>لینک YouTube، TikTok یا Instagram رو توی چت بفرستید.</p></div></section>
+    <aside class="lobby-side"><div class="glass side-card"><span class="section-number">CONNECTION</span><h3 id="modeTitle">اتصال به چت</h3><p id="modeMessage">در حال آماده‌سازی...</p><div class="connection-detail" id="connectionDetail">● آماده</div><button type="button" id="reconnectBtn" class="secondary-btn">↻ اتصال مجدد</button></div>
+     <div id="demoPanel" class="glass side-card hidden"><span class="section-number">TEST TOOLS</span><h3>شبیه‌ساز چت</h3><form id="demoSubmissionForm"><input id="demoUsername" placeholder="username" value="viewer_01" dir="ltr" required><textarea id="demoLink" rows="2" dir="ltr" placeholder="لینک YouTube / TikTok / Instagram" required></textarea><button type="submit" class="secondary-btn">+ ارسال لینک آزمایشی</button></form><button type="button" id="fillDemoBtn" class="secondary-btn subtle-btn">پر کردن ظرفیت با نمونه‌های آزمایشی</button><p class="hint">نمونه‌های آزمایشی صرفاً برای تست منطق بازی هستند و پخش‌شدن همه ویدیوهای نمونه تضمین‌شده نیست.</p></div>
+     <div class="glass side-card instruction-card"><span class="section-number">HOW IT WORKS</span><h3>قانون بازی</h3><p>هر نفر تا <b id="perUserDisplay">2</b> لینک می‌تونه بفرسته. لینک تکراری پذیرفته نمی‌شه. وقتی ظرفیت پر شد، مسابقه قابل شروعه.</p><div class="three-platforms"><span>▶ YouTube</span><span>♪ TikTok</span><span>◎ Instagram</span></div></div>
+     <button type="button" id="launchBtn" class="primary-btn" disabled>شروع رقابت <span>←</span></button></aside>
+   </div>
+  </section>
+  <section class="page" id="page-battle" aria-label="مسابقه">
+   <div class="battle-intro"><div><span class="section-number" id="battleRoundLabel">ROUND 01 / MATCH 01</span><h1 id="battleTopic">BATTLE ARENA</h1></div><div class="battle-progress"><b id="matchFraction">01 / 15</b><span>مسابقه انجام‌شده</span></div></div>
+   <div class="stage">
+    <div class="video-card" id="card-1"><div class="card-heading"><div class="video-side-id">01<span>CONTENDER</span></div><span class="platform-tag" id="platform-1">VIDEO</span></div>
+     <div class="video-frame" id="frame-1"><div class="video-cover" id="cover-1"><div class="cover-light"></div><img id="preview-1" alt="" class="cover-thumb" hidden><div class="video-lock"><span class="lock-symbol">◈</span><span>ویدیو مخفی است</span><small>برای پخش، دکمه پایین را بزنید</small></div></div><div class="frame-player" id="player-1"></div><span class="number-corner">1</span></div>
+     <div class="video-actions"><button class="play-action" type="button" data-play="1">▶ نمایش / پخش</button><button class="fullscreen-action" type="button" data-fullscreen="1">⛶ تمام‌صفحه</button><a id="original-1" class="external-action" href="#" target="_blank" rel="noopener noreferrer">↗ باز کردن در سایت اصلی</a></div>
+     <div class="vote-display"><div class="votes-top"><span>VOTES FOR 01</span><strong id="votes-1">0</strong></div><div class="votes-meter"><div id="meter-1"></div></div><button type="button" class="advance-action" data-advance="1" disabled>🏆 صعود ویدیوی ۱</button></div>
+    </div>
+    <div class="stage-center"><span class="vertical-line"></span><div class="versus-medal">VS</div><span class="vertical-line"></span></div>
+    <div class="video-card right-card" id="card-2"><div class="card-heading"><div class="video-side-id">02<span>CONTENDER</span></div><span class="platform-tag" id="platform-2">VIDEO</span></div>
+     <div class="video-frame" id="frame-2"><div class="video-cover" id="cover-2"><div class="cover-light"></div><img id="preview-2" alt="" class="cover-thumb" hidden><div class="video-lock"><span class="lock-symbol">◈</span><span>ویدیو مخفی است</span><small>برای پخش، دکمه پایین را بزنید</small></div></div><div class="frame-player" id="player-2"></div><span class="number-corner">2</span></div>
+     <div class="video-actions"><button class="play-action" type="button" data-play="2">▶ نمایش / پخش</button><button class="fullscreen-action" type="button" data-fullscreen="2">⛶ تمام‌صفحه</button><a id="original-2" class="external-action" href="#" target="_blank" rel="noopener noreferrer">↗ باز کردن در سایت اصلی</a></div>
+     <div class="vote-display"><div class="votes-top"><span>VOTES FOR 02</span><strong id="votes-2">0</strong></div><div class="votes-meter"><div id="meter-2"></div></div><button type="button" class="advance-action" data-advance="2" disabled>🏆 صعود ویدیوی ۲</button></div>
+    </div>
+   </div>
+   <div class="battle-controls glass"><div class="controls-text"><span class="section-number">THE CHAT DECIDES</span><strong id="battleInstruction">اول ویدیوها رو ببین، بعد رأی‌گیری رو شروع کن.</strong><span class="vote-command">برای رأی دادن فقط <kbd>1</kbd> یا <kbd>2</kbd> در چت ارسال شود.</span></div><div class="timer-block"><span>VOTE TIMER</span><strong id="votingClock" aria-live="off">00:30</strong><div class="timer-track"><div id="timerMeter"></div></div></div><div class="control-buttons"><button type="button" id="voteStartBtn" class="primary-btn">⚡ شروع رأی‌گیری</button><button type="button" id="voteStopBtn" class="secondary-btn" disabled>■ پایان رأی‌گیری</button></div></div>
+   <div id="demoVoting" class="demo-voting hidden glass"><span class="section-number">SIMULATED CHAT</span><label for="demoVoter">شبیه‌سازی رأی کاربر در چت:</label><input id="demoVoter" dir="ltr" placeholder="viewer_01" value="voter_01"><button type="button" data-demo-vote="1">ارسال 1</button><button type="button" data-demo-vote="2">ارسال 2</button><button type="button" id="demoVoteBurst">+ ۱۰ رأی تصادفی</button><small>این دکمه‌ها فقط در حالت آزمایشی فعال هستند.</small></div>
+   <section class="bracket-section glass"><div class="inside-heading"><div><span class="section-number">THE ROAD TO GLORY</span><h2>جدول حذفی مسابقه</h2></div><span class="pill">KNOCKOUT</span></div><div id="bracketScroller" class="bracket-scroller"><div id="bracket" class="bracket"></div></div></section>
+  </section>
+  <section class="page" id="page-results" aria-label="نتیجه مسابقه"><div class="results-top"><span class="section-number">THE FINAL RESULTS</span><div class="confetti-star">✦</div><h1>WE HAVE A <em>WINNER!</em></h1><p id="resultsTopic">مسابقه به پایان رسید</p><div class="winner-card" id="winnerCard"></div><div class="result-subtitle">رتبه‌بندی ویدیوهای مسابقه <span>•</span> هویت ارسال‌کننده‌ها حالا آشکار شده</div></div><div id="rankingList" class="ranking-list"></div><div class="result-actions"><button type="button" id="exportBtn" class="secondary-btn">↓ دانلود نتایج JSON</button><button type="button" id="newGameBtn" class="primary-btn">↻ مسابقه جدید</button></div><p class="ranking-note">رتبه‌بندی حذف‌شده‌های یک مرحله با درصد رأی در آخرین مبارزه و سپس تعداد رأی مرتب شده است؛ جایگاه‌های هم‌مرحله‌ای رتبه رسمی جداگانه ندارند.</p></section>
+ </main>
+ <footer class="site-footer"><span>CHAT BATTLE © 2026</span><span>MADE FOR THE CHAT. BUILT FOR THE HYPE.</span><a href="https://github.com/ahmadramzy1/instaQ" rel="noopener noreferrer" target="_blank">INSPIRED BY instaQ ↗</a></footer>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="modal-backdrop hidden" id="confirmDialog"><div class="confirm-card glass" role="dialog" aria-modal="true" aria-labelledby="dialogTitle"><span class="section-number">CONFIRM ACTION</span><h2 id="dialogTitle">مسابقه جدید؟</h2><p id="dialogBody">اطلاعات مسابقه فعلی پاک می‌شه.</p><div><button id="cancelConfirm" class="secondary-btn">انصراف</button><button id="confirmReset" class="primary-btn">بله، شروع مجدد</button></div></div></div>
+<script>
+/* Chat Battle tournament engine — dependency-free, browser + Node. */
+(function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;root.ChatBattleCore=api;})(typeof window!=='undefined'?window:globalThis,function(){
+ 'use strict';
+ const CAPACITIES=[16,24,32,48];
+ const safeText=x=>String(x??'').trim();
+ const rxLinks=/(?:https?:\/\/)?(?:www\.|m\.)?(?:youtube\.com|youtube-nocookie\.com|youtu\.be|instagram\.com|instagr\.am|tiktok\.com|vm\.tiktok\.com|vt\.tiktok\.com)\/[^\s<>"'`]+/gi;
+ const trimUrl=s=>s.replace(/[\]\[),;!?،؛.]+$/g,'');
+ function parseVideo(input){
+  try{
+   const raw=trimUrl(safeText(input));
+   const u=new URL(/^https?:\/\//i.test(raw)?raw:'https://'+raw);
+   if(!['https:','http:'].includes(u.protocol)||u.username||u.password) return null;
+   const h=u.hostname.toLowerCase().replace(/^www\.|^m\./,'');
+   const path=u.pathname.split('/').filter(Boolean);let id='',kind='',platform='';
+   if(['youtube.com','youtube-nocookie.com','youtu.be'].includes(h)){
+    platform='youtube';id=h==='youtu.be'?path[0]:(path[0]==='watch'?u.searchParams.get('v'):['shorts','live','embed','v'].includes(path[0])?path[1]:null);
+    if(!id||!/^[\w-]{11}$/.test(id))return null;
+    kind=path[0]==='shorts'?'Short':'Video';
+    return {key:'youtube:'+id,id,kind,platform,url:'https://www.youtube.com/watch?v='+id,thumbnail:'https://i.ytimg.com/vi/'+id+'/hqdefault.jpg',embed:'https://www.youtube-nocookie.com/embed/'+id+'?autoplay=1&enablejsapi=1&rel=0&playsinline=1'};
+   }
+   if(['tiktok.com','vm.tiktok.com','vt.tiktok.com'].includes(h)){
+    platform='tiktok';
+    if(h.startsWith('vm.')||h.startsWith('vt.')){
+     if(!path[0]||!/^[\w-]+$/.test(path[0]))return null;
+     return {key:'tiktok-short:'+path[0],id:path[0],kind:'Short Link',platform,url:u.origin+'/'+path[0]+'/',thumbnail:'',embed:''};
+    }
+    const vi=path.indexOf('video');if(vi<0||!/^[0-9]{12,25}$/.test(path[vi+1]||''))return null;
+    id=path[vi+1];return {key:'tiktok:'+id,id,kind:'TikTok',platform,url:'https://www.tiktok.com/'+path.slice(0,vi+2).join('/'),thumbnail:'',embed:'https://www.tiktok.com/player/v1/'+id+'?autoplay=1&controls=1&description=0'};
+   }
+   if(['instagram.com','instagr.am'].includes(h)){
+    platform='instagram';kind=path[0]?.toLowerCase();
+    if(kind==='share'&&path[1])return {key:'instagram-share:'+path.slice(1).join('/'),id:path.slice(1).join('/'),kind:'Share Link',platform,url:'https://www.instagram.com/'+path.join('/')+'/',thumbnail:'',embed:''};
+    if(kind==='reels')kind='reel';
+    if(!['reel','p','tv'].includes(kind)||!/^[\w-]{5,}$/.test(path[1]||''))return null;
+    id=path[1];return {key:'instagram:'+kind+':'+id,id,kind:kind==='p'?'Post':'Reel',platform,url:'https://www.instagram.com/'+kind+'/'+id+'/',thumbnail:'',embed:'https://www.instagram.com/'+kind+'/'+id+'/embed/'};
+   }
+   return null;
+  }catch{return null}
+ }
+ function linksIn(message){const matches=safeText(message).match(rxLinks)||[];return matches.map(parseVideo).filter(Boolean);}
+ function defaults(){return {channel:'',topic:'بهترین ویدیوی چت',capacity:16,perUser:1,voteSeconds:30,allowChange:false,mode:'demo',pusherKey:'32cbd69e4b950bf97679'};}
+ function newGame(settings={}){
+  const d={...defaults(),...settings};d.capacity=Number(d.capacity);d.perUser=Number(d.perUser);d.voteSeconds=Number(d.voteSeconds);
+  if(!CAPACITIES.includes(d.capacity))throw Error('Invalid tournament capacity');
+  if(!Number.isInteger(d.perUser)||d.perUser<1||d.perUser>10)throw Error('Invalid user limit');
+  if(!Number.isFinite(d.voteSeconds)||d.voteSeconds<5||d.voteSeconds>600)throw Error('Invalid vote duration');
+  d.topic=safeText(d.topic).slice(0,110)||'Chat Battle';d.channel=safeText(d.channel).toLowerCase().replace(/^@/,'');
+  return {version:1,settings:d,phase:'collecting',entries:[],rounds:[],current:null,createdAt:Date.now(),completedAt:null,matchStatus:'preview',votingEndsAt:null,lastEvent:''};
+ }
+ function submitLink(state,text,user){
+  if(state.phase!=='collecting')return {ok:false,reason:'closed'};
+  if(state.entries.length>=state.settings.capacity)return {ok:false,reason:'full'};
+  const cleanUser=safeText(user).toLowerCase();if(!cleanUser)return {ok:false,reason:'username'};
+  const valid=linksIn(text);if(!valid.length)return {ok:false,reason:'invalid'};
+  const accepted=[];let failed='invalid';
+  for(const video of valid){
+   if(state.entries.length>=state.settings.capacity){failed='full';break}
+   if(state.entries.some(v=>v.video.key===video.key)){failed='duplicate';continue}
+   if(state.entries.filter(v=>v.senderKey===cleanUser).length>=state.settings.perUser){failed='per-user';break}
+   state.entries.push({id:'cb_'+(state.entries.length+1).toString(36)+'_'+Math.floor(Date.now()%100000).toString(36),sender:safeText(user),senderKey:cleanUser,video,createdAt:Date.now(),eliminatedRound:null,lastShare:0,lastVotes:0});
+   accepted.push(video);
+  }
+  return {ok:accepted.length>0,count:accepted.length,reason:accepted.length?'accepted':failed};
+ }
+ function seeds(size){if(size===2)return [1,2];const p=seeds(size/2);return p.flatMap(s=>[s,size+1-s]);}
+ function shuffle(arr,random=Math.random){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a;}
+ function makeMatch(round,index){return {id:'r'+round+'m'+index,round,index,left:null,right:null,winner:null,status:'waiting',votes:[0,0],voters:{},endedAt:null};}
+ function propagate(state,round,index,winnerId){const nr=state.rounds[round+1];if(!nr)return;const next=nr[Math.floor(index/2)];if(index%2===0)next.left=winnerId;else next.right=winnerId;}
+ function nextMatch(state){for(let r=0;r<state.rounds.length;r++)for(let i=0;i<state.rounds[r].length;i++){const m=state.rounds[r][i];if(m.left&&m.right&&!m.winner)return {round:r,index:i};}return null;}
+ function startTournament(state,random=Math.random){
+  if(state.phase!=='collecting'||state.entries.length!==state.settings.capacity)return {ok:false,reason:'not-full'};
+  const n=2**Math.ceil(Math.log2(state.entries.length));const ordered=shuffle(state.entries,random);const arranged=seeds(n).map(s=>ordered[s-1]?.id||null);
+  state.rounds=[];for(let size=n,round=0;size>=2;size/=2,round++){state.rounds.push(Array.from({length:size/2},(_,i)=>makeMatch(round,i)));}
+  arranged.forEach((id,i)=>{const m=state.rounds[0][Math.floor(i/2)];if(i%2===0)m.left=id;else m.right=id;});
+  for(let r=0;r<state.rounds.length;r++)for(let i=0;i<state.rounds[r].length;i++){
+   const m=state.rounds[r][i];if(r===0&&!!m.left!==!!m.right){m.winner=m.left||m.right;m.status='bye';propagate(state,r,i,m.winner);}
+  }
+  state.current=nextMatch(state);state.phase='battle';state.matchStatus='preview';state.votingEndsAt=null;
+  return {ok:true,rounds:state.rounds.length,byes:n-state.entries.length};
+ }
+ function currentMatch(state){return state.current?state.rounds[state.current.round]?.[state.current.index]||null:null;}
+ function startVote(state,now=Date.now()){
+  const m=currentMatch(state);if(state.phase!=='battle'||!m||state.matchStatus!=='preview')return false;
+  state.matchStatus='voting';m.status='voting';state.votingEndsAt=now+state.settings.voteSeconds*1000;return true;
+ }
+ function endVote(state,now=Date.now()){
+  const m=currentMatch(state);if(state.phase!=='battle'||state.matchStatus!=='voting'||!m)return false;
+  state.matchStatus='closed';state.votingEndsAt=null;m.status='closed';m.endedAt=now;return true;
+ }
+ function maybeExpire(state,now=Date.now()){return state.matchStatus==='voting'&&state.votingEndsAt!==null&&now>=state.votingEndsAt?endVote(state,now):false;}
+ function vote(state,choice,user,now=Date.now()){
+  if(state.phase!=='battle'||state.matchStatus!=='voting')return {ok:false,reason:'not-voting'};
+  if(!['1','2'].includes(String(choice)))return {ok:false,reason:'invalid-choice'};
+  if(state.votingEndsAt===null||now>=state.votingEndsAt){maybeExpire(state,now);return {ok:false,reason:'expired'};}
+  const key=safeText(user).toLowerCase();if(!key)return {ok:false,reason:'username'};
+  const m=currentMatch(state),next=Number(choice)-1,old=m.voters[key];
+  if(old!==undefined){if(!state.settings.allowChange||old===next)return {ok:false,reason:'already-voted'};m.votes[old]--;}
+  m.voters[key]=next;m.votes[next]++;return {ok:true,side:next,changed:old!==undefined};
+ }
+ function advance(state,side,now=Date.now()){
+  const m=currentMatch(state);if(state.phase!=='battle'||state.matchStatus!=='closed'||!m||![0,1].includes(side))return {ok:false,reason:'not-ready'};
+  const winner=side===0?m.left:m.right;const loser=side===0?m.right:m.left;
+  if(!winner||!loser)return {ok:false,reason:'invalid-side'};
+  m.winner=winner;m.status='complete';m.endedAt=now;
+  const l=state.entries.find(e=>e.id===loser);if(l){l.eliminatedRound=state.current.round;l.lastVotes=m.votes[1-side];l.lastShare=m.votes[0]+m.votes[1]?m.votes[1-side]/(m.votes[0]+m.votes[1]):0;}
+  propagate(state,state.current.round,state.current.index,winner);
+  const next=nextMatch(state);state.current=next;state.matchStatus='preview';state.votingEndsAt=null;
+  if(!next){state.phase='finished';state.completedAt=now;}
+  return {ok:true,winner,loser,finished:!next};
+ }
+ function rankings(state){if(state.phase!=='finished')return [];
+  const winner=state.rounds.at(-1)?.[0]?.winner;
+  return state.entries.slice().sort((a,b)=>{
+   if(a.id===winner)return -1;if(b.id===winner)return 1;
+   if(a.eliminatedRound!==b.eliminatedRound)return (b.eliminatedRound??-1)-(a.eliminatedRound??-1);
+   if(b.lastShare!==a.lastShare)return b.lastShare-a.lastShare;
+   if(b.lastVotes!==a.lastVotes)return b.lastVotes-a.lastVotes;
+   return a.createdAt-b.createdAt;
+  });
+ }
+ function matchProgress(state){const total=state.entries.length-1;const done=state.rounds.flat().filter(m=>m.status==='complete').length;return {done,total};}
+ return {CAPACITIES,defaults,newGame,parseVideo,linksIn,submitLink,startTournament,currentMatch,startVote,endVote,maybeExpire,vote,advance,rankings,matchProgress,seeds};
+});
+
+</script>
+<script>
+/* Chat Battle — UI, Kick Pusher adapter, and browser persistence. */
+(()=>{
+ 'use strict';
+ const Core=window.ChatBattleCore;
+ const $=id=>document.getElementById(id);
+ const q=(s,scope=document)=>scope.querySelector(s);
+ const qa=(s,scope=document)=>[...scope.querySelectorAll(s)];
+ const STORE='chatbattle:game:v1',ROOM_CACHE='chatbattle:room:',MAX_MSG_IDS=1500;
+ let game=null, ws=null, sockGeneration=0, retryTimer=0, retryAttempt=0, manuallyDisconnected=false;
+ let toastTimer=0, lastBattleKey='', lastPage='', visualCounts=[0,0], animIds=[0,0], demoVoterCounter=1, fallback=false;
+ const idsSeen=new Set(), recentMessageKeys=new Map();
+ const shortReason={closed:'پذیرش لینک بسته شده',full:'ظرفیت مسابقه تکمیل شده',username:'نام کاربری معتبر نیست',invalid:'لینک معتبر پیدا نشد',duplicate:'این ویدیو قبلاً ارسال شده', 'per-user':'سقف لینک‌های این کاربر تکمیل شده'};
+ const safeStorage={get(k){try{return localStorage.getItem(k)}catch{return null}},set(k,v){try{localStorage.setItem(k,v)}catch{}},remove(k){try{localStorage.removeItem(k)}catch{}}};
+ const text=(id,val)=>{$(id).textContent=String(val)};
+ const pad=n=>String(n).padStart(2,'0');
+ const number=n=>Number(n).toLocaleString('en-US');
+ function toast(s){const el=$('toast');el.textContent=s;el.classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('visible'),3000)}
+ function save(){if(game)safeStorage.set(STORE,JSON.stringify(game));}
+ function load(){try{const g=JSON.parse(safeStorage.get(STORE));if(g?.version===1&&g?.settings&&['collecting','battle','finished'].includes(g.phase)&&Array.isArray(g.entries))return g;}catch{}return null;}
+ function phasePage(phase){const lookup={collecting:'collecting',battle:'battle',finished:'results'};const target=lookup[phase]||'setup';qa('.page').forEach(e=>e.classList.toggle('active',e.id==='page-'+target));if(lastPage!==target){lastPage=target;window.scrollTo(0,0);requestAnimationFrame(()=>window.scrollTo(0,0));}}
+ function setConnection(mode,label){const el=$('connectionStatus');el.className='connection-indicator '+mode;el.querySelector('span').textContent=label;if(game&&game.phase==='collecting'){text('connectionDetail',(mode==='connected'?'● ':'○ ')+label);}}
+ function renderHeader(){text('headerPhase',!game?'آماده برای مسابقه':game.phase==='collecting'?'دریافت ویدیوها':game.phase==='battle'?'مسابقه در جریان': 'قهرمان مشخص شد');text('headerTopic',game?.settings.topic||'YOUR NEXT BIG BATTLE');}
+ function updateConnectionDescription(message){text('modeMessage',message);}
+ function iconFor(v){return v.platform==='youtube'?'▶':v.platform==='tiktok'?'♪':'◎'}
+ function platformName(v){return v.platform==='youtube'?'YOUTUBE':v.platform==='tiktok'?'TIKTOK':'INSTAGRAM'}
+ function thumbNode(v,klass){const holder=document.createElement('div');holder.className=klass;
+  if(v.thumbnail){const img=document.createElement('img');img.loading='lazy';img.referrerPolicy='no-referrer';img.src=v.thumbnail;img.alt='تصویر بندانگشتی '+platformName(v);img.onerror=()=>{img.remove();const s=document.createElement('span');s.textContent=iconFor(v);s.className='placeholder-symbol';holder.append(s)};holder.append(img)}
+  else {const symbol=document.createElement('span');symbol.textContent=iconFor(v);symbol.className='placeholder-symbol';holder.append(symbol)}return holder;}
+ function render(){renderHeader();if(!game){phasePage(null);setConnection('disconnected','آماده');return}phasePage(game.phase);
+  if(game.settings.mode==='demo'){disconnect();setConnection('connected','DEMO MODE')}else if(!ws){setConnection('disconnected','آفلاین')}
+  if(game.phase==='collecting')renderCollection();if(game.phase==='battle'){renderBattleMatch();refreshBattleControls();}if(game.phase==='finished')renderResults();
+ }
+ function renderCollection(){const count=game.entries.length,cap=game.settings.capacity;
+  text('lobbyCount',pad(count));text('lobbyCapacity',cap);text('lobbyAvailable',count>=cap?'ظرفیت تکمیل':number(cap-count)+' جای خالی');text('perUserDisplay',game.settings.perUser);
+  $('collectionProgress').style.width=(count/cap*100)+'%';$('launchBtn').disabled=count!==cap;
+  const demo=game.settings.mode==='demo'||fallback;
+  $('demoPanel').classList.toggle('hidden',!demo);text('modeTitle',game.settings.mode==='demo'?'حالت آزمایشی':'اتصال به چت Kick');
+  $('reconnectBtn').classList.toggle('hidden',game.settings.mode==='demo');
+  if(game.settings.mode==='demo')updateConnectionDescription('می‌تونی لینک آزمایشی اضافه کنی، ظرفیت رو پر کنی و تمام مسابقه رو تست کنی.');
+  const list=$('entryGrid');list.replaceChildren();game.entries.forEach((e,i)=>{
+   const tile=document.createElement('div');tile.className='entry-tile';const pic=thumbNode(e.video,'entry-photo');
+   const tag=document.createElement('span');tag.textContent=platformName(e.video);pic.append(tag);
+   const meta=document.createElement('div');meta.className='entry-details';const idx=document.createElement('b');idx.textContent='VIDEO '+pad(i+1);
+   const kind=document.createElement('small');kind.textContent=e.video.kind;meta.append(kind,idx);tile.append(pic,meta);list.append(tile);
+  });$('emptyEntries').classList.toggle('hidden',count>0);
+ }
+ function registerText(content,username,id,time){if(!game)return;
+  if(id){const normalized=String(id);if(idsSeen.has(normalized))return;idsSeen.add(normalized);if(idsSeen.size>MAX_MSG_IDS){const old=idsSeen.values().next().value;idsSeen.delete(old)}}
+  else {const key=String(username).toLowerCase()+'\0'+String(content)+'\0'+String(time||'');const t=Date.now();if(recentMessageKeys.get(key)&&t-recentMessageKeys.get(key)<3000)return;recentMessageKeys.set(key,t);if(recentMessageKeys.size>150)for(const [k,v] of recentMessageKeys){if(t-v>10000)recentMessageKeys.delete(k);}}
+  if(game.phase==='collecting'){
+   const result=Core.submitLink(game,content,username);
+   if(result.ok){save();renderCollection();if(game.entries.length===game.settings.capacity)toast('ظرفیت تکمیل شد! مسابقه آماده‌ی شروعه.');}
+  }else if(game.phase==='battle'&&String(content).trim().match(/^[12]$/)){
+   const result=Core.vote(game,String(content).trim(),username);if(result.ok){save();refreshVotes(result.side)}
+  }
+ }
+ async function getJson(url,timeout=7000){const c=new AbortController();const timer=setTimeout(()=>c.abort(),timeout);try{const r=await fetch(url,{signal:c.signal,headers:{'Accept':'application/json'}});if(!r.ok)throw Error('HTTP '+r.status);return await r.json()}finally{clearTimeout(timer)}}
+ async function resolveRoom(channel){
+  if(/^\d+$/.test(channel))return Number(channel);
+  const cached=Number(safeStorage.get(ROOM_CACHE+channel));if(cached>0)return cached;
+  const endpoints=['https://kick.com/api/v2/channels/','https://kick.com/api/v1/channels/'];
+  for(const ep of endpoints){const base=ep+encodeURIComponent(channel);
+   const urls=[base,'https://corsproxy.io/?url='+encodeURIComponent(base),'https://api.allorigins.win/raw?url='+encodeURIComponent(base)];
+   try{const room=await Promise.any(urls.map(async url=>{const data=await getJson(url,6500);const id=Number(data?.chatroom?.id);if(!(id>0))throw Error('Room ID missing');return id}));
+    safeStorage.set(ROOM_CACHE+channel,String(room));return room;
+   }catch{}
+  }
+  throw Error('شناسه چت پیدا نشد؛ نام کانال یا اتصال اینترنت را بررسی کنید.');
+ }
+ function disconnect(){manuallyDisconnected=true;sockGeneration++;clearTimeout(retryTimer);retryTimer=0;retryAttempt=0;if(ws){try{ws.onmessage=ws.onclose=ws.onerror=null;ws.close()}catch{}ws=null}}
+ async function connectKick(){if(!game||game.settings.mode!=='kick'||game.phase==='finished')return;
+  disconnect();manuallyDisconnected=false;const generation=++sockGeneration;
+  const channel=game.settings.channel;setConnection('disconnected','در حال اتصال');
+  if(game.phase==='collecting')updateConnectionDescription('شناسه چت '+channel+' در حال دریافت است...');
+  try{const room=await resolveRoom(channel);if(generation!==sockGeneration)return;openSocket(room,generation)}catch(e){if(generation!==sockGeneration)return;setConnection('error','خطای اتصال');if(game.phase==='collecting'){updateConnectionDescription(e.message+' برای تست آفلاین می‌توانید از ابزارهای آزمایشی استفاده کنید.');fallback=true;renderCollection();}}
+ }
+ function openSocket(room,generation){if(generation!==sockGeneration||manuallyDisconnected)return;
+  const key=(game.settings.pusherKey||Core.defaults().pusherKey).trim();const addr='wss://ws-us2.pusher.com/app/'+encodeURIComponent(key)+'?protocol=7&client=js&version=8.4.0&flash=false';
+  let socket;try{socket=new WebSocket(addr)}catch{scheduleRetry(room,generation);return}ws=socket;
+  socket.onmessage=e=>{if(generation!==sockGeneration||ws!==socket)return;let msg;try{msg=JSON.parse(e.data)}catch{return}
+   if(msg.event==='pusher:connection_established'){
+    socket.send(JSON.stringify({event:'pusher:subscribe',data:{auth:'',channel:'chatrooms.'+room+'.v2'}}));
+   }else if(msg.event==='pusher_internal:subscription_succeeded'){
+    retryAttempt=0;fallback=false;setConnection('connected','Kick Live');if(game?.phase==='collecting'){updateConnectionDescription('کانال '+game.settings.channel+' متصل است. لینک‌های معتبر به‌صورت خودکار وارد مسابقه می‌شن.');renderCollection()}
+   }else if(msg.event==='pusher:ping'){socket.send(JSON.stringify({event:'pusher:pong',data:{}}))}
+   else if(msg.event==='pusher:error'){
+    const d=decodeData(msg.data);setConnection('error','خطای Kick '+(d?.code||''));if(game?.phase==='collecting'){fallback=true;updateConnectionDescription('خطا در اتصال Kick. دکمه اتصال مجدد را بزنید، یا با شبیه‌ساز ادامه دهید.');renderCollection()}
+   }else if(msg.event==='App\\Events\\ChatMessageEvent'||msg.event?.endsWith('ChatMessageEvent')){
+    const d=decodeData(msg.data);const username=d?.sender?.username||d?.sender?.slug||d?.sender?.id;
+    if(username&&typeof d.content==='string')registerText(d.content,String(username),d.id||d.message_id,d.created_at);
+   }
+  };
+  socket.onclose=()=>{if(generation!==sockGeneration||manuallyDisconnected)return;ws=null;setConnection('disconnected','اتصال قطع شد');if(game?.phase==='collecting'){fallback=true;updateConnectionDescription('اتصال موقتاً قطع شده و در حال تلاش دوباره است. برای تست آفلاین شبیه‌ساز فعال شد.');renderCollection()}scheduleRetry(room,generation)};
+  socket.onerror=()=>{try{socket.close()}catch{}}
+ }
+ function decodeData(x){if(typeof x==='string'){try{return JSON.parse(x)}catch{return null}}return x||null}
+ function scheduleRetry(room,generation){if(generation!==sockGeneration||manuallyDisconnected)return;const ms=Math.min(12000,800*2**Math.min(retryAttempt++,4));setConnection('disconnected','اتصال مجدد...');clearTimeout(retryTimer);retryTimer=setTimeout(()=>openSocket(room,generation),ms)}
+ function submitSettings(e){e.preventDefault();const form=$('setupForm');const radios=n=>q('input[name="'+n+'"]:checked',form)?.value;
+  const channel=$('channelInput').value.trim().replace(/^https?:\/\/(www\.)?kick\.com\//i,'').replace(/[@/?#].*$/,'').toLowerCase();
+  const mode=radios('mode');if(mode==='kick'&&!channel){$('channelInput').focus();toast('نام کانال Kick را وارد کنید.');return}
+  const settings={topic:$('topicInput').value,channel,mode,capacity:Number(radios('capacity')),perUser:Number($('perUserInput').value),voteSeconds:Number($('secondsInput').value),allowChange:$('allowChangeInput').checked,pusherKey:$('pusherInput').value.trim()};
+  try{game=Core.newGame(settings)}catch(ex){toast(ex.message);return}
+  fallback=false;lastBattleKey='';save();render();if(mode==='kick')connectKick();else toast('مسابقه آزمایشی ساخته شد؛ لینک‌ها رو اضافه کن!');
+ }
+ function demoSubmit(e){e.preventDefault();if(!game)return;const user=$('demoUsername').value,link=$('demoLink').value;
+  const result=Core.submitLink(game,link,user);if(!result.ok)toast(shortReason[result.reason]||'خطای ورودی');else{save();renderCollection();$('demoLink').value='';toast(result.count+' لینک به مسابقه اضافه شد.')}}
+ function fillDemo(){if(!game||game.phase!=='collecting')return;
+  const yt=['jNQXAC9IVRw','aqz-KE-bpKQ','LXb3EKWsInQ','ScMzIvxBSi4','dQw4w9WgXcQ','kJQP7kiw5Fk','9bZkp7q19f0','fJ9rUzIMcZQ','OPf0YbXqDm0','hT_nvWreIhg','YQHsXMglC9A','60ItHLz5WEA','CevxZvSJLk8','uelHwf8o7_U','RgKAFK5djSk','JGwWNGJdvx8'];
+  const existing=game.entries.length;let added=0;
+  for(let i=0;game.entries.length<game.settings.capacity&&i<500;i++){
+   const count=existing+i;const fakeId=count<yt.length?yt[count]:(count.toString(36).padStart(11,'x').slice(-11));
+   const url=count%3===1?'https://www.tiktok.com/@example/video/'+String(7300000000000000000n+BigInt(count)):count%3===2?'https://www.instagram.com/reel/CBDEMO'+count.toString(36).padStart(6,'0')+'/':'https://www.youtube.com/watch?v='+fakeId;
+   const res=Core.submitLink(game,url,'demo_viewer_'+pad(count+1));if(res.ok)added++;
+  }
+  save();renderCollection();toast(added+' لینک نمونه اضافه شد (صرفاً جهت تست).');
+ }
+ function getEntry(id){return game.entries.find(e=>e.id===id)||null}
+ function formatRound(r){const total=game.rounds.length;return r===total-1?'GRAND FINAL':r===total-2?'SEMI FINALS':r===total-3?'QUARTER FINALS':'ROUND '+pad(r+1)}
+ function loadBattleSlot(side,entry){window.ChatBattlePlayer?.destroy(side);const v=entry.video;
+  text('platform-'+side,platformName(v));$('original-'+side).href=v.url;
+  const cover=$('cover-'+side),img=$('preview-'+side);img.hidden=!v.thumbnail;if(v.thumbnail)img.src=v.thumbnail;else img.removeAttribute('src');
+  $('player-'+side).replaceChildren();$('frame-'+side).classList.remove('is-open');
+  q('[data-play="'+side+'"]').textContent='▶ نمایش / پخش';
+ }
+ function renderBattleMatch(){const m=Core.currentMatch(game);if(!m)return;const key=m.id;
+  const round=game.current.round;const position=game.current.index+1;const progress=Core.matchProgress(game);
+  text('battleTopic',game.settings.topic);text('battleRoundLabel',formatRound(round)+' / MATCH '+pad(position));text('matchFraction',pad(progress.done+1)+' / '+pad(progress.total));
+  if(lastBattleKey!==key){lastBattleKey=key;loadBattleSlot(1,getEntry(m.left));loadBattleSlot(2,getEntry(m.right));visualCounts=[0,0];renderBracket();}
+  const demo=game.settings.mode==='demo'||fallback;$('demoVoting').classList.toggle('hidden',!demo);refreshVotes();
+ }
+ function playSide(side){if(!game||game.phase!=='battle')return;
+  const m=Core.currentMatch(game);if(!m)return;
+  const selected=side===1?getEntry(m.left):getEntry(m.right),other=side===1?2:1;
+  window.ChatBattlePlayer.destroy(other);
+  $('player-'+other).replaceChildren();$('frame-'+other).classList.remove('is-open');
+  q('[data-play="'+other+'"]').textContent='▶ نمایش / پخش';
+  const container=$('player-'+side);const parent=$('frame-'+side);
+  parent.classList.add('is-open');q('[data-play="'+side+'"]').textContent='↻ پخش مجدد';
+  window.ChatBattlePlayer.mount(side,selected.video);
+ }
+ function countAnimate(side,val){const idx=side-1,el=$('votes-'+side),from=visualCounts[idx]||0;
+  if(from===val){el.textContent=number(val);return}cancelAnimationFrame(animIds[idx]);const begin=performance.now(),duration=val-from>12?460:220;
+  function frame(now){const f=Math.min(1,(now-begin)/duration);const eased=1-(1-f)**3;visualCounts[idx]=Math.round(from+(val-from)*eased);el.textContent=number(visualCounts[idx]);if(f<1)animIds[idx]=requestAnimationFrame(frame);else visualCounts[idx]=val;}animIds[idx]=requestAnimationFrame(frame);
+  el.classList.remove('bump');void el.offsetWidth;el.classList.add('bump');
+ }
+ function refreshVotes(changedSide){if(game?.phase!=='battle')return;const m=Core.currentMatch(game);if(!m)return;
+  const total=m.votes[0]+m.votes[1];for(let side=1;side<=2;side++){
+   const n=m.votes[side-1];if(changedSide===side)countAnimate(side,n);else{cancelAnimationFrame(animIds[side-1]);visualCounts[side-1]=n;text('votes-'+side,number(n))}
+   $('meter-'+side).style.width=(total?100*n/total:50)+'%';
+  }
+  $('card-1').classList.toggle('leading',m.votes[0]>m.votes[1]);$('card-2').classList.toggle('leading',m.votes[1]>m.votes[0]);
+ }
+ function refreshBattleControls(){if(game?.phase!=='battle')return;
+  const status=game.matchStatus;const voting=status==='voting',closed=status==='closed';
+  $('voteStartBtn').disabled=status!=='preview';$('voteStopBtn').disabled=!voting;
+  qa('[data-advance]').forEach(b=>b.disabled=!closed);
+  text('battleInstruction',status==='preview'?'اول ویدیوها رو ببین، بعد رأی‌گیری رو شروع کن.':voting?'رأی‌گیری بازه! فقط پیام دقیق 1 یا 2 شمرده می‌شه.':'رأی‌گیری بسته شد؛ حالا برنده رو انتخاب کن.');
+  updateClock();
+ }
+ function updateClock(){if(game?.phase!=='battle')return;const duration=game.settings.voteSeconds;
+  const remain=game.matchStatus==='voting'?Math.max(0,game.votingEndsAt-Date.now()):game.matchStatus==='closed'?0:duration*1000;
+  const sec=Math.ceil(remain/1000);text('votingClock',pad(Math.floor(sec/60))+':'+pad(sec%60));$('timerMeter').style.width=(100*remain/(duration*1000))+'%';
+  $('timerMeter').style.background=sec<=5&&game.matchStatus==='voting'?'#ff8e82':'';
+  q('.timer-block').classList.toggle('urgent',sec<=5&&game.matchStatus==='voting');
+ }
+ function tick(){if(game?.phase!=='battle')return;const changed=Core.maybeExpire(game,Date.now());if(changed){save();refreshBattleControls();toast('⏱️ زمان رأی‌گیری تمام شد؛ برنده را انتخاب کنید.')}else updateClock();}
+ function startVoting(){if(!game||!Core.startVote(game))return;save();refreshBattleControls();toast('⚡ رأی‌گیری آغاز شد! فقط 1 یا 2 بفرستید.')}
+ function stopVoting(){if(!game||!Core.endVote(game))return;save();refreshBattleControls();toast('رأی‌گیری بسته شد. حالا صعود را انتخاب کنید.')}
+ function advanceSide(side){if(!game)return;const res=Core.advance(game,side-1);if(!res.ok){toast('اول رأی‌گیری رو به پایان برسون.');return}
+  window.ChatBattlePlayer?.destroyAll();$('player-1').replaceChildren();$('player-2').replaceChildren();lastBattleKey='';save();render();if(res.finished){disconnect();toast('🏆 قهرمان Chat Battle مشخص شد!')}else toast('🎉 ویدیو '+side+' صعود کرد!')
+ }
+ function entryLabel(id){if(!id)return 'TBD';const n=game.entries.findIndex(e=>e.id===id);return n<0?'TBD':'VIDEO #'+pad(n+1)}
+ function renderBracket(){if(game?.phase!=='battle')return;const root=$('bracket');root.replaceChildren();
+  game.rounds.forEach((round,r)=>{const column=document.createElement('div');column.className='round-col';
+   const title=document.createElement('div');title.className='round-title';const name=document.createElement('b');name.textContent=formatRound(r);const counter=document.createElement('span');counter.textContent=round.filter(m=>m.status==='complete').length+'/'+round.length;title.append(name,counter);
+   const matches=document.createElement('div');matches.className='bracket-list';
+   round.forEach((m,i)=>{const item=document.createElement('div');item.className='mini-match';if(m.status==='bye')item.classList.add('bye');if(game.current?.round===r&&game.current?.index===i)item.classList.add('current');
+    for(const id of [m.left,m.right]){const competitor=document.createElement('div');competitor.className='mini-contender';if(id&&id===m.winner)competitor.classList.add('win');const label=document.createElement('b');label.textContent=id&&id===m.winner?'✓':'—';const name=document.createElement('span');name.textContent=id?entryLabel(id):r===0?'BYE':'TBD';competitor.append(label,name);item.append(competitor)}matches.append(item)});
+   column.append(title,matches);root.append(column);
+  });
+ }
+ function demoVote(choice){if(!game||game.phase!=='battle')return;const name=$('demoVoter').value.trim();const res=Core.vote(game,String(choice),name);if(!res.ok){toast(res.reason==='already-voted'?'این کاربر قبلاً رأی داده.':res.reason==='not-voting'?'ابتدا رأی‌گیری رو شروع کن.':'رأی پذیرفته نشد.');return}
+  save();refreshVotes(choice);toast('رأی آزمایشی ثبت شد.');
+ }
+ function voteBurst(){if(!game||game.matchStatus!=='voting'){toast('اول رأی‌گیری رو شروع کن.');return}
+  let last=0;for(let i=0;i<10;i++){const side=Math.random()<.5?'1':'2';const res=Core.vote(game,side,'simulated_'+(demoVoterCounter++));if(res.ok)last=Number(side)}
+  save();refreshVotes(last);toast('۱۰ رأی شبیه‌سازی‌شده اضافه شد!');
+ }
+ function renderResults(){const ranked=Core.rankings(game);if(!ranked.length)return;const champion=ranked[0];text('resultsTopic',game.settings.topic);
+  const card=$('winnerCard');card.replaceChildren();card.append(thumbNode(champion.video,'winner-image'));
+  const meta=document.createElement('div');meta.className='winner-data';const badge=document.createElement('small');badge.textContent='🏆 CHAMPION';const label=document.createElement('h2');label.textContent=platformName(champion.video);const user=document.createElement('p');user.textContent='ارسال‌شده توسط @'+champion.sender;
+  const link=document.createElement('a');link.href=champion.video.url;link.target='_blank';link.rel='noopener noreferrer';link.textContent='↗ تماشای ویدیو';link.className='external-action';link.style.marginTop='10px';meta.append(badge,label,user,link);card.append(meta);
+  const list=$('rankingList');list.replaceChildren();ranked.forEach((e,i)=>{
+   const row=document.createElement('div');row.className='ranking-row';const num=document.createElement('div');num.className='ranking-rank';num.textContent=i===0?'♛':pad(i+1);
+   const image=thumbNode(e.video,'ranking-photo');const info=document.createElement('div');info.className='ranking-meta';const platform=document.createElement('strong');platform.textContent=platformName(e.video)+' · '+e.video.kind;
+   const sub=document.createElement('small');sub.textContent=i===0?'قهرمان مسابقه':i===1?'نایب قهرمان': 'حذف در '+formatRound(e.eliminatedRound??0)+' • '+Math.round(e.lastShare*100)+'% آرای مبارزه آخر';
+   info.append(platform,sub);const sender=document.createElement('div');sender.className='ranking-user';sender.textContent='@'+e.sender;
+   const watch=document.createElement('a');watch.href=e.video.url;watch.target='_blank';watch.rel='noopener noreferrer';watch.textContent='↗';watch.title='باز کردن در سایت اصلی';watch.setAttribute('aria-label','باز کردن ویدیو');watch.style.color='var(--lime)';
+   row.append(num,image,info,sender,watch);list.append(row)
+  });
+ }
+ function exportResults(){if(!game||game.phase!=='finished')return;
+  const result={app:'Chat Battle',topic:game.settings.topic,finishedAt:new Date(game.completedAt).toISOString(),capacity:game.settings.capacity,rankingRule:'Champion, elimination round, final vote share, votes',rankings:Core.rankings(game).map((e,i)=>({position:i+1,platform:e.video.platform,url:e.video.url,sender:e.sender,eliminatedRound:e.eliminatedRound,finalVoteShare:e.lastShare,finalVotes:e.lastVotes}))};
+  const blob=new Blob([JSON.stringify(result,null,2)],{type:'application/json;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='chat-battle-results.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);
+ }
+ function reset(){window.ChatBattlePlayer?.destroyAll();disconnect();game=null;fallback=false;lastBattleKey='';idsSeen.clear();recentMessageKeys.clear();safeStorage.remove(STORE);$('confirmDialog').classList.add('hidden');render();window.scrollTo({top:0,behavior:'smooth'});}
+ function showReset(){if(!game){toast('هنوز مسابقه‌ای ساخته نشده.');return}$('confirmDialog').classList.remove('hidden')}
+ $('setupForm').addEventListener('submit',submitSettings);$('demoSubmissionForm').addEventListener('submit',demoSubmit);
+ $('fillDemoBtn').addEventListener('click',fillDemo);$('launchBtn').addEventListener('click',()=>{if(!game)return;const result=Core.startTournament(game);if(!result.ok){toast('برای شروع باید ظرفیت مسابقه کامل بشه.');return}save();render();toast('⚔️ مسابقه شروع شد! '+(result.byes?' | '+result.byes+' صعود خودکار':''));});
+ $('reconnectBtn').addEventListener('click',connectKick);
+ $('voteStartBtn').addEventListener('click',startVoting);$('voteStopBtn').addEventListener('click',stopVoting);
+ qa('[data-play]').forEach(btn=>btn.addEventListener('click',()=>playSide(Number(btn.dataset.play))));
+ qa('[data-advance]').forEach(btn=>btn.addEventListener('click',()=>advanceSide(Number(btn.dataset.advance))));
+ qa('[data-demo-vote]').forEach(btn=>btn.addEventListener('click',()=>demoVote(btn.dataset.demoVote)));
+ $('demoVoteBurst').addEventListener('click',voteBurst);
+ $('exportBtn').addEventListener('click',exportResults);
+ $('resetBtn').addEventListener('click',showReset);$('newGameBtn').addEventListener('click',showReset);
+ $('cancelConfirm').addEventListener('click',()=>$('confirmDialog').classList.add('hidden'));
+ $('confirmReset').addEventListener('click',reset);
+ $('confirmDialog').addEventListener('click',e=>{if(e.target===$('confirmDialog'))$('confirmDialog').classList.add('hidden')});
+ window.addEventListener('keydown',e=>{if(e.key==='Escape')$('confirmDialog').classList.add('hidden')});
+ window.addEventListener('beforeunload',()=>{if(ws)try{ws.close()}catch{}});
+ game=load();if(game&&game.phase==='battle'&&Core.maybeExpire(game))save();render();if(game&&game.settings.mode==='kick'&&game.phase!=='finished')connectKick();
+ setInterval(tick,180);
+ // Test hook is never called by application logic and never exposes sender identity in the UI.
+ if(new URLSearchParams(location.search).has('chatbattle_test'))window.__chatBattleTest={receive:registerText,state:()=>game,reset,connect:connectKick};
+})();
+
+</script>
+<script>
+
+(function(){
+'use strict';
+const active=new Map();let ticket=0;
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const time=t=>{t=Math.max(0,Math.floor(t||0));return String(Math.floor(t/60)).padStart(2,'0')+':'+String(t%60).padStart(2,'0')};
+function fullscreen(side){const e=document.getElementById('frame-'+side);if(!e)return;if(document.fullscreenElement){document.exitFullscreen();return}e.requestFullscreen?.().catch(()=>{})}
+function destroy(side){const old=active.get(side);if(old){old.stop();active.delete(side)}}
+function destroyAll(){destroy(1);destroy(2)}
+function frame(el,url,title){
+ const i=document.createElement('iframe');i.src=url;i.title=title;i.referrerPolicy='strict-origin-when-cross-origin';i.allow='autoplay; encrypted-media; fullscreen; picture-in-picture; web-share';i.allowFullscreen=true;i.setAttribute('scrolling','no');i.loading='eager';i.style.border='0';el.append(i);return i;
+}
+function notice(target,message,video){
+ target.innerHTML='<div class="cb-message"><strong>'+esc(message)+'</strong><a target="_blank" rel="noopener noreferrer" href="'+esc(video.url)+'">↗ باز کردن در سایت اصلی</a></div>';
+}
+function mount(side,video){
+ destroy(side);const el=document.getElementById('player-'+side);if(!el)return;
+ const id=++ticket,ctrl=new AbortController();let dead=false,clean=()=>{};
+ const item={stop(){dead=true;ctrl.abort();clean();el.replaceChildren()}};
+ active.set(side,item);el.replaceChildren();
+ const current=()=>!dead&&active.get(side)===item;
+ if(video.platform==='youtube'){
+   if(location.protocol==='file:'){notice(el,'برای پخش یوتیوب، سایت را با HTTPS باز کن.',video);return}
+   const wrapper=document.createElement('div');wrapper.className='cb-fit '+(video.kind==='Short'?'portrait':'landscape');el.append(wrapper);
+   const url=new URL('https://www.youtube.com/embed/'+encodeURIComponent(video.id));
+   Object.entries({autoplay:'1',controls:'1',playsinline:'1',rel:'0',fs:'1',enablejsapi:'1',origin:location.origin}).forEach(([k,v])=>url.searchParams.set(k,v));
+   const iframe=frame(wrapper,url.href,'YouTube video');
+   clean=()=>{try{iframe.contentWindow.postMessage(JSON.stringify({event:'command',func:'stopVideo',args:[]}),'https://www.youtube.com')}catch{}};
+   return;
+ }
+ if(video.platform==='tiktok'){
+  if(!/^[0-9]{12,25}$/.test(video.id)){notice(el,'این لینک کوتاه TikTok شناسه پخش قابل استفاده ندارد.',video);return}
+  const wrapper=document.createElement('div');wrapper.className='cb-fit portrait';el.append(wrapper);
+  frame(wrapper,'https://www.tiktok.com/player/v1/'+encodeURIComponent(video.id)+'?autoplay=1&controls=1&description=0&music_info=0','TikTok video');return;
+ }
+ if(video.platform!=='instagram'||!video.id||!/^[-\w]+$/.test(video.id)){notice(el,'این لینک پلیر داخلی ندارد.',video);return}
+ const kind=(video.url.match(/\/(reel|p|tv)\//)||[])[1]||'reel';
+ const shortcode=video.id;
+ function igEmbed(){
+   if(!current())return;clean();clean=()=>{};el.replaceChildren();
+   const wrapper=document.createElement('div');wrapper.className='cb-instagram';el.append(wrapper);
+   const i=frame(wrapper,'https://www.instagram.com/'+kind+'/'+encodeURIComponent(shortcode)+'/embed/','Instagram embed');
+   let eh=940;const fit=()=>{if(!current())return;const b=wrapper.getBoundingClientRect();if(!b.width||!b.height)return;const scale=Math.min(b.width/540,b.height/eh,1.6);i.style.width='540px';i.style.height=eh+'px';i.style.transform='translate(-50%,-50%) scale('+scale+')'};
+   const onMessage=e=>{if(e.source!==i.contentWindow||!/^https:\/\/(www\.)?instagram\.com$/.test(e.origin))return;let d=e.data;try{if(typeof d==='string')d=JSON.parse(d)}catch{return}const h=Number(d?.details?.height);if(d?.type==='MEASURE'&&h>150&&h<3000){eh=h;fit()}};
+   const ro=new ResizeObserver(fit);ro.observe(wrapper);addEventListener('message',onMessage);clean=()=>{ro.disconnect();removeEventListener('message',onMessage)};fit();
+ }
+ function native(src){
+   if(!current())return;el.replaceChildren();
+   const box=document.createElement('div');box.className='cb-native';el.append(box);
+   const v=document.createElement('video');v.src=src;v.playsInline=true;v.autoplay=true;v.preload='auto';v.controls=false;box.append(v);
+   const d=document.createElement('div');d.className='cb-controls';
+   d.innerHTML='<button type="button" data-f="play">❚❚</button><button type="button" data-f="back">-5</button><span class="cb-time">00:00/00:00</span><input type="range" min="0" max="1000" value="0" aria-label="تایم‌لاین ویدیو"><button type="button" data-f="forward">+5</button><button type="button" data-f="mute">♫</button><button type="button" data-f="speed">1×</button><button type="button" data-f="full">⛶</button>';
+   box.append(d);const $=s=>d.querySelector(s),play=$('[data-f=play]'),range=$('input'),clock=$('.cb-time'),mute=$('[data-f=mute]'),speed=$('[data-f=speed]');
+   let timer=0;const update=()=>{if(!current())return;const total=isFinite(v.duration)?v.duration:0;range.value=total?Math.floor(v.currentTime/total*1000):0;clock.textContent=time(v.currentTime)+' / '+time(total);play.textContent=v.paused?'▶':'❚❚';mute.textContent=v.muted?'🔇':'♫';timer=requestAnimationFrame(update)};update();
+   play.onclick=()=>v.paused?v.play().catch(()=>{}):v.pause();
+   $('[data-f=back]').onclick=()=>v.currentTime=Math.max(0,v.currentTime-5);
+   $('[data-f=forward]').onclick=()=>v.currentTime=Math.min(v.duration||Infinity,v.currentTime+5);
+   $('[data-f=full]').onclick=()=>fullscreen(side);
+   mute.onclick=()=>{v.muted=!v.muted};
+   const rates=[1,1.25,1.5,2];speed.onclick=()=>{v.playbackRate=rates[(rates.indexOf(v.playbackRate)+1)%rates.length];speed.textContent=v.playbackRate+'×'};
+   range.oninput=()=>{if(isFinite(v.duration)&&v.duration>0)v.currentTime=v.duration*range.value/1000};
+   v.onerror=()=>igEmbed();
+   clean=()=>{cancelAnimationFrame(timer);v.pause();v.removeAttribute('src');v.load()};
+   v.play().catch(()=>{});
+ }
+ el.innerHTML='<div class="cb-message"><strong>در حال آماده کردن پلیر اختصاصی اینستاگرام…</strong><small>اگر منبع مستقیم در دسترس نباشد، پلیر جایگزین نمایش داده می‌شود.</small></div>';
+ const sourceUrls=[];
+ for(const host of ['d.ddinstagram.com','d.instagramfix.com','d.instagram7.com','kkinstagram.com']){sourceUrls.push('https://'+host+'/'+kind+'/'+shortcode);sourceUrls.push('https://'+host+'/p/'+shortcode)}
+ sourceUrls.push('https://ddinstagram.com/videos/'+shortcode+'/1');
+ async function resolve(){
+  const url='https://www.instagram.com/'+kind+'/'+shortcode+'/embed/captioned/';
+  const proxies=[url,'https://corsproxy.io/?url='+encodeURIComponent(url),'https://api.allorigins.win/raw?url='+encodeURIComponent(url)];
+  return Promise.any(proxies.map(async p=>{
+   const ac=new AbortController(),t=setTimeout(()=>ac.abort(),8000);
+   try{
+    const r=await fetch(p,{signal:ac.signal,credentials:'omit'});if(!r.ok)throw Error();
+    const html=await r.text();
+    const m=html.match(/"video_url"\s*:\s*"([^"]+)"/)||html.match(/video_url\\\*"\s*:\s*\\\*"(.+?)\\\*"/);
+    if(!m)throw Error();
+    const src=m[1].replace(/\\u0026/gi,'&').replace(/\\\//g,'/').replace(/&amp;/g,'&');
+    if(!/^https:\/\/[\w.-]+\//i.test(src))throw Error();
+    return src;
+   }finally{clearTimeout(t)}
+  }));
+ }
+ function probe(src){return new Promise((yes,no)=>{
+  if(ctrl.signal.aborted)return no(Error('cancelled'));
+  const v=document.createElement('video');v.preload='metadata';v.muted=true;const t=setTimeout(()=>done(false),7000);
+  function done(ok){clearTimeout(t);v.onloadedmetadata=v.onerror=null;ctrl.signal.removeEventListener('abort',ab);v.removeAttribute('src');v.load();ok?yes(src):no(Error('video not available'))}
+  const ab=()=>done(false);ctrl.signal.addEventListener('abort',ab,{once:true});
+  v.onloadedmetadata=()=>done(v.videoWidth>0);v.onerror=()=>done(false);v.src=src;
+ })}
+ Promise.any([resolve().then(probe),...sourceUrls.slice(0,6).map(probe)]).then(src=>{if(current())native(src)}).catch(()=>{if(current())igEmbed()});
+}
+window.ChatBattlePlayer={mount,destroy,destroyAll,fullscreen};
+document.querySelectorAll('[data-fullscreen]').forEach(b=>b.addEventListener('click',()=>fullscreen(+b.dataset.fullscreen)));
+})();
+
+</script>
+</body>
+</html>
