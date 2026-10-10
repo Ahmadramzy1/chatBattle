@@ -4,80 +4,196 @@ service cloud.firestore {
     function signed() {
       return request.auth != null;
     }
-    function sessionPath(id) {
+    function roomPath(id) {
       return /databases/$(database)/documents/chatBattleSessions/$(id);
     }
-    function submissionPath(id, uid) {
+    function subPath(id, uid) {
       return /databases/$(database)/documents/chatBattleSessions/$(id)/submissions/$(uid);
     }
-    function validVideoLink(link) {
-      return link is string && link.size() >= 14 && link.size() <= 800
-        && link.matches('^https://(www[.]|m[.])?(youtube[.]com|youtube-nocookie[.]com|youtu[.]be|instagram[.]com|instagr[.]am|tiktok[.]com|vm[.]tiktok[.]com|vt[.]tiktok[.]com)/[^ ]+$');
+    function canonicalKey(link) {
+      // Firestore RE2 replace strips the TikTok username and Instagram route.
+      return link
+        .replace('^https://www[.]tiktok[.]com/@[A-Za-z0-9_.-]+/video/', 'https://www.tiktok.com/video/')
+        .replace('^https://www[.]instagram[.]com/(reel|p|tv)/', 'https://www.instagram.com/v/');
     }
-    function validVideoLinks(links) {
-      return links is list && links.size() > 0 && links.size() <= 10
-        && validVideoLink(links[0])
-        && (links.size() < 2 || validVideoLink(links[1]))
-        && (links.size() < 3 || validVideoLink(links[2]))
-        && (links.size() < 4 || validVideoLink(links[3]))
-        && (links.size() < 5 || validVideoLink(links[4]))
-        && (links.size() < 6 || validVideoLink(links[5]))
-        && (links.size() < 7 || validVideoLink(links[6]))
-        && (links.size() < 8 || validVideoLink(links[7]))
-        && (links.size() < 9 || validVideoLink(links[8]))
-        && (links.size() < 10 || validVideoLink(links[9]));
+    function validPair(url, key) {
+      return url is string && key is string &&
+        url.size() >= 14 && url.size() <= 800 &&
+        (
+          url.matches('^https://www[.]youtube[.]com/watch[?]v=[A-Za-z0-9_-]{11}$') ||
+          url.matches('^https://www[.]instagram[.]com/(reel|p|tv)/[A-Za-z0-9_-]{5,}/$') ||
+          url.matches('^https://www[.]tiktok[.]com/@[A-Za-z0-9_.-]+/video/[0-9]{12,25}$')
+        ) &&
+        key == canonicalKey(url) && key.size() <= 800;
     }
+    function validPairs(links, keys) {
+      return links is list && keys is list &&
+        links.size() > 0 && links.size() <= 10 &&
+        keys.size() == links.size() &&
+        keys.toSet().size() == keys.size() &&
+        validPair(links[0], keys[0]) &&
+        (links.size() < 2 || validPair(links[1], keys[1])) &&
+        (links.size() < 3 || validPair(links[2], keys[2])) &&
+        (links.size() < 4 || validPair(links[3], keys[3])) &&
+        (links.size() < 5 || validPair(links[4], keys[4])) &&
+        (links.size() < 6 || validPair(links[5], keys[5])) &&
+        (links.size() < 7 || validPair(links[6], keys[6])) &&
+        (links.size() < 8 || validPair(links[7], keys[7])) &&
+        (links.size() < 9 || validPair(links[8], keys[8])) &&
+        (links.size() < 10 || validPair(links[9], keys[9]));
+    }
+    function validLegacyVideo(link) {
+      return link is string && link.size() >= 14 && link.size() <= 800 &&
+        link.matches('^https://(www[.]|m[.])?(youtube[.]com|youtube-nocookie[.]com|youtu[.]be|instagram[.]com|instagr[.]am|tiktok[.]com|vm[.]tiktok[.]com|vt[.]tiktok[.]com)/[^ ]+$');
+    }
+    function validLegacyLinks(links) {
+      return links is list && links.size() > 0 && links.size() <= 10 &&
+        validLegacyVideo(links[0]) &&
+        (links.size() < 2 || validLegacyVideo(links[1])) &&
+        (links.size() < 3 || validLegacyVideo(links[2])) &&
+        (links.size() < 4 || validLegacyVideo(links[3])) &&
+        (links.size() < 5 || validLegacyVideo(links[4])) &&
+        (links.size() < 6 || validLegacyVideo(links[5])) &&
+        (links.size() < 7 || validLegacyVideo(links[6])) &&
+        (links.size() < 8 || validLegacyVideo(links[7])) &&
+        (links.size() < 9 || validLegacyVideo(links[8])) &&
+        (links.size() < 10 || validLegacyVideo(links[9]));
+    }
+    function beforeKeys(id) {
+      return exists(subPath(id, request.auth.uid)) ?
+        get(subPath(id, request.auth.uid)).data.get('videoKeys', []) : [];
+    }
+    function beforeCount(id) {
+      return exists(subPath(id, request.auth.uid)) ?
+        get(subPath(id, request.auth.uid)).data.links.size() : 0;
+    }
+    function validViewerRoomUpdate(id) {
+      let after = getAfter(subPath(id, request.auth.uid)).data;
+      let keys = request.resource.data.reservedVideoKeys;
+      return resource.data.get('schemaVersion', 1) == 2 &&
+        resource.data.status == 'collecting' &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['usedCount', 'reservedVideoKeys']) &&
+        keys is list && keys.size() == request.resource.data.usedCount &&
+        keys.size() == keys.toSet().size() &&
+        request.resource.data.usedCount >= 0 &&
+        request.resource.data.usedCount <= resource.data.capacity &&
+        existsAfter(subPath(id, request.auth.uid)) &&
+        after.uid == request.auth.uid &&
+        request.resource.data.usedCount ==
+          resource.data.usedCount + after.links.size() - beforeCount(id) &&
+        keys.toSet() ==
+          resource.data.reservedVideoKeys.toSet()
+            .difference(beforeKeys(id).toSet())
+            .union(after.videoKeys.toSet());
+    }
+    function validSubmissionData(d, uid, room) {
+      return d.keys().hasOnly(['uid', 'username', 'links', 'videoKeys', 'submittedAt']) &&
+        d.keys().hasAll(['uid', 'username', 'links', 'videoKeys', 'submittedAt']) &&
+        d.uid == uid &&
+        d.username is string &&
+        d.username.matches('^[a-zA-Z0-9_.]{2,32}$') &&
+        validPairs(d.links, d.videoKeys) &&
+        d.links.size() <= room.perUser;
+    }
+    function validSubmissionRoomTransition(id, oldCount) {
+      let before = get(roomPath(id)).data;
+      let after = getAfter(roomPath(id)).data;
+      return before.get('schemaVersion', 1) == 2 &&
+        before.status == 'collecting' &&
+        after.status == 'collecting' &&
+        after.usedCount == before.usedCount + request.resource.data.links.size() - oldCount &&
+        after.usedCount <= before.capacity &&
+        after.reservedVideoKeys.toSet().hasAll(request.resource.data.videoKeys);
+    }
+
     match /chatBattleSessions/{sessionId} {
       allow get: if signed();
       allow list: if false;
-      allow create: if signed()
-        && request.resource.data.keys().hasOnly(['ownerUid', 'topic', 'capacity', 'perUser', 'status', 'usedCount', 'createdAt'])
-        && request.resource.data.keys().hasAll(['ownerUid', 'topic', 'capacity', 'perUser', 'status', 'usedCount', 'createdAt'])
-        && request.resource.data.ownerUid == request.auth.uid
-        && request.resource.data.topic is string
-        && request.resource.data.topic.size() > 0 && request.resource.data.topic.size() <= 110
-        && request.resource.data.capacity in [16, 24, 32, 48]
-        && request.resource.data.perUser is int
-        && request.resource.data.perUser >= 1 && request.resource.data.perUser <= 10
-        && request.resource.data.status == 'collecting'
-        && request.resource.data.usedCount == 0
-        && request.resource.data.createdAt == request.time;
+      allow create: if signed() &&
+        request.resource.data.keys().hasOnly([
+          'ownerUid','topic','capacity','perUser','status','usedCount',
+          'createdAt','schemaVersion','reservedVideoKeys'
+        ]) &&
+        request.resource.data.keys().hasAll([
+          'ownerUid','topic','capacity','perUser','status','usedCount',
+          'createdAt','schemaVersion','reservedVideoKeys'
+        ]) &&
+        request.resource.data.ownerUid == request.auth.uid &&
+        request.resource.data.topic is string &&
+        request.resource.data.topic.size() > 0 &&
+        request.resource.data.topic.size() <= 110 &&
+        request.resource.data.capacity in [16, 24, 32, 48] &&
+        request.resource.data.perUser is int &&
+        request.resource.data.perUser >= 1 &&
+        request.resource.data.perUser <= 10 &&
+        request.resource.data.status == 'collecting' &&
+        request.resource.data.usedCount == 0 &&
+        request.resource.data.schemaVersion == 2 &&
+        request.resource.data.reservedVideoKeys == [] &&
+        request.resource.data.createdAt == request.time;
+
       allow update: if signed() && (
-        (resource.data.ownerUid == request.auth.uid
-         && resource.data.status == 'collecting'
-         && request.resource.data.status == 'closed'
-         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']))
+        (resource.data.ownerUid == request.auth.uid &&
+          resource.data.status == 'collecting' &&
+          request.resource.data.status == 'closed' &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']))
         ||
-        (resource.data.status == 'collecting'
-         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['usedCount'])
-         && !exists(submissionPath(sessionId, request.auth.uid))
-         && existsAfter(submissionPath(sessionId, request.auth.uid))
-         && getAfter(submissionPath(sessionId, request.auth.uid)).data.uid == request.auth.uid
-         && request.resource.data.usedCount == resource.data.usedCount
-            + getAfter(submissionPath(sessionId, request.auth.uid)).data.links.size()
-         && request.resource.data.usedCount <= resource.data.capacity)
+        validViewerRoomUpdate(sessionId)
+        ||
+        // Existing schema v1 sessions can still accept their original submissions.
+        (resource.data.get('schemaVersion', 1) == 1 &&
+          resource.data.status == 'collecting' &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['usedCount']) &&
+          !exists(subPath(sessionId, request.auth.uid)) &&
+          existsAfter(subPath(sessionId, request.auth.uid)) &&
+          getAfter(subPath(sessionId, request.auth.uid)).data.uid == request.auth.uid &&
+          request.resource.data.usedCount == resource.data.usedCount +
+            getAfter(subPath(sessionId, request.auth.uid)).data.links.size() &&
+          request.resource.data.usedCount <= resource.data.capacity)
       );
       allow delete: if false;
 
       match /submissions/{viewerUid} {
         allow get: if signed() &&
-          (request.auth.uid == viewerUid || request.auth.uid == get(sessionPath(sessionId)).data.ownerUid);
-        allow list: if signed() && request.auth.uid == get(sessionPath(sessionId)).data.ownerUid;
-        allow create: if signed()
-          && viewerUid == request.auth.uid
-          && get(sessionPath(sessionId)).data.status == 'collecting'
-          && request.resource.data.keys().hasOnly(['uid', 'username', 'links', 'submittedAt'])
-          && request.resource.data.keys().hasAll(['uid', 'username', 'links', 'submittedAt'])
-          && request.resource.data.uid == viewerUid
-          && request.resource.data.username is string
-          && request.resource.data.username.matches('^[a-zA-Z0-9_.]{2,32}$')
-          && validVideoLinks(request.resource.data.links)
-          && request.resource.data.links.size() <= get(sessionPath(sessionId)).data.perUser
-          && request.resource.data.submittedAt == request.time
-          && getAfter(sessionPath(sessionId)).data.usedCount
-             == get(sessionPath(sessionId)).data.usedCount + request.resource.data.links.size()
-          && getAfter(sessionPath(sessionId)).data.usedCount <= get(sessionPath(sessionId)).data.capacity;
-        allow update, delete: if false;
+          (request.auth.uid == viewerUid ||
+            request.auth.uid == get(roomPath(sessionId)).data.ownerUid);
+        allow list: if signed() &&
+          request.auth.uid == get(roomPath(sessionId)).data.ownerUid;
+
+        allow create: if signed() && viewerUid == request.auth.uid &&
+          (
+            (get(roomPath(sessionId)).data.get('schemaVersion', 1) == 2 &&
+              validSubmissionData(request.resource.data, viewerUid, get(roomPath(sessionId)).data) &&
+              request.resource.data.submittedAt == request.time &&
+              validSubmissionRoomTransition(sessionId, 0))
+            ||
+            (get(roomPath(sessionId)).data.get('schemaVersion', 1) == 1 &&
+              get(roomPath(sessionId)).data.status == 'collecting' &&
+              request.resource.data.keys().hasOnly(['uid','username','links','submittedAt']) &&
+              request.resource.data.keys().hasAll(['uid','username','links','submittedAt']) &&
+              request.resource.data.uid == viewerUid &&
+              request.resource.data.username is string &&
+              request.resource.data.username.matches('^[a-zA-Z0-9_.]{2,32}$') &&
+              validLegacyLinks(request.resource.data.links) &&
+              request.resource.data.links.size() <= get(roomPath(sessionId)).data.perUser &&
+              request.resource.data.submittedAt == request.time &&
+              getAfter(roomPath(sessionId)).data.usedCount ==
+                get(roomPath(sessionId)).data.usedCount +
+                  request.resource.data.links.size() &&
+              getAfter(roomPath(sessionId)).data.usedCount <=
+                get(roomPath(sessionId)).data.capacity)
+          );
+
+        allow update: if signed() && viewerUid == request.auth.uid &&
+          resource.data.uid == viewerUid &&
+          get(roomPath(sessionId)).data.get('schemaVersion', 1) == 2 &&
+          validSubmissionData(request.resource.data, viewerUid, get(roomPath(sessionId)).data) &&
+          request.resource.data.submittedAt == resource.data.submittedAt &&
+          request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['username','links','videoKeys']) &&
+          validSubmissionRoomTransition(sessionId, resource.data.links.size());
+
+        allow delete: if false;
       }
     }
   }
