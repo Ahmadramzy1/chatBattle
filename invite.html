@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0c1014">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>Chat Battle — ارسال ویدیو</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--green:#d7ff76;--line:#303e43;--muted:#9aaab6;--surface:#171e24;--bg:#0b0e12}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 18% 4%,#2b3d25 0%,transparent 40%),radial-gradient(ellipse at 85% 60%,#292330 0%,transparent 44%),var(--bg);color:#f3f8fa;font:14px/1.95 Vazirmatn,Tahoma,Arial,sans-serif;min-height:100vh}button,input{font:inherit}
+.wrap{width:min(610px,calc(100% - 32px));margin:0 auto;padding:40px 0 90px}
+.brand{display:flex;align-items:center;gap:10px;direction:ltr;font:800 21px 'Space Grotesk',sans-serif;letter-spacing:-.8px}.brand span{color:var(--green)}.brand-mark{display:grid;place-items:center;width:42px;height:42px;border:1px solid #627849;border-radius:13px;background:#243321;color:var(--green);font-size:25px}
+.eyebrow{color:var(--green);letter-spacing:2px;font:700 11px 'Space Grotesk',sans-serif;margin-top:43px;direction:ltr}
+h1{font-size:clamp(30px,7vw,52px);line-height:1.35;margin:12px 0 7px}h1 em{font-style:normal;color:var(--green)}
+.sub{color:var(--muted);margin:5px 0 26px}.card{border:1px solid var(--line);background:#161d24e6;box-shadow:0 20px 65px #0004;border-radius:21px;padding:25px;margin-top:14px}
+.session-info{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:#cbd9cf}.chip{border:1px solid #475446;border-radius:30px;padding:3px 11px;background:#1c2921}.topic{font-size:18px;font-weight:900;margin:0 0 13px}
+label{font-size:12px;font-weight:800;display:block;margin:18px 0 7px}input{outline:0;color:#fff;background:#0e1419;border:1px solid #38434d;border-radius:10px;padding:12px 13px;width:100%;direction:ltr}input:focus{border-color:var(--green);box-shadow:0 0 0 3px #d7ff7615}input::placeholder{color:#6d7a89}
+.inputs{display:grid;gap:9px}.entry{display:flex;gap:7px;direction:ltr}.entry input{flex:1;min-width:0}.remove{border:1px solid #644852;border-radius:9px;background:#2c1e24;color:#ffacb2;padding:0 14px;cursor:pointer;font-weight:800}
+button:disabled{opacity:.43;cursor:not-allowed}.subtle{background:#243122;color:var(--green);border:1px dashed #637f4b;border-radius:11px;padding:10px 14px;cursor:pointer;width:100%;margin-top:10px;font-weight:800}.subtle:hover{background:#344a2d}
+.submit{border:0;border-radius:11px;background:var(--green);color:#101912;width:100%;padding:14px;margin-top:23px;font-size:15px;font-weight:900;cursor:pointer}.submit:not(:disabled):hover{background:#e6ffb4}
+.hint{color:#93a4ae;font-size:11px;margin:8px 0;line-height:1.9}
+.status{font-size:12px;padding:11px 13px;border:1px solid #425349;border-radius:10px;background:#18261c;color:#cfe5c7;margin:20px 0 0}
+.status.error{background:#321c23;border-color:#734151;color:#ffb6c1}.status.info{background:#1a2430;border-color:#42556e;color:#b9d1ff}
+.done{display:none;text-align:center;padding:45px 26px}.done strong{font-size:24px;display:block;color:var(--green)}.done p{color:#bdc6cf}footer{color:#829199;text-align:center;padding:30px 8px;font:700 10px 'Space Grotesk',sans-serif;letter-spacing:2px}a{color:var(--green)}
+@media(max-width:500px){.wrap{padding-top:22px}.card{padding:19px}.eyebrow{margin-top:32px}}
+</style></head>
+<body>
+<div class="wrap">
+<div class="brand"><div class="brand-mark">✕</div> CHAT <span>BATTLE</span></div>
+<div class="eyebrow">OFFICIAL VIDEO SUBMISSION</div>
+<h1>ویدیوت رو <em>وارد رقابت کن!</em></h1>
+<p class="sub">لینک ویدیوها رو ثبت کن؛ چت Kick بعداً قهرمان رو با رأی تعیین می‌کنه.</p>
+<section class="card" aria-label="مشخصات مسابقه">
+ <p class="topic" id="topic">در حال بارگذاری مسابقه...</p>
+ <div class="session-info"><span class="chip" id="capacity">— ظرفیت</span><span class="chip" id="perUser">— لینک برای هر نفر</span><span class="chip" id="remaining">— جای خالی</span></div>
+ <p id="state" class="status info" role="status">در حال اتصال امن به Firebase...</p>
+</section>
+<form id="entryForm" class="card" hidden>
+ <label for="username">نام کاربری Kick</label><input id="username" maxlength="32" minlength="2" pattern="[A-Za-z0-9_.]{2,32}" autocomplete="nickname" placeholder="your_kick_username" required>
+ <p class="hint">این نام در پایان مسابقه به‌عنوان فرستنده نمایش داده می‌شه؛ تأیید هویت Kick فعلاً انجام نمی‌شه.</p>
+ <label>لینک ویدیوها</label>
+ <div id="inputs" class="inputs"></div>
+ <button id="addAnother" class="subtle" type="button">＋ اضافه کردن لینک دیگر</button>
+ <p id="linkHint" class="hint">لینک‌های عمومی YouTube، TikTok و Instagram پذیرفته می‌شن.</p>
+ <button id="confirm" type="submit" class="submit">تأیید نهایی و ثبت ویدیوها ←</button>
+ <p class="hint">بعد از ثبت نهایی امکان ویرایش یا ارسال مجدد از همین مرورگر وجود نداره.</p>
+</form>
+<section id="success" class="card done"><span style="font-size:53px">🏆</span><strong>لینک‌هات با موفقیت ثبت شدن!</strong><p id="successInfo">منتظر شروع رقابت باش.</p></section>
+<footer>CHAT BATTLE — THE CHAT DECIDES.</footer>
+</div>
+<script type="module" src="./firebase-invite.js"></script>
+</body></html>
