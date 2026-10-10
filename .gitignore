@@ -1,4 +1,7 @@
 node_modules/
+.wrangler/
+.dev.vars*
+*service-account*.json
 functions/.env*
 functions/.secret*
 firebase-debug.log

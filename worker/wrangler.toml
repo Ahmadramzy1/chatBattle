@@ -1,0 +1,13 @@
+name = "chatbattle-auth"
+main = "worker.mjs"
+compatibility_date = "2026-10-10"
+workers_dev = true
+
+[vars]
+KICK_CLIENT_ID = "01M4KM71HWC2MQQTYRWFQE5KYF"
+KICK_REDIRECT_URI = "https://ahmadramzy1.github.io/chatBattle/kick-callback.html"
+SITE_ORIGIN = "https://ahmadramzy1.github.io"
+FIREBASE_PROJECT_ID = "chat-battle-b976d"
+
+# Configure KICK_CLIENT_SECRET and FIREBASE_SERVICE_ACCOUNT as encrypted Secrets.
+# Never place either secret in this file or commit a service account JSON file.

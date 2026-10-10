@@ -1,3 +1,7 @@
+# مسیر فعلی: Cloudflare رایگان
+
+راهنمای فعال پروژه [CLOUDFLARE-SETUP.md](CLOUDFLARE-SETUP.md) است. به Firebase Functions یا ارتقای Blaze نیازی نیست. بخش راه‌اندازی Functions در ادامه فقط مرجع روش قبلی است و نباید برای مسیر رایگان اجرا شود.
+
 # راه‌اندازی نسخهٔ جدید Chat Battle
 
 این نسخه هر هشت تغییر را در کد دارد. فایل‌های سایت همچنان روی GitHub Pages قرار می‌گیرند؛ ورود واقعی Kick به یک Firebase Cloud Function نیاز دارد. رأی‌دهی همچنان در چت Kick است و ورود به سایت فقط برای ارسال و ویرایش ویدیو لازم است.
@@ -53,3 +57,4 @@ node --test tournament.test.cjs functions/auth.test.js
 - [OAuth Kick](https://docs.kick.com/getting-started/generating-tokens-oauth2-flow)
 - [Scopes Kick](https://github.com/KickEngineering/KickDevDocs/blob/main/scopes/scopes.md)
 - [تعریف API حساب کاربران](https://api.kick.com/swagger/doc.yaml)
+

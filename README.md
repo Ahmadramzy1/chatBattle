@@ -1,5 +1,7 @@
 # Chat Battle ⚔️
 
+> راه‌اندازی فعلی بدون حساب پرداخت: [Cloudflare Workers Free + Firebase Spark](CLOUDFLARE-SETUP.md). کد functions/ مربوط به روش قبلی و اختیاری است.
+
 > نسخهٔ جدید: [راهنمای راه‌اندازی و تغییرات](DEPLOYMENT.md). ورود Kick برای ارسال ویدیو به تنظیم سرویس سروری نیاز دارد. جزئیات قدیمی زیر دربارهٔ ورود ناشناس بیننده و پنهان‌بودن اجباری نام‌ها با این نسخه جایگزین شده‌اند.
 
 سیستم مسابقه حذفی ویدیوها برای استریمرها. بیننده‌ها از طریق **لینک دعوت اختصاصی** ویدیوهای YouTube / Instagram / TikTok ارسال می‌کنند و در چت Kick با پیام‌های دقیق **1** و **2** رأی می‌دهند.
@@ -58,3 +60,4 @@
 از **Settings → Pages** گزینه **Deploy from a branch** با شاخه `main` و پوشه `/(root)` را انتخاب کن. پس از انتشار فایل‌ها در [GitHub Actions](https://github.com/Ahmadramzy1/chatBattle/actions) وضعیت Success نشان داده می‌شود.
 
 © 2026 Chat Battle.
+
