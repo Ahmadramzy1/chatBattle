@@ -764,7 +764,7 @@
  function flipCoin(){
   const m=Core.currentMatch(game);if(coinPending||winPending||game?.matchStatus!=='closed'||!m||m.votes[0]!==m.votes[1])return;
   coinPending=true;refreshBattleControls();qa('[data-advance]').forEach(b=>b.disabled=true);
-  const side=m.coinResult||(crypto.getRandomValues(new Uint32Array(1))[0]%2+1);m.coinResult=side;save();
+  const side=crypto.getRandomValues(new Uint32Array(1))[0]%2+1;m.coinResult=side;save();
   const coin=$('coin3d');$('coinDialog').classList.remove('hidden');$('coinResult').textContent='سکه در حال چرخش…';$('coinClose').disabled=true;
   coinAnimation?.cancel();
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
