@@ -158,6 +158,16 @@
   #page-battle .stage.cb-stage-arriving .video-card{animation:none!important}
 }
 
+
+.invite-panel{border-color:#b7de655e!important;background:linear-gradient(155deg,#243020,#111a19)!important}
+.invite-panel h3{color:#d7ff76}.invite-label{display:block;margin:13px 0 5px;color:#a5b5ae;font-size:11px}
+.invite-panel input{font:600 11px 'Space Grotesk',Arial,sans-serif;direction:ltr;white-space:nowrap;text-overflow:ellipsis;padding:12px 10px}
+.invite-buttons{display:flex;align-items:stretch;gap:7px;margin-top:9px}
+.invite-buttons>*{flex:1;min-width:0;font-size:10px!important;padding:11px 6px!important}
+.invite-buttons [aria-disabled="true"]{pointer-events:none;opacity:.4}
+.invite-state{display:flex;flex-direction:column;gap:2px;background:#101715aa;border:1px solid #3c523a;border-radius:9px;padding:9px 12px;margin-top:12px}
+.invite-state b{font-size:12px;color:#d7ff76}.invite-state small{font-size:10px;color:#90a498;line-height:1.6}
+#makeInvite{margin-top:8px;width:100%}
 </style>
 </head>
 <body>
@@ -177,7 +187,7 @@
     <div class="setup-hero">
      <span class="eyebrow"><span class="eyebrow-rule"></span> INTERACTIVE STREAM EXPERIENCE <span class="eyebrow-rule"></span></span>
      <h1>ONE CHAT.<br><em>ONE CHAMPION.</em></h1>
-     <p>بیننده‌ها ویدیوهاشون رو می‌فرستن، رو‌به‌روی هم قرار می‌گیرن و این چته که قهرمان مسابقه رو انتخاب می‌کنه.</p>
+     <p>بیننده‌ها از لینک دعوت اختصاصی ویدیو می‌فرستن و چت Kick فقط با رأی‌های 1 و 2 قهرمان رو تعیین می‌کنه.</p>
      <div class="hero-orbit" aria-hidden="true"><div class="ring ring-one"></div><div class="ring ring-two"></div><div class="orb-card orb-one"><b>01</b><span>VIDEO A</span></div><span class="versus">VS</span><div class="orb-card orb-two"><b>02</b><span>VIDEO B</span></div></div>
      <div class="hero-pills"><span>⚡ LIVE VOTING</span><span>🏆 KNOCKOUT FORMAT</span><span>🔒 ANONYMOUS SUBMISSIONS</span></div>
     </div>
@@ -185,7 +195,7 @@
      <div class="panel-heading"><span class="section-number">01 / SETUP</span><h2>مسابقه‌ات رو بساز</h2><p>چندتا انتخاب کوچیک تا شروع یک رقابت بزرگ.</p></div>
      <div class="form-field"><label for="topicInput">عنوان مسابقه</label><input id="topicInput" name="topic" maxlength="110" placeholder="مثلاً: خنده‌دارترین ویدیوی اینترنت" value="خنده‌دارترین ویدیوی اینترنت" required></div>
      <div class="form-field"><label for="channelInput">یوزرنیم کانال Kick</label><div class="prefix-input"><span>kick.com/</span><input id="channelInput" name="channel" dir="ltr" placeholder="channel_name" spellcheck="false"></div></div>
-     <div class="form-field"><label>روش دریافت پیام‌ها</label><div class="segment" id="modeSelector"><label><input type="radio" name="mode" value="kick" checked><span>● چت واقعی Kick</span></label><label><input type="radio" name="mode" value="demo"><span>◉ حالت آزمایشی</span></label></div><p class="hint">حالت آزمایشی بدون نیاز به اتصال برای تست کامل مسابقه است.</p></div>
+     <div class="form-field"><label>حالت رأی‌گیری Kick</label><div class="segment" id="modeSelector"><label><input type="radio" name="mode" value="kick" checked><span>● چت واقعی Kick</span></label><label><input type="radio" name="mode" value="demo"><span>◉ حالت آزمایشی</span></label></div><p class="hint">ارسال ویدیو از لینک دعوت انجام می‌شه؛ حالت آزمایشی فقط برای تست رأی‌گیری بدون Kick است.</p></div>
      <div class="form-field"><label>تعداد شرکت‌کننده</label><div class="capacity-select"><label><input type="radio" name="capacity" value="16" checked><span>16</span></label><label><input type="radio" name="capacity" value="24"><span>24</span></label><label><input type="radio" name="capacity" value="32"><span>32</span></label><label><input type="radio" name="capacity" value="48"><span>48</span></label></div></div>
      <div class="form-double"><div class="form-field"><label for="perUserInput">لینک مجاز هر نفر</label><select id="perUserInput"><option value="1">۱ لینک</option><option value="2" selected>۲ لینک</option><option value="3">۳ لینک</option><option value="5">۵ لینک</option><option value="10">۱۰ لینک</option></select></div><div class="form-field"><label for="secondsInput">زمان هر رأی‌گیری</label><select id="secondsInput"><option value="15">۱۵ ثانیه</option><option value="20">۲۰ ثانیه</option><option value="30" selected>۳۰ ثانیه</option><option value="45">۴۵ ثانیه</option><option value="60">۶۰ ثانیه</option><option value="90">۹۰ ثانیه</option><option value="120">۱۲۰ ثانیه</option></select></div></div>
      <label class="toggle-row"><span><b>امکان تغییر رأی</b><small>آخرین 1 یا 2 هر نفر ملاک باشد؛ نه رأی اضافه</small></span><input type="checkbox" id="allowChangeInput"><i></i></label>
@@ -198,10 +208,24 @@
    <div class="page-title"><div><span class="section-number">02 / THE LOBBY</span><h1>لینک‌ها رو <em>جمع کنیم!</em></h1><p id="lobbySubtitle">ویدیوها به ترتیب ورود اضافه می‌شن. هویت ارسال‌کننده تا پایان پنهانه.</p></div><div class="lobby-counter"><strong id="lobbyCount">00</strong><span>/ <b id="lobbyCapacity">16</b><small>VIDEOS COLLECTED</small></span></div></div>
    <div class="progress-track"><div id="collectionProgress"></div></div>
    <div class="lobby-grid">
-    <section class="glass lobby-main"><div class="inside-heading"><h2>ورودی‌های مسابقه</h2><span id="lobbyAvailable" class="pill">16 جای خالی</span></div><div id="entryGrid" class="entry-grid"></div><div id="emptyEntries" class="empty-entries"><span>⤴</span><strong>منتظر اولین ویدیو هستیم</strong><p>لینک YouTube، TikTok یا Instagram رو توی چت بفرستید.</p></div></section>
-    <aside class="lobby-side"><div class="glass side-card"><span class="section-number">CONNECTION</span><h3 id="modeTitle">اتصال به چت</h3><p id="modeMessage">در حال آماده‌سازی...</p><div class="connection-detail" id="connectionDetail">● آماده</div><button type="button" id="reconnectBtn" class="secondary-btn">↻ اتصال مجدد</button></div>
-     <div id="demoPanel" class="glass side-card hidden"><span class="section-number">TEST TOOLS</span><h3>شبیه‌ساز چت</h3><form id="demoSubmissionForm"><input id="demoUsername" placeholder="username" value="viewer_01" dir="ltr" required><textarea id="demoLink" rows="2" dir="ltr" placeholder="لینک YouTube / TikTok / Instagram" required></textarea><button type="submit" class="secondary-btn">+ ارسال لینک آزمایشی</button></form><button type="button" id="fillDemoBtn" class="secondary-btn subtle-btn">پر کردن ظرفیت با نمونه‌های آزمایشی</button><p class="hint">نمونه‌های آزمایشی صرفاً برای تست منطق بازی هستند و پخش‌شدن همه ویدیوهای نمونه تضمین‌شده نیست.</p></div>
-     <div class="glass side-card instruction-card"><span class="section-number">HOW IT WORKS</span><h3>قانون بازی</h3><p>هر نفر تا <b id="perUserDisplay">2</b> لینک می‌تونه بفرسته. لینک تکراری پذیرفته نمی‌شه. وقتی ظرفیت پر شد، مسابقه قابل شروعه.</p><div class="three-platforms"><span>▶ YouTube</span><span>♪ TikTok</span><span>◎ Instagram</span></div></div>
+    <section class="glass lobby-main"><div class="inside-heading"><h2>ورودی‌های مسابقه</h2><span id="lobbyAvailable" class="pill">16 جای خالی</span></div><div id="entryGrid" class="entry-grid"></div><div id="emptyEntries" class="empty-entries"><span>⤴</span><strong>منتظر اولین ویدیو هستیم</strong><p>لینک دعوت رو در چت قرار بده تا بیننده‌ها از صفحه اختصاصی ثبت کنن.</p></div></section>
+    <aside class="lobby-side">
+     <div id="invitePanel" class="glass side-card invite-panel">
+       <span class="section-number">VIEWER INVITATION</span>
+       <h3>🔗 لینک دعوت بیننده‌ها</h3>
+       <p>این لینک رو داخل چت Kick ارسال کن. هر نفر لینک‌های مجازش رو وارد و یک‌بار تأیید نهایی می‌کنه.</p>
+       <label for="inviteAddress" class="invite-label">آدرس فرم ثبت ویدیو</label>
+       <input id="inviteAddress" dir="ltr" readonly aria-label="لینک دعوت">
+       <div class="invite-buttons">
+        <button id="copyInvite" type="button" class="primary-btn" disabled>📋 کپی لینک دعوت</button>
+        <a id="openInvite" href="#" class="secondary-btn" target="_blank" rel="noopener noreferrer" aria-disabled="true">↗ بازکردن فرم</a>
+       </div>
+       <button id="makeInvite" type="button" class="secondary-btn" hidden>ساخت لینک دعوت</button>
+       <div class="invite-state"><b id="inviteStatus">در حال آماده‌سازی...</b><small id="inviteStatusExtra"></small></div>
+     </div>
+     <div class="glass side-card"><span class="section-number">KICK VOTING</span><h3 id="modeTitle">اتصال رأی‌گیری</h3><p id="modeMessage">در حال آماده‌سازی...</p><div class="connection-detail" id="connectionDetail">● آماده</div><button type="button" id="reconnectBtn" class="secondary-btn">↻ اتصال مجدد</button></div>
+     <div id="demoPanel" class="glass side-card hidden"><span class="section-number">TEST TOOLS</span><h3>ابزار آزمایشی (فقط توسعه)</h3><form id="demoSubmissionForm"><input id="demoUsername" placeholder="username" value="viewer_01" dir="ltr" required><textarea id="demoLink" rows="2" dir="ltr" placeholder="لینک YouTube / TikTok / Instagram" required></textarea><button type="submit" class="secondary-btn">+ ارسال لینک آزمایشی</button></form><button type="button" id="fillDemoBtn" class="secondary-btn subtle-btn">پر کردن ظرفیت با نمونه‌های آزمایشی</button><p class="hint">نمونه‌های آزمایشی صرفاً برای تست منطق بازی هستند و پخش‌شدن همه ویدیوهای نمونه تضمین‌شده نیست.</p></div>
+     <div class="glass side-card instruction-card"><span class="section-number">HOW IT WORKS</span><h3>قانون بازی</h3><p>هر بیننده از طریق لینک دعوت تا <b id="perUserDisplay">2</b> ویدیو ثبت می‌کنه. چت Kick فقط برای رأی‌های 1 و 2 استفاده می‌شه.</p><div class="three-platforms"><span>▶ YouTube</span><span>♪ TikTok</span><span>◎ Instagram</span></div></div>
      <button type="button" id="launchBtn" class="primary-btn" disabled>شروع رقابت <span>←</span></button></aside>
    </div>
   </section>
@@ -393,9 +417,10 @@
   text('lobbyCount',pad(count));text('lobbyCapacity',cap);text('lobbyAvailable',count>=cap?'ظرفیت تکمیل':number(cap-count)+' جای خالی');text('perUserDisplay',game.settings.perUser);
   $('collectionProgress').style.width=(count/cap*100)+'%';$('launchBtn').disabled=count!==cap;
   const demo=game.settings.mode==='demo'||fallback;
-  $('demoPanel').classList.toggle('hidden',!demo);text('modeTitle',game.settings.mode==='demo'?'حالت آزمایشی':'اتصال به چت Kick');
+  $('demoPanel').classList.add('hidden');text('modeTitle',game.settings.mode==='demo'?'شبیه‌ساز رأی Kick':'اتصال به چت Kick (فقط رأی)');
   $('reconnectBtn').classList.toggle('hidden',game.settings.mode==='demo');
-  if(game.settings.mode==='demo')updateConnectionDescription('می‌تونی لینک آزمایشی اضافه کنی، ظرفیت رو پر کنی و تمام مسابقه رو تست کنی.');
+  if(game.settings.mode==='demo')updateConnectionDescription('رأی‌گیری آزمایشی فعاله. لینک‌های بیننده‌ها فقط از طریق فرم دعوت دریافت می‌شن.');
+  window.ChatBattleCloudHost?.display();
   const list=$('entryGrid');list.replaceChildren();game.entries.forEach((e,i)=>{
    const tile=document.createElement('div');tile.className='entry-tile';const pic=thumbNode(e.video,'entry-photo');
    const tag=document.createElement('span');tag.textContent=platformName(e.video);pic.append(tag);
@@ -406,10 +431,7 @@
  function registerText(content,username,id,time){if(!game)return;
   if(id){const normalized=String(id);if(idsSeen.has(normalized))return;idsSeen.add(normalized);if(idsSeen.size>MAX_MSG_IDS){const old=idsSeen.values().next().value;idsSeen.delete(old)}}
   else {const key=String(username).toLowerCase()+'\0'+String(content)+'\0'+String(time||'');const t=Date.now();if(recentMessageKeys.get(key)&&t-recentMessageKeys.get(key)<3000)return;recentMessageKeys.set(key,t);if(recentMessageKeys.size>150)for(const [k,v] of recentMessageKeys){if(t-v>10000)recentMessageKeys.delete(k);}}
-  if(game.phase==='collecting'){
-   const result=Core.submitLink(game,content,username);
-   if(result.ok){save();renderCollection();if(game.entries.length===game.settings.capacity)toast('ظرفیت تکمیل شد! مسابقه آماده‌ی شروعه.');}
-  }else if(game.phase==='battle'&&String(content).trim().match(/^[12]$/)){
+  if(game.phase==='battle'&&String(content).trim().match(/^[12]$/)){
    const result=Core.vote(game,String(content).trim(),username);if(result.ok){save();refreshVotes(result.side)}
   }
  }
@@ -440,7 +462,7 @@
    if(msg.event==='pusher:connection_established'){
     socket.send(JSON.stringify({event:'pusher:subscribe',data:{auth:'',channel:'chatrooms.'+room+'.v2'}}));
    }else if(msg.event==='pusher_internal:subscription_succeeded'){
-    retryAttempt=0;fallback=false;setConnection('connected','Kick Live');if(game?.phase==='collecting'){updateConnectionDescription('کانال '+game.settings.channel+' متصل است. لینک‌های معتبر به‌صورت خودکار وارد مسابقه می‌شن.');renderCollection()}
+    retryAttempt=0;fallback=false;setConnection('connected','Kick Live');if(game?.phase==='collecting'){updateConnectionDescription('کانال '+game.settings.channel+' متصل است. فقط پیام‌های 1 و 2 در زمان رأی‌گیری شمرده می‌شن.');renderCollection()}
    }else if(msg.event==='pusher:ping'){socket.send(JSON.stringify({event:'pusher:pong',data:{}}))}
    else if(msg.event==='pusher:error'){
     const d=decodeData(msg.data);setConnection('error','خطای Kick '+(d?.code||''));if(game?.phase==='collecting'){fallback=true;updateConnectionDescription('خطا در اتصال Kick. دکمه اتصال مجدد را بزنید، یا با شبیه‌ساز ادامه دهید.');renderCollection()}
@@ -459,7 +481,10 @@
   const mode=radios('mode');if(mode==='kick'&&!channel){$('channelInput').focus();toast('نام کانال Kick را وارد کنید.');return}
   const settings={topic:$('topicInput').value,channel,mode,capacity:Number(radios('capacity')),perUser:Number($('perUserInput').value),voteSeconds:Number($('secondsInput').value),allowChange:$('allowChangeInput').checked,pusherKey:$('pusherInput').value.trim()};
   try{game=Core.newGame(settings)}catch(ex){toast(ex.message);return}
-  fallback=false;lastBattleKey='';save();render();if(mode==='kick')connectKick();else toast('مسابقه آزمایشی ساخته شد؛ لینک‌ها رو اضافه کن!');
+  fallback=false;lastBattleKey='';save();render();
+  if(mode==='kick')connectKick();
+  if(window.ChatBattleCloudHost)window.ChatBattleCloudHost.createSession(game);
+  else toast('اتصال Firebase هنوز آماده نشده؛ صفحه را رفرش کن.');
  }
  function demoSubmit(e){e.preventDefault();if(!game)return;const user=$('demoUsername').value,link=$('demoLink').value;
   const result=Core.submitLink(game,link,user);if(!result.ok)toast(shortReason[result.reason]||'خطای ورودی');else{save();renderCollection();$('demoLink').value='';toast(result.count+' لینک به مسابقه اضافه شد.')}}
@@ -674,10 +699,23 @@
   const result={app:'Chat Battle',topic:game.settings.topic,finishedAt:new Date(game.completedAt).toISOString(),capacity:game.settings.capacity,rankingRule:'Champion, elimination round, final vote share, votes',rankings:Core.rankings(game).map((e,i)=>({position:i+1,platform:e.video.platform,url:e.video.url,sender:e.sender,eliminatedRound:e.eliminatedRound,finalVoteShare:e.lastShare,finalVotes:e.lastVotes}))};
   const blob=new Blob([JSON.stringify(result,null,2)],{type:'application/json;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='chat-battle-results.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);
  }
- function reset(){cancelWinFX();window.ChatBattlePlayer?.destroyAll();disconnect();game=null;fallback=false;lastBattleKey='';idsSeen.clear();recentMessageKeys.clear();safeStorage.remove(STORE);$('confirmDialog').classList.add('hidden');render();window.scrollTo({top:0,behavior:'smooth'});}
+ function reset(){const prior=game;window.ChatBattleCloudHost?.stopListening();if(prior?.phase==='collecting'&&prior.cloudSessionId)window.ChatBattleCloudHost?.closeSession(prior).catch(()=>{});cancelWinFX();window.ChatBattlePlayer?.destroyAll();disconnect();game=null;fallback=false;lastBattleKey='';idsSeen.clear();recentMessageKeys.clear();safeStorage.remove(STORE);$('confirmDialog').classList.add('hidden');render();window.scrollTo({top:0,behavior:'smooth'});}
  function showReset(){if(!game){toast('هنوز مسابقه‌ای ساخته نشده.');return}$('confirmDialog').classList.remove('hidden')}
  $('setupForm').addEventListener('submit',submitSettings);$('demoSubmissionForm').addEventListener('submit',demoSubmit);
- $('fillDemoBtn').addEventListener('click',fillDemo);$('launchBtn').addEventListener('click',()=>{if(!game)return;const result=Core.startTournament(game);if(!result.ok){toast('برای شروع باید ظرفیت مسابقه کامل بشه.');return}save();render();toast('⚔️ مسابقه شروع شد! '+(result.byes?' | '+result.byes+' صعود خودکار':''));});
+ $('fillDemoBtn').addEventListener('click',fillDemo);$('launchBtn').addEventListener('click',async()=>{
+  if(!game)return;
+  if(game.entries.length!==game.settings.capacity){toast('اول ظرفیت مسابقه رو کامل کن.');return}
+  const btn=$('launchBtn');btn.disabled=true;
+  try{
+   if(!window.ChatBattleCloudHost)throw Error('اتصال Firebase هنوز آماده نیست.');
+   await window.ChatBattleCloudHost.closeSession(game);
+   const result=Core.startTournament(game);
+   if(!result.ok)throw Error('برای شروع باید ظرفیت مسابقه کامل بشه.');
+   save();render();
+   if(game.settings.mode==='kick')connectKick();
+   toast('⚔️ مسابقه شروع شد! '+(result.byes?' | '+result.byes+' صعود خودکار':''));
+  }catch(error){toast(error.message||'شروع مسابقه ناموفق بود.');renderCollection()}
+ });
  $('reconnectBtn').addEventListener('click',connectKick);
  $('voteStartBtn').addEventListener('click',startVoting);$('voteStopBtn').addEventListener('click',stopVoting);
  qa('[data-play]').forEach(btn=>btn.addEventListener('click',()=>playSide(Number(btn.dataset.play))));
@@ -693,6 +731,38 @@
  window.addEventListener('beforeunload',()=>{if(ws)try{ws.close()}catch{}});
  game=load();if(game&&game.phase==='battle'&&Core.maybeExpire(game))save();render();if(game&&game.settings.mode==='kick'&&game.phase!=='finished')connectKick();
  setInterval(tick,180);
+
+// Public bridge between the local tournament engine and Firestore host adapter.
+ window.ChatBattleBridge={
+  getGame:()=>game,
+  toast,
+  attachSession(state,id){
+   if(game!==state||game.phase!=='collecting')return;
+   game.cloudSessionId=id;save();renderCollection();
+  },
+  syncSubmissions(roomId,records){
+   if(!game||game.phase!=='collecting'||game.cloudSessionId!==roomId)return;
+   const next=[];
+   const max=game.settings.capacity;
+   for(const record of records){
+    const sender=String(record.username||'viewer').slice(0,32);
+    if(!Array.isArray(record.links))continue;
+    for(let i=0;i<record.links.length&&next.length<max;i++){
+     const video=Core.parseVideo(record.links[i]);
+     if(!video)continue;
+     next.push({
+      id:'cb_'+String(record.uid||'').slice(0,25)+'_'+i,
+      sender,senderKey:String(record.uid||''),
+      video,createdAt:Number(record.when)||Date.now(),
+      eliminatedRound:null,lastShare:0,lastVotes:0
+     });
+    }
+   }
+   game.entries=next;
+   save();renderCollection();
+   if(next.length===max)toast('✅ ظرفیت مسابقه از طریق فرم دعوت تکمیل شد!');
+  }
+ };
  // Test hook is never called by application logic and never exposes sender identity in the UI.
  if(new URLSearchParams(location.search).has('chatbattle_test'))window.__chatBattleTest={receive:registerText,state:()=>game,reset,connect:connectKick};
 })();
@@ -798,5 +868,6 @@ document.querySelectorAll('[data-fullscreen]').forEach(b=>b.addEventListener('cl
 })();
 
 </script>
+<script type="module" src="./firebase-host.js"></script>
 </body>
 </html>
