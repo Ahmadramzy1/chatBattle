@@ -1,0 +1,84 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signed() {
+      return request.auth != null;
+    }
+    function sessionPath(id) {
+      return /databases/$(database)/documents/chatBattleSessions/$(id);
+    }
+    function submissionPath(id, uid) {
+      return /databases/$(database)/documents/chatBattleSessions/$(id)/submissions/$(uid);
+    }
+    function validVideoLink(link) {
+      return link is string && link.size() >= 14 && link.size() <= 800
+        && link.matches('^https://(www[.]|m[.])?(youtube[.]com|youtube-nocookie[.]com|youtu[.]be|instagram[.]com|instagr[.]am|tiktok[.]com|vm[.]tiktok[.]com|vt[.]tiktok[.]com)/[^ ]+$');
+    }
+    function validVideoLinks(links) {
+      return links is list && links.size() > 0 && links.size() <= 10
+        && validVideoLink(links[0])
+        && (links.size() < 2 || validVideoLink(links[1]))
+        && (links.size() < 3 || validVideoLink(links[2]))
+        && (links.size() < 4 || validVideoLink(links[3]))
+        && (links.size() < 5 || validVideoLink(links[4]))
+        && (links.size() < 6 || validVideoLink(links[5]))
+        && (links.size() < 7 || validVideoLink(links[6]))
+        && (links.size() < 8 || validVideoLink(links[7]))
+        && (links.size() < 9 || validVideoLink(links[8]))
+        && (links.size() < 10 || validVideoLink(links[9]));
+    }
+    match /chatBattleSessions/{sessionId} {
+      allow get: if signed();
+      allow list: if false;
+      allow create: if signed()
+        && request.resource.data.keys().hasOnly(['ownerUid', 'topic', 'capacity', 'perUser', 'status', 'usedCount', 'createdAt'])
+        && request.resource.data.keys().hasAll(['ownerUid', 'topic', 'capacity', 'perUser', 'status', 'usedCount', 'createdAt'])
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.topic is string
+        && request.resource.data.topic.size() > 0 && request.resource.data.topic.size() <= 110
+        && request.resource.data.capacity in [16, 24, 32, 48]
+        && request.resource.data.perUser is int
+        && request.resource.data.perUser >= 1 && request.resource.data.perUser <= 10
+        && request.resource.data.status == 'collecting'
+        && request.resource.data.usedCount == 0
+        && request.resource.data.createdAt == request.time;
+      allow update: if signed() && (
+        (resource.data.ownerUid == request.auth.uid
+         && resource.data.status == 'collecting'
+         && request.resource.data.status == 'closed'
+         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']))
+        ||
+        (resource.data.status == 'collecting'
+         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['usedCount'])
+         && !exists(submissionPath(sessionId, request.auth.uid))
+         && existsAfter(submissionPath(sessionId, request.auth.uid))
+         && getAfter(submissionPath(sessionId, request.auth.uid)).data.uid == request.auth.uid
+         && request.resource.data.usedCount == resource.data.usedCount
+            + getAfter(submissionPath(sessionId, request.auth.uid)).data.links.size()
+         && request.resource.data.usedCount <= resource.data.capacity)
+      );
+      allow delete: if false;
+
+      match /submissions/{viewerUid} {
+        allow get: if signed() &&
+          (request.auth.uid == viewerUid || request.auth.uid == get(sessionPath(sessionId)).data.ownerUid);
+        allow list: if signed() && request.auth.uid == get(sessionPath(sessionId)).data.ownerUid;
+        allow create: if signed()
+          && viewerUid == request.auth.uid
+          && get(sessionPath(sessionId)).data.status == 'collecting'
+          && request.resource.data.keys().hasOnly(['uid', 'username', 'links', 'submittedAt'])
+          && request.resource.data.keys().hasAll(['uid', 'username', 'links', 'submittedAt'])
+          && request.resource.data.uid == viewerUid
+          && request.resource.data.username is string
+          && request.resource.data.username.matches('^[a-zA-Z0-9_.]{2,32}$')
+          && validVideoLinks(request.resource.data.links)
+          && request.resource.data.links.size() <= get(sessionPath(sessionId)).data.perUser
+          && request.resource.data.submittedAt == request.time
+          && getAfter(sessionPath(sessionId)).data.usedCount
+             == get(sessionPath(sessionId)).data.usedCount + request.resource.data.links.size()
+          && getAfter(sessionPath(sessionId)).data.usedCount <= get(sessionPath(sessionId)).data.capacity;
+        allow update, delete: if false;
+      }
+    }
+  }
+}
