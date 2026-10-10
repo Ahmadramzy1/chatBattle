@@ -23,7 +23,9 @@ button:disabled{opacity:.43;cursor:not-allowed}.subtle{background:#243122;color:
 .submit{border:0;border-radius:11px;background:var(--green);color:#101912;width:100%;padding:14px;margin-top:23px;font-size:15px;font-weight:900;cursor:pointer}.submit:not(:disabled):hover{background:#e6ffb4}
 .hint{color:#93a4ae;font-size:11px;margin:8px 0;line-height:1.9}
 .status{font-size:12px;padding:11px 13px;border:1px solid #425349;border-radius:10px;background:#18261c;color:#cfe5c7;margin:20px 0 0}
-.status.error{background:#321c23;border-color:#734151;color:#ffb6c1}.status.info{background:#1a2430;border-color:#42556e;color:#b9d1ff}
+.status.error{background:#321c23;border-color:#734151;color:#ffb6c1}
+.entry.duplicate input{border-color:#ff8e82;box-shadow:0 0 0 2px #ff8e8222}
+.entry.duplicate::after{content:"قبلاً ثبت شده";font-size:10px;align-self:center;color:#ff8e82;white-space:nowrap}.status.info{background:#1a2430;border-color:#42556e;color:#b9d1ff}
 .done{display:none;text-align:center;padding:45px 26px}.done strong{font-size:24px;display:block;color:var(--green)}.done p{color:#bdc6cf}footer{color:#829199;text-align:center;padding:30px 8px;font:700 10px 'Space Grotesk',sans-serif;letter-spacing:2px}a{color:var(--green)}
 @media(max-width:500px){.wrap{padding-top:22px}.card{padding:19px}.eyebrow{margin-top:32px}}
 </style></head>
@@ -45,11 +47,11 @@ button:disabled{opacity:.43;cursor:not-allowed}.subtle{background:#243122;color:
  <div id="inputs" class="inputs"></div>
  <button id="addAnother" class="subtle" type="button">＋ اضافه کردن لینک دیگر</button>
  <p id="linkHint" class="hint">لینک‌های عمومی YouTube، TikTok و Instagram پذیرفته می‌شن.</p>
- <button id="confirm" type="submit" class="submit">تأیید نهایی و ثبت ویدیوها ←</button>
- <p class="hint">بعد از ثبت نهایی امکان ویرایش یا ارسال مجدد از همین مرورگر وجود نداره.</p>
+ <button id="confirm" type="submit" class="submit">تأیید نهایی و ثبت ویدیوها ←</button><button id="cancelEdit" class="subtle" type="button" hidden>انصراف از ویرایش</button>
+ <p class="hint">تا قبل از شروع مسابقه می‌تونی لینک‌های ثبت‌شده رو ویرایش، حذف یا تا سقف مجاز لینک جدید اضافه کنی.</p>
 </form>
-<section id="success" class="card done"><span style="font-size:53px">🏆</span><strong>لینک‌هات با موفقیت ثبت شدن!</strong><p id="successInfo">منتظر شروع رقابت باش.</p></section>
+<section id="success" class="card done"><span style="font-size:53px">🏆</span><strong>لینک‌هات ثبت شدن!</strong><p id="successInfo">منتظر شروع رقابت باش.</p><button class="subtle" id="editLinks" type="button" hidden>✎ ویرایش یا اضافه کردن لینک</button><p class="hint" id="editHint">ویرایش فقط تا پیش از شروع مسابقه فعال است.</p></section>
 <footer>CHAT BATTLE — THE CHAT DECIDES.</footer>
 </div>
-<script type="module" src="./firebase-invite.js?v=20261010-authfix2"></script>
+<script type="module" src="./firebase-invite.js?v=20261010-edit2"></script>
 </body></html>
