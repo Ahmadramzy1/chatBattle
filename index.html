@@ -6,7 +6,7 @@
 <meta name="color-scheme" content="dark">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="theme-color" content="#0c0e13">
-<meta name="description" content="Chat Battle — مسابقه حذفی ویدیوهای ارسالی در چت Kick با رأی‌گیری زنده">
+<meta name="description" content="Chat Battle — مسابقه حذفی ویدیوهای ارسالی از طریق لینک دعوت با رأی‌گیری زنده چت Kick">
 <title>Chat Battle — Live Video Tournament</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -227,7 +227,7 @@
      <div id="invitePanel" class="glass side-card invite-panel">
        <span class="section-number">VIEWER INVITATION</span>
        <h3>🔗 لینک دعوت بیننده‌ها</h3>
-       <p>این لینک رو داخل چت Kick ارسال کن. هر نفر لینک‌های مجازش رو وارد و یک‌بار تأیید نهایی می‌کنه.</p>
+       <p>این لینک رو داخل چت Kick ارسال کن. بیننده‌ها تا شروع مسابقه می‌تونن ویدیوهاشون رو ثبت، ویرایش یا اضافه کنن.</p>
        <label for="inviteAddress" class="invite-label">آدرس فرم ثبت ویدیو</label>
        <input id="inviteAddress" dir="ltr" readonly aria-label="لینک دعوت">
        <div class="invite-buttons">
@@ -239,7 +239,7 @@
      </div>
      <div class="glass side-card"><span class="section-number">KICK VOTING</span><h3 id="modeTitle">اتصال رأی‌گیری</h3><button type="button" id="reconnectBtn" class="secondary-btn">↻ اتصال مجدد</button></div>
      <div id="demoPanel" class="glass side-card hidden"><span class="section-number">TEST TOOLS</span><h3>ابزار آزمایشی (فقط توسعه)</h3><form id="demoSubmissionForm"><input id="demoUsername" placeholder="username" value="viewer_01" dir="ltr" required><textarea id="demoLink" rows="2" dir="ltr" placeholder="لینک YouTube / TikTok / Instagram" required></textarea><button type="submit" class="secondary-btn">+ ارسال لینک آزمایشی</button></form><button type="button" id="fillDemoBtn" class="secondary-btn subtle-btn">پر کردن ظرفیت با نمونه‌های آزمایشی</button><p class="hint">نمونه‌های آزمایشی صرفاً برای تست منطق بازی هستند و پخش‌شدن همه ویدیوهای نمونه تضمین‌شده نیست.</p></div>
-     <div class="glass side-card instruction-card"><span class="section-number">HOW IT WORKS</span><h3>قانون بازی</h3><p>هر بیننده از طریق لینک دعوت تا <b id="perUserDisplay">2</b> ویدیو ثبت می‌کنه. چت Kick فقط برای رأی‌های 1 و 2 استفاده می‌شه.</p><div class="three-platforms"><span>▶ YouTube</span><span>♪ TikTok</span><span>◎ Instagram</span></div></div>
+     <div class="glass side-card instruction-card"><span class="section-number">HOW IT WORKS</span><h3>قانون بازی</h3><p>هر بیننده از طریق لینک دعوت تا <b id="perUserDisplay">2</b> ویدیو ثبت می‌کنه. ویدیوی تکراری رد می‌شه و تا شروع رقابت قابل ویرایشه؛ چت Kick فقط برای رأی‌های 1 و 2 استفاده می‌شه.</p><div class="three-platforms"><span>▶ YouTube</span><span>♪ TikTok</span><span>◎ Instagram</span></div></div>
      <button type="button" id="launchBtn" class="primary-btn" disabled>شروع رقابت <span>←</span></button></aside>
    </div>
   </section>
