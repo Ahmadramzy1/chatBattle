@@ -476,15 +476,19 @@
  }
  function decodeData(x){if(typeof x==='string'){try{return JSON.parse(x)}catch{return null}}return x||null}
  function scheduleRetry(room,generation){if(generation!==sockGeneration||manuallyDisconnected)return;const ms=Math.min(12000,800*2**Math.min(retryAttempt++,4));setConnection('disconnected','اتصال مجدد...');clearTimeout(retryTimer);retryTimer=setTimeout(()=>openSocket(room,generation),ms)}
- function submitSettings(e){e.preventDefault();const form=$('setupForm');const radios=n=>q('input[name="'+n+'"]:checked',form)?.value;
+ async function submitSettings(e){e.preventDefault();const form=$('setupForm');const radios=n=>q('input[name="'+n+'"]:checked',form)?.value;
   const channel=$('channelInput').value.trim().replace(/^https?:\/\/(www\.)?kick\.com\//i,'').replace(/[@/?#].*$/,'').toLowerCase();
   const mode=radios('mode');if(mode==='kick'&&!channel){$('channelInput').focus();toast('نام کانال Kick را وارد کنید.');return}
   const settings={topic:$('topicInput').value,channel,mode,capacity:Number(radios('capacity')),perUser:Number($('perUserInput').value),voteSeconds:Number($('secondsInput').value),allowChange:$('allowChangeInput').checked,pusherKey:$('pusherInput').value.trim()};
   try{game=Core.newGame(settings)}catch(ex){toast(ex.message);return}
   fallback=false;lastBattleKey='';save();render();
+  const newGame=game;
+  // Start authentication and room creation BEFORE networking to Kick.
+  // Keeping these independent avoids concurrent Pusher/proxy requests interfering with room creation.
+  if(window.ChatBattleCloudHost)await window.ChatBattleCloudHost.createSession(newGame);
+  else toast('ماژول Firebase بارگذاری نشده؛ از رفرش کامل صفحه استفاده کن.');
+  if(newGame!==game)return;
   if(mode==='kick')connectKick();
-  if(window.ChatBattleCloudHost)window.ChatBattleCloudHost.createSession(game);
-  else toast('اتصال Firebase هنوز آماده نشده؛ صفحه را رفرش کن.');
  }
  function demoSubmit(e){e.preventDefault();if(!game)return;const user=$('demoUsername').value,link=$('demoLink').value;
   const result=Core.submitLink(game,link,user);if(!result.ok)toast(shortReason[result.reason]||'خطای ورودی');else{save();renderCollection();$('demoLink').value='';toast(result.count+' لینک به مسابقه اضافه شد.')}}
@@ -868,6 +872,6 @@ document.querySelectorAll('[data-fullscreen]').forEach(b=>b.addEventListener('cl
 })();
 
 </script>
-<script type="module" src="./firebase-host.js"></script>
+<script type="module" src="./firebase-host.js?v=20261010-authfix2"></script>
 </body>
 </html>
