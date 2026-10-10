@@ -1,6 +1,7 @@
+import { kickUser, loginWithKick } from './kick-auth.js';
 import {
   db, doc, getDoc, onSnapshot, runTransaction, serverTimestamp, authReady, firebaseError
-} from './firebase-client.js?v=20261010-authfix2';
+} from './firebase-client.js?v=20261010-controls3';
 
 const $=id=>document.getElementById(id);
 const sessionId=new URLSearchParams(location.search).get('s')||'';
@@ -64,7 +65,7 @@ function highlightDuplicates(){
   return duplicates;
 }
 function addField(value=''){
-  if(!current||inputs.children.length>=Math.min(Number(current.perUser)||1,10))return;
+  if(!current||inputs.children.length>=10)return;
   const div=document.createElement('div');div.className='entry';
   const field=document.createElement('input');field.type='url';field.placeholder='https://www.youtube.com/watch?v=...';field.setAttribute('aria-label','لینک ویدیو');field.value=value;field.maxLength=800;field.required=true;
   field.addEventListener('input',()=>{
@@ -85,7 +86,7 @@ function refreshControls(){
 }
 function populateForm(){
   inputs.replaceChildren();
-  $('username').value=mine?.username||'';
+  $('username').value=anonymousUser?.kickName||'';
   for(const link of mine?.links||[])addField(link);
   if(!inputs.children.length)addField();
   refreshControls();
@@ -138,8 +139,8 @@ async function submit(event){
   event.preventDefault();
   if(pending||!current||!anonymousUser||current.status!=='collecting')return;
   if(Number(current.schemaVersion)!==2){status(LEGACY,'error');return}
-  const name=$('username').value.trim();
-  if(!/^[A-Za-z0-9_.]{2,32}$/.test(name)){status('نام Kick باید ۲ تا ۳۲ کاراکتر انگلیسی، عدد، زیرخط یا نقطه باشه.','error');return}
+  const name=anonymousUser.kickName;
+  if(!name||name.length>64){status('نام Kick باید ۲ تا ۳۲ کاراکتر انگلیسی، عدد، زیرخط یا نقطه باشه.','error');return}
   const clips=linksFromForm().map(normalize);
   if(!clips.length||clips.some(v=>!v)){status('یک یا چند لینک معتبر نیست. لینک مستقیم و عمومی YouTube، Instagram یا TikTok بذار.','error');return}
   const keys=clips.map(c=>c.key);
@@ -190,7 +191,9 @@ form.addEventListener('submit',submit);
 async function boot(){
   if(!/^[A-Za-z0-9]{20}$/.test(sessionId)){status('لینک دعوت نامعتبره. لینک کامل رو از استریمر بگیر.','error');return}
   try{
-    anonymousUser=await authReady();
+    anonymousUser=await kickUser();
+    if(!anonymousUser){form.hidden=true;$('kickLogin').hidden=false;status('برای ارسال ویدیو با حساب Kick وارد شو.','info');return}
+    $('kickLogin').hidden=true;$('kickIdentity').textContent='حساب تأییدشده: @'+anonymousUser.kickName;
     const ownRef=doc(db,'chatBattleSessions',sessionId,'submissions',anonymousUser.uid);
     const mineSnap=await getDoc(ownRef);
     if(mineSnap.exists())mine=mineSnap.data();
@@ -200,5 +203,6 @@ async function boot(){
     },error=>{form.hidden=true;status(firebaseError(error),'error')});
   }catch(error){status(firebaseError(error),'error')}
 }
+$('kickLogin').addEventListener('click',()=>loginWithKick().catch(e=>status(e.message,'error')));
 boot();
 window.addEventListener('pagehide',()=>unsubscribe?.());

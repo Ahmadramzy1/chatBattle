@@ -1,0 +1,4 @@
+{
+  "functions": [{"source": "functions", "codebase": "kick-auth"}],
+  "firestore": {"rules": "firestore.rules"}
+}

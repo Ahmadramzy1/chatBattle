@@ -14,7 +14,9 @@ export const firebaseConfig = {
   messagingSenderId: '944995889142',
   appId: '1:944995889142:web:9566d408803e472c7a21d7'
 };
-export const app = initializeApp(firebaseConfig);
+// Viewer login must not replace the host's anonymous room-owner session.
+const viewerPage=/(?:invite|kick-callback)\.html$/.test(location.pathname);
+export const app = viewerPage ? initializeApp(firebaseConfig,'kick-viewer') : initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export { doc, collection, setDoc, getDoc, getDocs, onSnapshot, query, orderBy, updateDoc, runTransaction, serverTimestamp };

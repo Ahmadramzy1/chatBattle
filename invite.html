@@ -40,9 +40,10 @@ button:disabled{opacity:.43;cursor:not-allowed}.subtle{background:#243122;color:
  <div class="session-info"><span class="chip" id="capacity">— ظرفیت</span><span class="chip" id="perUser">— لینک برای هر نفر</span><span class="chip" id="remaining">— جای خالی</span></div>
  <p id="state" class="status info" role="status">در حال اتصال امن به Firebase...</p>
 </section>
+<section class="card"><p id="kickIdentity">نام فرستنده از حساب Kick دریافت می‌شود.</p><button id="kickLogin" class="submit" type="button" hidden>ورود با Kick</button><p class="hint">فقط دسترسی خواندن اطلاعات حساب درخواست می‌شود. اجازهٔ ارسال پیام یا مدیریت کانال لازم نیست.</p></section>
 <form id="entryForm" class="card" hidden>
- <label for="username">نام کاربری Kick</label><input id="username" maxlength="32" minlength="2" pattern="[A-Za-z0-9_.]{2,32}" autocomplete="nickname" placeholder="your_kick_username" required>
- <p class="hint">این نام در پایان مسابقه به‌عنوان فرستنده نمایش داده می‌شه؛ تأیید هویت Kick فعلاً انجام نمی‌شه.</p>
+ <label for="username">نام کاربری Kick</label><input id="username" readonly aria-readonly="true">
+ <p class="hint">این نام مستقیماً از حساب Kick دریافت شده و قابل تغییر نیست.</p>
  <label>لینک ویدیوها</label>
  <div id="inputs" class="inputs"></div>
  <button id="addAnother" class="subtle" type="button">＋ اضافه کردن لینک دیگر</button>
@@ -53,5 +54,5 @@ button:disabled{opacity:.43;cursor:not-allowed}.subtle{background:#243122;color:
 <section id="success" class="card done"><span style="font-size:53px">🏆</span><strong>لینک‌هات ثبت شدن!</strong><p id="successInfo">منتظر شروع رقابت باش.</p><button class="subtle" id="editLinks" type="button" hidden>✎ ویرایش یا اضافه کردن لینک</button><p class="hint" id="editHint">ویرایش فقط تا پیش از شروع مسابقه فعال است.</p></section>
 <footer>CHAT BATTLE — THE CHAT DECIDES.</footer>
 </div>
-<script type="module" src="./firebase-invite.js?v=20261010-edit2"></script>
+<script type="module" src="./firebase-invite.js?v=20261010-controls3"></script>
 </body></html>

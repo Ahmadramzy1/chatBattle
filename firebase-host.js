@@ -1,7 +1,7 @@
 import {
   db, doc, collection, setDoc, getDoc, getDocs, onSnapshot, query, orderBy,
-  updateDoc, serverTimestamp, authReady, firebaseError
-} from './firebase-client.js?v=20261010-authfix2';
+  updateDoc, runTransaction, serverTimestamp, authReady, firebaseError
+} from './firebase-client.js?v=20261010-controls3';
 
 const bridge=window.ChatBattleBridge;
 const box=document.getElementById('invitePanel');
@@ -64,7 +64,7 @@ async function createSession(g){
     await setDoc(ref,{
       ownerUid:user.uid,topic:g.settings.topic,capacity:g.settings.capacity,
       perUser:g.settings.perUser,status:'collecting',usedCount:0,
-      schemaVersion:2,reservedVideoKeys:[],createdAt:serverTimestamp()
+      schemaVersion:2,requireKick:true,reservedVideoKeys:[],createdAt:serverTimestamp()
     });
     if(bridge.getGame()!==g)return;
     bridge.attachSession(g,ref.id);
@@ -89,19 +89,28 @@ async function resume(g){
     display();
   }catch(error){status('خطای اتصال',firebaseError(error))}
 }
-async function closeSession(g){
+async function closeSession(g,{forStart=false}={}){
   if(!g?.cloudSessionId)throw Error('اول لینک دعوت رو بساز.');
   const id=g.cloudSessionId;
   const user=await authReady();
   const ref=doc(db,'chatBattleSessions',id);
-  const snap=await getDoc(ref);
-  if(!snap.exists()||snap.data().ownerUid!==user.uid)throw Error('مجوز مدیریت این مسابقه در این مرورگر موجود نیست.');
-  if(snap.data().status==='collecting')await updateDoc(ref,{status:'closed'});
+  await runTransaction(db,async tx=>{
+    const snap=await tx.get(ref);
+    if(!snap.exists()||snap.data().ownerUid!==user.uid)throw Error('مجوز مدیریت این مسابقه در این مرورگر موجود نیست.');
+    if(forStart&&snap.data().usedCount<2)throw Error('حداقل دو ویدیو برای شروع لازم است.');
+    if(snap.data().status==='collecting')tx.update(ref,{status:'closed'});
+  });
   const entries=await getDocs(query(collection(db,'chatBattleSessions',id,'submissions'),orderBy('submittedAt','asc')));
   if(g===bridge.getGame()&&g.phase==='collecting'){
     bridge.syncSubmissions(id,entries.docs.map(d=>({...d.data(),uid:d.id,when:d.data().submittedAt?.toMillis()||Date.now()})));
   }
   stopListening();
+}
+async function updatePerUser(g,value){
+  if(!g?.cloudSessionId||g.phase!=='collecting')throw Error('ابتدا لینک دعوت را بساز.');
+  if(!Number.isInteger(value)||value<1||value>10)throw Error('سقف نامعتبر است.');
+  await authReady();
+  await updateDoc(doc(db,'chatBattleSessions',g.cloudSessionId),{perUser:value});
 }
 async function copyInvite(){
   const g=bridge?.getGame();if(!g?.cloudSessionId)return;
@@ -111,7 +120,7 @@ async function copyInvite(){
 }
 box?.querySelector('#copyInvite')?.addEventListener('click',copyInvite);
 box?.querySelector('#makeInvite')?.addEventListener('click',()=>createSession(bridge.getGame()));
-window.ChatBattleCloudHost={createSession,resume,closeSession,stopListening,display,copyInvite};
+window.ChatBattleCloudHost={createSession,resume,closeSession,updatePerUser,stopListening,display,copyInvite};
 const existing=bridge?.getGame();
 if(existing?.phase==='collecting'){
   display();

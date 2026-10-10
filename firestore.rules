@@ -91,7 +91,11 @@ service cloud.firestore {
         d.keys().hasAll(['uid', 'username', 'links', 'videoKeys', 'submittedAt']) &&
         d.uid == uid &&
         d.username is string &&
-        d.username.matches('^[a-zA-Z0-9_.]{2,32}$') &&
+        d.username.size() > 0 && d.username.size() <= 64 &&
+        (!room.get('requireKick', false) ||
+          (request.auth.token.get('kick_verified', false) == true &&
+           uid == 'kick:' + request.auth.token.kick_id &&
+           d.username == request.auth.token.kick_name)) &&
         validPairs(d.links, d.videoKeys) &&
         d.links.size() <= room.perUser;
     }
@@ -112,11 +116,11 @@ service cloud.firestore {
       allow create: if signed() &&
         request.resource.data.keys().hasOnly([
           'ownerUid','topic','capacity','perUser','status','usedCount',
-          'createdAt','schemaVersion','reservedVideoKeys'
+          'createdAt','schemaVersion','reservedVideoKeys','requireKick'
         ]) &&
         request.resource.data.keys().hasAll([
           'ownerUid','topic','capacity','perUser','status','usedCount',
-          'createdAt','schemaVersion','reservedVideoKeys'
+          'createdAt','schemaVersion','reservedVideoKeys','requireKick'
         ]) &&
         request.resource.data.ownerUid == request.auth.uid &&
         request.resource.data.topic is string &&
@@ -129,6 +133,7 @@ service cloud.firestore {
         request.resource.data.status == 'collecting' &&
         request.resource.data.usedCount == 0 &&
         request.resource.data.schemaVersion == 2 &&
+        request.resource.data.requireKick == true &&
         request.resource.data.reservedVideoKeys == [] &&
         request.resource.data.createdAt == request.time;
 
@@ -137,6 +142,11 @@ service cloud.firestore {
           resource.data.status == 'collecting' &&
           request.resource.data.status == 'closed' &&
           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']))
+        ||
+        (resource.data.ownerUid == request.auth.uid &&
+          resource.data.status == 'collecting' &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['perUser']) &&
+          request.resource.data.perUser is int && request.resource.data.perUser >= 1 && request.resource.data.perUser <= 10)
         ||
         validViewerRoomUpdate(sessionId)
         ||

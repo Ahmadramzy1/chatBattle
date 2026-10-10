@@ -182,6 +182,7 @@
  border-radius:9px;font-size:11px;line-height:1.7;
 }
 
+.voter-frame{border:1px solid #485344;border-radius:12px;padding:12px;max-height:130px;overflow:auto;display:flex;flex-wrap:wrap;gap:7px;direction:ltr;margin-bottom:12px}.voter-frame[hidden]{display:none}.voter-frame span{background:#263328;border-radius:20px;padding:3px 9px;font-size:12px}.sender-label{direction:rtl;color:var(--lime)}.revealed-preview{width:100%;height:100%;display:grid;place-items:center}.revealed-preview img{width:100%;height:100%;object-fit:contain}.control-buttons{flex-wrap:wrap}.coin-scene{perspective:900px;height:240px;display:grid;place-items:center}.coin-3d{position:relative;width:170px;height:170px;transform-style:preserve-3d}.coin-edge{position:absolute;inset:0;border-radius:50%;background:repeating-conic-gradient(#d4a134 0deg 4deg,#755015 4deg 6deg)}.coin-face{position:absolute;inset:0;border-radius:50%;backface-visibility:hidden;background:radial-gradient(circle at 30% 25%,#fff3ae,#d4a134 65%,#755015);border:10px ridge #d7b157;display:grid;place-items:center;font:700 95px var(--latin);color:#654711;text-shadow:1px 2px #ffe8a5;box-shadow:0 0 25px #c99b4244;transform:translateZ(6px)}.coin-back{transform:rotateY(180deg) translateZ(6px)}
 </style>
 </head>
 <body>
@@ -211,6 +212,8 @@
      <div class="form-field"><label for="channelInput">یوزرنیم کانال Kick</label><div class="prefix-input"><span>kick.com/</span><input id="channelInput" name="channel" dir="ltr" placeholder="channel_name" spellcheck="false"></div></div>
      <div class="form-field"><label>حالت رأی‌گیری Kick</label><div class="segment" id="modeSelector"><label><input type="radio" name="mode" value="kick" checked><span>● چت واقعی Kick</span></label><label><input type="radio" name="mode" value="demo"><span>◉ حالت آزمایشی</span></label></div><p class="hint">ارسال ویدیو از لینک دعوت انجام می‌شه؛ حالت آزمایشی فقط برای تست رأی‌گیری بدون Kick است.</p></div>
      <div class="form-field"><label>تعداد شرکت‌کننده</label><div class="capacity-select"><label><input type="radio" name="capacity" value="16" checked><span>16</span></label><label><input type="radio" name="capacity" value="24"><span>24</span></label><label><input type="radio" name="capacity" value="32"><span>32</span></label><label><input type="radio" name="capacity" value="48"><span>48</span></label></div></div>
+     <label class="toggle-row"><span><b>نمایش نام رأی‌دهنده‌ها</b><small>زیر ویدیویی که انتخاب کرده‌اند</small></span><input type="checkbox" id="showVotersInput"><i></i></label>
+     <label class="toggle-row"><span><b>نمایش نام فرستندهٔ ویدیو</b><small>در لابی و هنگام رأی‌گیری</small></span><input type="checkbox" id="showSendersInput"><i></i></label>
      <div class="form-double"><div class="form-field"><label for="perUserInput">لینک مجاز هر نفر</label><select id="perUserInput"><option value="1">۱ لینک</option><option value="2" selected>۲ لینک</option><option value="3">۳ لینک</option><option value="5">۵ لینک</option><option value="10">۱۰ لینک</option></select></div><div class="form-field"><label for="secondsInput">زمان هر رأی‌گیری</label><select id="secondsInput"><option value="15">۱۵ ثانیه</option><option value="20">۲۰ ثانیه</option><option value="30" selected>۳۰ ثانیه</option><option value="45">۴۵ ثانیه</option><option value="60">۶۰ ثانیه</option><option value="90">۹۰ ثانیه</option><option value="120">۱۲۰ ثانیه</option></select></div></div>
      <label class="toggle-row"><span><b>امکان تغییر رأی</b><small>آخرین 1 یا 2 هر نفر ملاک باشد؛ نه رأی اضافه</small></span><input type="checkbox" id="allowChangeInput"><i></i></label>
      <details class="advanced"><summary>تنظیمات پیشرفته اتصال <span>⌄</span></summary><label for="pusherInput">Kick Pusher app key (اختیاری)</label><input id="pusherInput" dir="ltr" spellcheck="false" value="32cbd69e4b950bf97679"><p class="hint">اتصال مستقیم به چت مشابه instaQ است؛ اگر Kick روش اتصالش را تغییر دهد، ممکن است نیاز به کلید جدید باشد.</p></details>
@@ -240,6 +243,7 @@
      <div class="glass side-card"><span class="section-number">KICK VOTING</span><h3 id="modeTitle">اتصال رأی‌گیری</h3><button type="button" id="reconnectBtn" class="secondary-btn">↻ اتصال مجدد</button></div>
      <div id="demoPanel" class="glass side-card hidden"><span class="section-number">TEST TOOLS</span><h3>ابزار آزمایشی (فقط توسعه)</h3><form id="demoSubmissionForm"><input id="demoUsername" placeholder="username" value="viewer_01" dir="ltr" required><textarea id="demoLink" rows="2" dir="ltr" placeholder="لینک YouTube / TikTok / Instagram" required></textarea><button type="submit" class="secondary-btn">+ ارسال لینک آزمایشی</button></form><button type="button" id="fillDemoBtn" class="secondary-btn subtle-btn">پر کردن ظرفیت با نمونه‌های آزمایشی</button><p class="hint">نمونه‌های آزمایشی صرفاً برای تست منطق بازی هستند و پخش‌شدن همه ویدیوهای نمونه تضمین‌شده نیست.</p></div>
      <div class="glass side-card instruction-card"><span class="section-number">HOW IT WORKS</span><h3>قانون بازی</h3><p>هر بیننده از طریق لینک دعوت تا <b id="perUserDisplay">2</b> ویدیو ثبت می‌کنه. ویدیوی تکراری رد می‌شه و تا شروع رقابت قابل ویرایشه؛ چت Kick فقط برای رأی‌های 1 و 2 استفاده می‌شه.</p><div class="three-platforms"><span>▶ YouTube</span><span>♪ TikTok</span><span>◎ Instagram</span></div></div>
+<div class="glass side-card"><label for="livePerUser">سقف لینک هر نفر</label><input id="livePerUser" type="number" min="1" max="10" step="1"><button id="savePerUser" class="secondary-btn" type="button">اعمال سقف جدید</button><p class="hint">لینک‌های قبلی حفظ می‌شوند. سقف جدید برای ارسال و ذخیرهٔ بعدی اعمال می‌شود.</p></div>
      <button type="button" id="launchBtn" class="primary-btn" disabled>شروع رقابت <span>←</span></button></aside>
    </div>
   </section>
@@ -249,23 +253,24 @@
     <div class="video-card" id="card-1"><div class="card-heading"><div class="video-side-id">01<span>CONTENDER</span></div><span class="platform-tag" id="platform-1">VIDEO</span></div>
      <div class="video-frame" id="frame-1"><div class="video-cover" id="cover-1"><div class="cover-light"></div><img id="preview-1" alt="" class="cover-thumb" hidden><div class="video-lock"><span class="lock-symbol">◈</span><span>ویدیو مخفی است</span><small>برای پخش، دکمه پایین را بزنید</small></div></div><div class="frame-player" id="player-1"></div><span class="number-corner">1</span></div>
      <div class="video-actions"><button class="play-action" type="button" data-play="1">▶ نمایش / پخش</button><button class="fullscreen-action" type="button" data-fullscreen="1">⛶ تمام‌صفحه</button><a id="original-1" class="external-action" href="#" target="_blank" rel="noopener noreferrer">↗ باز کردن در سایت اصلی</a></div>
-     <div class="vote-display"><div class="votes-top"><span>VOTES FOR 01</span><strong id="votes-1">0</strong></div><div class="votes-meter"><div id="meter-1"></div></div><button type="button" class="advance-action" data-advance="1" disabled>🏆 صعود ویدیوی ۱</button></div>
+     <p id="sender-1" class="sender-label"></p><div id="voters-1" class="voter-frame" hidden></div><div class="vote-display"><div class="votes-top"><span>VOTES FOR 01</span><strong id="votes-1">0</strong></div><div class="votes-meter"><div id="meter-1"></div></div><button type="button" class="advance-action" data-advance="1" disabled>🏆 صعود ویدیوی ۱</button></div>
     </div>
     <div class="stage-center"><span class="vertical-line"></span><div class="versus-medal">VS</div><span class="vertical-line"></span></div>
     <div class="video-card right-card" id="card-2"><div class="card-heading"><div class="video-side-id">02<span>CONTENDER</span></div><span class="platform-tag" id="platform-2">VIDEO</span></div>
      <div class="video-frame" id="frame-2"><div class="video-cover" id="cover-2"><div class="cover-light"></div><img id="preview-2" alt="" class="cover-thumb" hidden><div class="video-lock"><span class="lock-symbol">◈</span><span>ویدیو مخفی است</span><small>برای پخش، دکمه پایین را بزنید</small></div></div><div class="frame-player" id="player-2"></div><span class="number-corner">2</span></div>
      <div class="video-actions"><button class="play-action" type="button" data-play="2">▶ نمایش / پخش</button><button class="fullscreen-action" type="button" data-fullscreen="2">⛶ تمام‌صفحه</button><a id="original-2" class="external-action" href="#" target="_blank" rel="noopener noreferrer">↗ باز کردن در سایت اصلی</a></div>
-     <div class="vote-display"><div class="votes-top"><span>VOTES FOR 02</span><strong id="votes-2">0</strong></div><div class="votes-meter"><div id="meter-2"></div></div><button type="button" class="advance-action" data-advance="2" disabled>🏆 صعود ویدیوی ۲</button></div>
+     <p id="sender-2" class="sender-label"></p><div id="voters-2" class="voter-frame" hidden></div><div class="vote-display"><div class="votes-top"><span>VOTES FOR 02</span><strong id="votes-2">0</strong></div><div class="votes-meter"><div id="meter-2"></div></div><button type="button" class="advance-action" data-advance="2" disabled>🏆 صعود ویدیوی ۲</button></div>
     </div>
    </div>
-   <div class="battle-controls glass"><div class="controls-text"><span class="section-number">THE CHAT DECIDES</span><strong id="battleInstruction">اول ویدیوها رو ببین، بعد رأی‌گیری رو شروع کن.</strong><span class="vote-command">برای رأی دادن فقط <kbd>1</kbd> یا <kbd>2</kbd> در چت ارسال شود.</span></div><div class="timer-block"><span>VOTE TIMER</span><strong id="votingClock" aria-live="off">00:30</strong><div class="timer-track"><div id="timerMeter"></div></div></div><div class="control-buttons"><button type="button" id="voteStartBtn" class="primary-btn">⚡ شروع رأی‌گیری</button><button type="button" id="voteStopBtn" class="secondary-btn" disabled>■ پایان رأی‌گیری</button></div></div>
+   <div class="battle-controls glass"><div class="controls-text"><span class="section-number">THE CHAT DECIDES</span><strong id="battleInstruction">اول ویدیوها رو ببین، بعد رأی‌گیری رو شروع کن.</strong><span class="vote-command">برای رأی دادن فقط <kbd>1</kbd> یا <kbd>2</kbd> در چت ارسال شود.</span></div><div class="timer-block"><span>VOTE TIMER</span><strong id="votingClock" aria-live="off">00:30</strong><div class="timer-track"><div id="timerMeter"></div></div></div><div class="control-buttons"><button type="button" id="undoBtn" class="secondary-btn">↶ برگشت</button><button type="button" id="coinBtn" class="secondary-btn" hidden>FLIP a COIN</button><button type="button" id="voteStartBtn" class="primary-btn">⚡ شروع رأی‌گیری</button><button type="button" id="voteStopBtn" class="secondary-btn" disabled>■ پایان رأی‌گیری</button></div></div>
    <div id="demoVoting" class="demo-voting hidden glass"><span class="section-number">SIMULATED CHAT</span><label for="demoVoter">شبیه‌سازی رأی کاربر در چت:</label><input id="demoVoter" dir="ltr" placeholder="viewer_01" value="voter_01"><button type="button" data-demo-vote="1">ارسال 1</button><button type="button" data-demo-vote="2">ارسال 2</button><button type="button" id="demoVoteBurst">+ ۱۰ رأی تصادفی</button><small>این دکمه‌ها فقط در حالت آزمایشی فعال هستند.</small></div>
    <section class="bracket-section glass"><div class="inside-heading"><div><span class="section-number">THE ROAD TO GLORY</span><h2>جدول حذفی مسابقه</h2></div><span class="pill">KNOCKOUT</span></div><div id="bracketScroller" class="bracket-scroller"><div id="bracket" class="bracket"></div></div></section>
   </section>
-  <section class="page" id="page-results" aria-label="نتیجه مسابقه"><div class="results-top"><span class="section-number">THE FINAL RESULTS</span><div class="confetti-star">✦</div><h1>WE HAVE A <em>WINNER!</em></h1><p id="resultsTopic">مسابقه به پایان رسید</p><div class="winner-card" id="winnerCard"></div><div class="result-subtitle">رتبه‌بندی ویدیوهای مسابقه <span>•</span> هویت ارسال‌کننده‌ها حالا آشکار شده</div></div><div id="rankingList" class="ranking-list"></div><div class="result-actions"><button type="button" id="exportBtn" class="secondary-btn">↓ دانلود نتایج JSON</button><button type="button" id="newGameBtn" class="primary-btn">↻ مسابقه جدید</button></div><p class="ranking-note">رتبه‌بندی حذف‌شده‌های یک مرحله با درصد رأی در آخرین مبارزه و سپس تعداد رأی مرتب شده است؛ جایگاه‌های هم‌مرحله‌ای رتبه رسمی جداگانه ندارند.</p></section>
+  <section class="page" id="page-results" aria-label="نتیجه مسابقه"><div class="results-top"><span class="section-number">THE FINAL RESULTS</span><div class="confetti-star">✦</div><h1>WE HAVE A <em>WINNER!</em></h1><p id="resultsTopic">مسابقه به پایان رسید</p><div class="winner-card" id="winnerCard"></div><div class="result-subtitle">رتبه‌بندی ویدیوهای مسابقه <span>•</span> هویت ارسال‌کننده‌ها حالا آشکار شده</div></div><div id="rankingList" class="ranking-list"></div><div class="result-actions"><button type="button" id="undoFinalBtn" class="secondary-btn">↶ برگشت به فینال</button><button type="button" id="exportBtn" class="secondary-btn">↓ دانلود نتایج JSON</button><button type="button" id="newGameBtn" class="primary-btn">↻ مسابقه جدید</button></div><p class="ranking-note">رتبه‌بندی حذف‌شده‌های یک مرحله با درصد رأی در آخرین مبارزه و سپس تعداد رأی مرتب شده است؛ جایگاه‌های هم‌مرحله‌ای رتبه رسمی جداگانه ندارند.</p></section>
  </main>
  <footer class="site-footer"><span>CHAT BATTLE © 2026</span><span>MADE FOR THE CHAT. BUILT FOR THE HYPE.</span><a href="https://github.com/ahmadramzy1/instaQ" rel="noopener noreferrer" target="_blank">INSPIRED BY instaQ ↗</a></footer>
 </div>
+<div id="coinDialog" class="modal-backdrop hidden"><div class="confirm-card glass" role="dialog" aria-modal="true" aria-label="پرتاب سکه"><div class="coin-scene"><div id="coin3d" class="coin-3d"><span class="coin-edge" style="transform:translateZ(-5px)"></span><span class="coin-edge" style="transform:translateZ(-4px)"></span><span class="coin-edge" style="transform:translateZ(-3px)"></span><span class="coin-edge" style="transform:translateZ(-2px)"></span><span class="coin-edge" style="transform:translateZ(-1px)"></span><span class="coin-edge" style="transform:translateZ(0px)"></span><span class="coin-edge" style="transform:translateZ(1px)"></span><span class="coin-edge" style="transform:translateZ(2px)"></span><span class="coin-edge" style="transform:translateZ(3px)"></span><span class="coin-edge" style="transform:translateZ(4px)"></span><span class="coin-edge" style="transform:translateZ(5px)"></span><div class="coin-face">1</div><div class="coin-face coin-back">2</div></div></div><p id="coinResult" aria-live="polite"></p><button id="coinClose" class="primary-btn">بازگشت و انتخاب برنده</button></div></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="modal-backdrop hidden" id="confirmDialog"><div class="confirm-card glass" role="dialog" aria-modal="true" aria-labelledby="dialogTitle"><span class="section-number">CONFIRM ACTION</span><h2 id="dialogTitle">مسابقه جدید؟</h2><p id="dialogBody">اطلاعات مسابقه فعلی پاک می‌شه.</p><div><button id="cancelConfirm" class="secondary-btn">انصراف</button><button id="confirmReset" class="primary-btn">بله، شروع مجدد</button></div></div></div>
 <script>
@@ -309,7 +314,7 @@
   }catch{return null}
  }
  function linksIn(message){const matches=safeText(message).match(rxLinks)||[];return matches.map(parseVideo).filter(Boolean);}
- function defaults(){return {channel:'',topic:'بهترین ویدیوی چت',capacity:16,perUser:1,voteSeconds:30,allowChange:false,mode:'demo',pusherKey:'32cbd69e4b950bf97679'};}
+ function defaults(){return {channel:'',topic:'بهترین ویدیوی چت',capacity:16,perUser:1,voteSeconds:30,showVoters:false,showSenders:false,allowChange:false,mode:'demo',pusherKey:'32cbd69e4b950bf97679'};}
  function newGame(settings={}){
   const d={...defaults(),...settings};d.capacity=Number(d.capacity);d.perUser=Number(d.perUser);d.voteSeconds=Number(d.voteSeconds);
   if(!CAPACITIES.includes(d.capacity))throw Error('Invalid tournament capacity');
@@ -339,7 +344,7 @@
  function propagate(state,round,index,winnerId){const nr=state.rounds[round+1];if(!nr)return;const next=nr[Math.floor(index/2)];if(index%2===0)next.left=winnerId;else next.right=winnerId;}
  function nextMatch(state){for(let r=0;r<state.rounds.length;r++)for(let i=0;i<state.rounds[r].length;i++){const m=state.rounds[r][i];if(m.left&&m.right&&!m.winner)return {round:r,index:i};}return null;}
  function startTournament(state,random=Math.random){
-  if(state.phase!=='collecting'||state.entries.length!==state.settings.capacity)return {ok:false,reason:'not-full'};
+  if(state.phase!=='collecting'||state.entries.length<2)return {ok:false,reason:'not-enough'};
   const n=2**Math.ceil(Math.log2(state.entries.length));const ordered=shuffle(state.entries,random);const arranged=seeds(n).map(s=>ordered[s-1]?.id||null);
   state.rounds=[];for(let size=n,round=0;size>=2;size/=2,round++){state.rounds.push(Array.from({length:size/2},(_,i)=>makeMatch(round,i)));}
   arranged.forEach((id,i)=>{const m=state.rounds[0][Math.floor(i/2)];if(i%2===0)m.left=id;else m.right=id;});
@@ -364,20 +369,27 @@
   if(!['1','2'].includes(String(choice)))return {ok:false,reason:'invalid-choice'};
   if(state.votingEndsAt===null||now>=state.votingEndsAt){maybeExpire(state,now);return {ok:false,reason:'expired'};}
   const key=safeText(user).toLowerCase();if(!key)return {ok:false,reason:'username'};
-  const m=currentMatch(state),next=Number(choice)-1,old=m.voters[key];
+  const m=currentMatch(state),next=Number(choice)-1,old=Object.hasOwn(m.voters,key)?m.voters[key]:undefined;
   if(old!==undefined){if(!state.settings.allowChange||old===next)return {ok:false,reason:'already-voted'};m.votes[old]--;}
-  m.voters[key]=next;m.votes[next]++;return {ok:true,side:next,changed:old!==undefined};
+  Object.defineProperty(m.voters,key,{value:next,writable:true,enumerable:true,configurable:true});m.votes[next]++;return {ok:true,side:next,changed:old!==undefined};
  }
  function advance(state,side,now=Date.now()){
   const m=currentMatch(state);if(state.phase!=='battle'||state.matchStatus!=='closed'||!m||![0,1].includes(side))return {ok:false,reason:'not-ready'};
   const winner=side===0?m.left:m.right;const loser=side===0?m.right:m.left;
   if(!winner||!loser)return {ok:false,reason:'invalid-side'};
+  const {history,...snapshot}=state;
+  (state.history??=[]).push(JSON.parse(JSON.stringify(snapshot)));
   m.winner=winner;m.status='complete';m.endedAt=now;
   const l=state.entries.find(e=>e.id===loser);if(l){l.eliminatedRound=state.current.round;l.lastVotes=m.votes[1-side];l.lastShare=m.votes[0]+m.votes[1]?m.votes[1-side]/(m.votes[0]+m.votes[1]):0;}
   propagate(state,state.current.round,state.current.index,winner);
   const next=nextMatch(state);state.current=next;state.matchStatus='preview';state.votingEndsAt=null;
   if(!next){state.phase='finished';state.completedAt=now;}
   return {ok:true,winner,loser,finished:!next};
+ }
+ function undo(state){
+  if(!state.history?.length)return false;
+  const snapshot=state.history.pop(),history=state.history,revealed=state.revealed||{};
+  Object.assign(state,snapshot,{history,revealed});return true;
  }
  function rankings(state){if(state.phase!=='finished')return [];
   const winner=state.rounds.at(-1)?.[0]?.winner;
@@ -390,7 +402,7 @@
   });
  }
  function matchProgress(state){const total=state.entries.length-1;const done=state.rounds.flat().filter(m=>m.status==='complete').length;return {done,total};}
- return {CAPACITIES,defaults,newGame,parseVideo,linksIn,submitLink,startTournament,currentMatch,startVote,endVote,maybeExpire,vote,advance,rankings,matchProgress,seeds};
+ return {CAPACITIES,defaults,newGame,parseVideo,linksIn,submitLink,startTournament,currentMatch,startVote,endVote,maybeExpire,vote,advance,undo,rankings,matchProgress,seeds};
 });
 
 </script>
@@ -403,7 +415,7 @@
  const q=(s,scope=document)=>scope.querySelector(s);
  const qa=(s,scope=document)=>[...scope.querySelectorAll(s)];
  const STORE='chatbattle:game:v1',ROOM_CACHE='chatbattle:room:',MAX_MSG_IDS=1500;
- let game=null, ws=null, sockGeneration=0, retryTimer=0, retryAttempt=0, manuallyDisconnected=false;
+ let launching=false,game=null, ws=null, sockGeneration=0, retryTimer=0, retryAttempt=0, manuallyDisconnected=false;
  let toastTimer=0, lastBattleKey='', lastPage='', visualCounts=[0,0], animIds=[0,0], demoVoterCounter=1, fallback=false;
  const idsSeen=new Set(), recentMessageKeys=new Map();
  const shortReason={closed:'پذیرش لینک بسته شده',full:'ظرفیت مسابقه تکمیل شده',username:'نام کاربری معتبر نیست',invalid:'لینک معتبر پیدا نشد',duplicate:'این ویدیو قبلاً ارسال شده', 'per-user':'سقف لینک‌های این کاربر تکمیل شده'};
@@ -429,7 +441,7 @@
  }
  function renderCollection(){const count=game.entries.length,cap=game.settings.capacity;
   text('lobbyTopicTitle',game.settings.topic);text('lobbyCount',pad(count));text('lobbyCapacity',cap);text('lobbyAvailable',count>=cap?'ظرفیت تکمیل':number(cap-count)+' جای خالی');text('perUserDisplay',game.settings.perUser);
-  $('collectionProgress').style.width=(count/cap*100)+'%';$('launchBtn').disabled=count!==cap;
+  $('collectionProgress').style.width=(count/cap*100)+'%';$('launchBtn').disabled=launching||count<2; if(document.activeElement!==$('livePerUser'))$('livePerUser').value=game.settings.perUser;
   const demo=game.settings.mode==='demo'||fallback;
   $('demoPanel').classList.add('hidden');text('modeTitle',game.settings.mode==='demo'?'شبیه‌ساز رأی Kick':'اتصال به چت Kick (فقط رأی)');
   $('reconnectBtn').classList.toggle('hidden',game.settings.mode==='demo');
@@ -439,14 +451,16 @@
    const tile=document.createElement('div');tile.className='entry-tile';const pic=thumbNode(e.video,'entry-photo');
    const tag=document.createElement('span');tag.textContent=platformName(e.video);pic.append(tag);
    const meta=document.createElement('div');meta.className='entry-details';const idx=document.createElement('b');idx.textContent='VIDEO '+pad(i+1);
-   const kind=document.createElement('small');kind.textContent=e.video.kind;meta.append(kind,idx);tile.append(pic,meta);list.append(tile);
+   const kind=document.createElement('small');kind.textContent=game.settings.showSenders?'@'+e.sender:e.video.kind;meta.append(kind,idx);tile.append(pic,meta);list.append(tile);
   });$('emptyEntries').classList.toggle('hidden',count>0);
  }
- function registerText(content,username,id,time){if(!game)return;
+ function registerText(content,username,id,time,kickId){if(!game)return;
   if(id){const normalized=String(id);if(idsSeen.has(normalized))return;idsSeen.add(normalized);if(idsSeen.size>MAX_MSG_IDS){const old=idsSeen.values().next().value;idsSeen.delete(old)}}
   else {const key=String(username).toLowerCase()+'\0'+String(content)+'\0'+String(time||'');const t=Date.now();if(recentMessageKeys.get(key)&&t-recentMessageKeys.get(key)<3000)return;recentMessageKeys.set(key,t);if(recentMessageKeys.size>150)for(const [k,v] of recentMessageKeys){if(t-v>10000)recentMessageKeys.delete(k);}}
   if(game.phase==='battle'&&String(content).trim().match(/^[12]$/)){
-   const result=Core.vote(game,String(content).trim(),username);if(result.ok){save();refreshVotes(result.side)}
+   if(game.settings.mode==='kick'&&!kickId)return;
+   const voterKey=game.settings.mode==='kick'?'kick:'+kickId:String(username);
+   const result=Core.vote(game,String(content).trim(),voterKey);if(result.ok){const m=Core.currentMatch(game);(m.voterNames??={})[voterKey.toLowerCase()]=username;}if(result.ok){save();refreshVotes(result.side)}
   }
  }
  async function getJson(url,timeout=7000){const c=new AbortController();const timer=setTimeout(()=>c.abort(),timeout);try{const r=await fetch(url,{signal:c.signal,headers:{'Accept':'application/json'}});if(!r.ok)throw Error('HTTP '+r.status);return await r.json()}finally{clearTimeout(timer)}}
@@ -482,7 +496,7 @@
     const d=decodeData(msg.data);setConnection('error','خطای Kick '+(d?.code||''));if(game?.phase==='collecting'){fallback=true;updateConnectionDescription('خطا در اتصال Kick. دکمه اتصال مجدد را بزنید، یا با شبیه‌ساز ادامه دهید.');renderCollection()}
    }else if(msg.event==='App\\Events\\ChatMessageEvent'||msg.event?.endsWith('ChatMessageEvent')){
     const d=decodeData(msg.data);const username=d?.sender?.username||d?.sender?.slug||d?.sender?.id;
-    if(username&&typeof d.content==='string')registerText(d.content,String(username),d.id||d.message_id,d.created_at);
+    if(username&&typeof d.content==='string')registerText(d.content,String(username),d.id||d.message_id,d.created_at,d.sender?.id);
    }
   };
   socket.onclose=()=>{if(generation!==sockGeneration||manuallyDisconnected)return;ws=null;setConnection('disconnected','اتصال قطع شد');if(game?.phase==='collecting'){fallback=true;updateConnectionDescription('اتصال موقتاً قطع شده و در حال تلاش دوباره است. برای تست آفلاین شبیه‌ساز فعال شد.');renderCollection()}scheduleRetry(room,generation)};
@@ -493,7 +507,7 @@
  async function submitSettings(e){e.preventDefault();const form=$('setupForm');const radios=n=>q('input[name="'+n+'"]:checked',form)?.value;
   const channel=$('channelInput').value.trim().replace(/^https?:\/\/(www\.)?kick\.com\//i,'').replace(/[@/?#].*$/,'').toLowerCase();
   const mode=radios('mode');if(mode==='kick'&&!channel){$('channelInput').focus();toast('نام کانال Kick را وارد کنید.');return}
-  const settings={topic:$('topicInput').value,channel,mode,capacity:Number(radios('capacity')),perUser:Number($('perUserInput').value),voteSeconds:Number($('secondsInput').value),allowChange:$('allowChangeInput').checked,pusherKey:$('pusherInput').value.trim()};
+  const settings={topic:$('topicInput').value,channel,mode,capacity:Number(radios('capacity')),perUser:Number($('perUserInput').value),voteSeconds:Number($('secondsInput').value),showVoters:$('showVotersInput').checked,showSenders:$('showSendersInput').checked,allowChange:$('allowChangeInput').checked,pusherKey:$('pusherInput').value.trim()};
   try{game=Core.newGame(settings)}catch(ex){toast(ex.message);return}
   fallback=false;lastBattleKey='';save();render();
   const newGame=game;
@@ -523,19 +537,20 @@
   const cover=$('cover-'+side),img=$('preview-'+side);img.hidden=!v.thumbnail;if(v.thumbnail)img.src=v.thumbnail;else img.removeAttribute('src');
   $('player-'+side).replaceChildren();$('frame-'+side).classList.remove('is-open');
   q('[data-play="'+side+'"]').textContent='▶ نمایش / پخش';
+  text('sender-'+side,game.settings.showSenders?'ارسال‌کننده: \u2066@'+entry.sender+'\u2069':'');
+  if(game.revealed?.[entry.id]){ $('frame-'+side).classList.add('is-open'); const preview=thumbNode(v,'revealed-preview');$('player-'+side).append(preview);}
  }
  function renderBattleMatch(){const m=Core.currentMatch(game);if(!m)return;const key=m.id;
   const round=game.current.round;const position=game.current.index+1;const progress=Core.matchProgress(game);
   text('battleTopic',game.settings.topic);text('battleRoundLabel',formatRound(round)+' / MATCH '+pad(position));text('matchFraction',pad(progress.done+1)+' / '+pad(progress.total));
   if(lastBattleKey!==key){lastBattleKey=key;loadBattleSlot(1,getEntry(m.left));loadBattleSlot(2,getEntry(m.right));visualCounts=[0,0];renderBracket();}
-  const demo=game.settings.mode==='demo'||fallback;$('demoVoting').classList.toggle('hidden',!demo);refreshVotes();
+  const demo=game.settings.mode==='demo';$('demoVoting').classList.toggle('hidden',!demo);refreshVotes();
  }
  function playSide(side){if(!game||game.phase!=='battle')return;
   const m=Core.currentMatch(game);if(!m)return;
   const selected=side===1?getEntry(m.left):getEntry(m.right),other=side===1?2:1;
-  window.ChatBattlePlayer.destroy(other);
-  $('player-'+other).replaceChildren();$('frame-'+other).classList.remove('is-open');
-  q('[data-play="'+other+'"]').textContent='▶ نمایش / پخش';
+  window.ChatBattlePlayer.pause(other);
+  (game.revealed??={})[selected.id]=true;save();
   const container=$('player-'+side);const parent=$('frame-'+side);
   parent.classList.add('is-open');q('[data-play="'+side+'"]').textContent='↻ پخش مجدد';
   window.ChatBattlePlayer.mount(side,selected.video);
@@ -546,6 +561,7 @@
   el.classList.remove('bump');void el.offsetWidth;el.classList.add('bump');
  }
  function refreshVotes(changedSide){if(game?.phase!=='battle')return;const m=Core.currentMatch(game);if(!m)return;
+  for(let side=1;side<=2;side++){const box=$('voters-'+side);box.hidden=!game.settings.showVoters;box.replaceChildren();if(!box.hidden){const names=Object.entries(m.voters).filter(([,v])=>v===side-1);for(const [key] of names){const chip=document.createElement('span');chip.textContent='@'+(m.voterNames?.[key]||key);box.append(chip)}if(!names.length)box.textContent='هنوز رأیی ثبت نشده';}}
   const total=m.votes[0]+m.votes[1];for(let side=1;side<=2;side++){
    const n=m.votes[side-1];if(changedSide===side)countAnimate(side,n);else{cancelAnimationFrame(animIds[side-1]);visualCounts[side-1]=n;text('votes-'+side,number(n))}
    $('meter-'+side).style.width=(total?100*n/total:50)+'%';
@@ -553,6 +569,8 @@
   $('card-1').classList.toggle('leading',m.votes[0]>m.votes[1]);$('card-2').classList.toggle('leading',m.votes[1]>m.votes[0]);
  }
  function refreshBattleControls(){if(game?.phase!=='battle')return;
+  const match=Core.currentMatch(game);$('coinBtn').hidden=game.matchStatus!=='closed'||match.votes[0]!==match.votes[1];$('coinBtn').disabled=coinPending||winPending;
+  $('undoBtn').disabled=!game.history?.length||coinPending||winPending;
   const status=game.matchStatus;const voting=status==='voting',closed=status==='closed';
   $('voteStartBtn').disabled=status!=='preview';$('voteStopBtn').disabled=!voting;
   qa('[data-advance]').forEach(b=>b.disabled=!closed);
@@ -637,7 +655,7 @@
   document.body.append(layer);winOverlay=layer;
  }
  function advanceSide(side){
-  if(winPending)return;
+  if(winPending||coinPending)return;
   if(!game||game.phase!=='battle'||game.matchStatus!=='closed'||!Core.currentMatch(game)){
    toast('اول رأی‌گیری رو به پایان برسون.');return;
   }
@@ -679,6 +697,7 @@
      winTimer=null;
      stage?.classList.remove('cb-stage-arriving');
      winPending=false;
+     refreshBattleControls();
     },reduced?0:matchEnterDuration);
    },reduced?0:matchExitDuration);
   },reduced?250:winFXDuration);
@@ -693,14 +712,14 @@
    column.append(title,matches);root.append(column);
   });
  }
- function demoVote(choice){if(!game||game.phase!=='battle')return;const name=$('demoVoter').value.trim();const res=Core.vote(game,String(choice),name);if(!res.ok){toast(res.reason==='already-voted'?'این کاربر قبلاً رأی داده.':res.reason==='not-voting'?'ابتدا رأی‌گیری رو شروع کن.':'رأی پذیرفته نشد.');return}
+ function demoVote(choice){if(!game||game.settings.mode!=='demo'||game.phase!=='battle')return;const name=$('demoVoter').value.trim();const res=Core.vote(game,String(choice),name);if(!res.ok){toast(res.reason==='already-voted'?'این کاربر قبلاً رأی داده.':res.reason==='not-voting'?'ابتدا رأی‌گیری رو شروع کن.':'رأی پذیرفته نشد.');return}
   save();refreshVotes(choice);toast('رأی آزمایشی ثبت شد.');
  }
- function voteBurst(){if(!game||game.matchStatus!=='voting'){toast('اول رأی‌گیری رو شروع کن.');return}
+ function voteBurst(){if(!game||game.settings.mode!=='demo'||game.matchStatus!=='voting'){toast('اول رأی‌گیری رو شروع کن.');return}
   let last=0;for(let i=0;i<10;i++){const side=Math.random()<.5?'1':'2';const res=Core.vote(game,side,'simulated_'+(demoVoterCounter++));if(res.ok)last=Number(side)}
   save();refreshVotes(last);toast('۱۰ رأی شبیه‌سازی‌شده اضافه شد!');
  }
- function renderResults(){const ranked=Core.rankings(game);if(!ranked.length)return;const champion=ranked[0];text('resultsTopic',game.settings.topic);
+ function renderResults(){$('undoFinalBtn').disabled=!game.history?.length;const ranked=Core.rankings(game);if(!ranked.length)return;const champion=ranked[0];text('resultsTopic',game.settings.topic);
   const card=$('winnerCard');card.replaceChildren();card.append(thumbNode(champion.video,'winner-image'));
   const meta=document.createElement('div');meta.className='winner-data';const badge=document.createElement('small');badge.textContent='🏆 CHAMPION';const label=document.createElement('h2');label.textContent=platformName(champion.video);const user=document.createElement('p');user.textContent='ارسال‌شده توسط @'+champion.sender;
   const link=document.createElement('a');link.href=champion.video.url;link.target='_blank';link.rel='noopener noreferrer';link.textContent='↗ تماشای ویدیو';link.className='external-action';link.style.marginTop='10px';meta.append(badge,label,user,link);card.append(meta);
@@ -717,22 +736,40 @@
   const result={app:'Chat Battle',topic:game.settings.topic,finishedAt:new Date(game.completedAt).toISOString(),capacity:game.settings.capacity,rankingRule:'Champion, elimination round, final vote share, votes',rankings:Core.rankings(game).map((e,i)=>({position:i+1,platform:e.video.platform,url:e.video.url,sender:e.sender,eliminatedRound:e.eliminatedRound,finalVoteShare:e.lastShare,finalVotes:e.lastVotes}))};
   const blob=new Blob([JSON.stringify(result,null,2)],{type:'application/json;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='chat-battle-results.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);
  }
- function reset(){const prior=game;window.ChatBattleCloudHost?.stopListening();if(prior?.phase==='collecting'&&prior.cloudSessionId)window.ChatBattleCloudHost?.closeSession(prior).catch(()=>{});cancelWinFX();window.ChatBattlePlayer?.destroyAll();disconnect();game=null;fallback=false;lastBattleKey='';idsSeen.clear();recentMessageKeys.clear();safeStorage.remove(STORE);$('confirmDialog').classList.add('hidden');render();window.scrollTo({top:0,behavior:'smooth'});}
+ function reset(){cancelCoin();const prior=game;window.ChatBattleCloudHost?.stopListening();if(prior?.phase==='collecting'&&prior.cloudSessionId)window.ChatBattleCloudHost?.closeSession(prior).catch(()=>{});cancelWinFX();window.ChatBattlePlayer?.destroyAll();disconnect();game=null;fallback=false;lastBattleKey='';idsSeen.clear();recentMessageKeys.clear();safeStorage.remove(STORE);$('confirmDialog').classList.add('hidden');render();window.scrollTo({top:0,behavior:'smooth'});}
  function showReset(){if(!game){toast('هنوز مسابقه‌ای ساخته نشده.');return}$('confirmDialog').classList.remove('hidden')}
+ let coinPending=false,coinTimer=null;
+ function cancelCoin(){clearTimeout(coinTimer);coinPending=false;$('coinDialog').classList.add('hidden');}
+ function undoWinner(){if(!game||coinPending)return;cancelWinFX();if(!Core.undo(game))return;window.ChatBattlePlayer?.destroyAll();lastBattleKey='';save();render();if(game.settings.mode==='kick')connectKick();toast('رأی‌گیری قبلی برگشت؛ برنده را دوباره انتخاب کن.');}
+ function flipCoin(){
+  const m=Core.currentMatch(game);if(coinPending||winPending||game?.matchStatus!=='closed'||!m||m.votes[0]!==m.votes[1])return;
+  coinPending=true;refreshBattleControls();qa('[data-advance]').forEach(b=>b.disabled=true);
+  const side=m.coinResult||(crypto.getRandomValues(new Uint32Array(1))[0]%2+1);m.coinResult=side;save();
+  const coin=$('coin3d');$('coinDialog').classList.remove('hidden');$('coinResult').textContent='سکه در حال چرخش…';$('coinClose').disabled=true;
+  coin.style.transition='none';coin.style.transform='rotateY(0deg)';void coin.offsetWidth;
+  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  coin.style.transition=reduced?'none':'transform 2.8s cubic-bezier(.15,.65,.2,1)';coin.style.transform='rotateY('+(1800+(side===2?180:0))+'deg)';
+  coinTimer=setTimeout(()=>{coinPending=false;text('coinResult','نتیجه: ویدیوی '+side);$('coinClose').disabled=false;refreshBattleControls();},reduced?0:2900);
+ }
+ $('coinBtn').addEventListener('click',flipCoin);$('coinClose').addEventListener('click',cancelCoin);
+ $('undoBtn').addEventListener('click',undoWinner);$('undoFinalBtn').addEventListener('click',undoWinner);
+ $('savePerUser').addEventListener('click',async()=>{const g=game,value=Number($('livePerUser').value);if(!g||g.phase!=='collecting'||!Number.isInteger(value)||value<1||value>10){toast('سقف باید عدد صحیح بین ۱ و ۱۰ باشد.');return}const b=$('savePerUser');b.disabled=true;try{await window.ChatBattleCloudHost.updatePerUser(g,value);if(game===g){g.settings.perUser=value;save();renderCollection();toast('سقف جدید اعمال شد.')}}catch(e){toast(e.message)}finally{b.disabled=false}});
  $('setupForm').addEventListener('submit',submitSettings);$('demoSubmissionForm').addEventListener('submit',demoSubmit);
  $('fillDemoBtn').addEventListener('click',fillDemo);$('launchBtn').addEventListener('click',async()=>{
-  if(!game)return;
-  if(game.entries.length!==game.settings.capacity){toast('اول ظرفیت مسابقه رو کامل کن.');return}
-  const btn=$('launchBtn');btn.disabled=true;
+  if(!game||launching||game.phase!=='collecting')return;
+  if(game.entries.length<2){toast('حداقل دو ویدیو برای شروع لازم است.');return}
+  const startingGame=game;launching=true;const btn=$('launchBtn');btn.disabled=true;
   try{
    if(!window.ChatBattleCloudHost)throw Error('اتصال Firebase هنوز آماده نیست.');
-   await window.ChatBattleCloudHost.closeSession(game);
+   await window.ChatBattleCloudHost.closeSession(startingGame,{forStart:true});
+   if(game!==startingGame)return;
    const result=Core.startTournament(game);
-   if(!result.ok)throw Error('برای شروع باید ظرفیت مسابقه کامل بشه.');
+   if(!result.ok)throw Error('برای شروع حداقل دو ویدیو لازم است.');
    save();render();
    if(game.settings.mode==='kick')connectKick();
    toast('⚔️ مسابقه شروع شد! '+(result.byes?' | '+result.byes+' صعود خودکار':''));
-  }catch(error){toast(error.message||'شروع مسابقه ناموفق بود.');renderCollection()}
+  }catch(error){toast(error.message||'شروع مسابقه ناموفق بود.');}
+  finally{launching=false;if(game?.phase==='collecting')renderCollection()}
  });
  $('reconnectBtn').addEventListener('click',connectKick);
  $('voteStartBtn').addEventListener('click',startVoting);$('voteStopBtn').addEventListener('click',stopVoting);
@@ -763,7 +800,7 @@
    const next=[];
    const max=game.settings.capacity;
    for(const record of records){
-    const sender=String(record.username||'viewer').slice(0,32);
+    const sender=String(record.username||'viewer').slice(0,64);
     if(!Array.isArray(record.links))continue;
     for(let i=0;i<record.links.length&&next.length<max;i++){
      const video=Core.parseVideo(record.links[i]);
@@ -881,11 +918,12 @@ function mount(side,video){
  })}
  Promise.any([resolve().then(probe),...sourceUrls.slice(0,6).map(probe)]).then(src=>{if(current())native(src)}).catch(()=>{if(current())igEmbed()});
 }
-window.ChatBattlePlayer={mount,destroy,destroyAll,fullscreen};
+function pause(side){const el=document.getElementById('player-'+side);el?.querySelectorAll('video').forEach(v=>v.pause());el?.querySelectorAll('iframe').forEach(f=>{try{const origin=new URL(f.src).origin;f.contentWindow.postMessage(JSON.stringify({event:'command',func:'pauseVideo',args:[]}),origin);f.contentWindow.postMessage({'x-tiktok-player':true,type:'pause'},origin)}catch{}})}
+window.ChatBattlePlayer={mount,destroy,destroyAll,fullscreen,pause};
 document.querySelectorAll('[data-fullscreen]').forEach(b=>b.addEventListener('click',()=>fullscreen(+b.dataset.fullscreen)));
 })();
 
 </script>
-<script type="module" src="./firebase-host.js?v=20261010-edit2"></script>
+<script type="module" src="./firebase-host.js?v=20261010-controls3"></script>
 </body>
 </html>

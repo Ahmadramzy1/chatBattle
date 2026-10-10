@@ -1,0 +1,8 @@
+{
+  "name": "chatbattle-kick-auth",
+  "private": true,
+  "engines": {"node": "22"},
+  "main": "index.js",
+  "scripts": {"test": "node --test"},
+  "dependencies": {"firebase-admin": "^14.5.0", "firebase-functions": "^7.4.0"}
+}

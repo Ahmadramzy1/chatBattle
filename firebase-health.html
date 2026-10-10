@@ -26,7 +26,7 @@ const line=t=>{out.textContent+=t+'\n'};
 async function run(){
  btn.disabled=true;out.textContent='Checking Firebase...\n';
  try{
-  const firebase=await import('./firebase-client.js?v=20261010-authfix2');
+  const firebase=await import('./firebase-client.js?v=20261010-controls3');
   line('Project: '+firebase.firebaseConfig.projectId);
   line('Web app: '+firebase.firebaseConfig.appId.slice(0,23)+'...');
   line('SDK: 11.10.0');
