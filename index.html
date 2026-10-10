@@ -168,6 +168,20 @@
 .invite-state{display:flex;flex-direction:column;gap:2px;background:#101715aa;border:1px solid #3c523a;border-radius:9px;padding:9px 12px;margin-top:12px}
 .invite-state b{font-size:12px;color:#d7ff76}.invite-state small{font-size:10px;color:#90a498;line-height:1.6}
 #makeInvite{margin-top:8px;width:100%}
+
+/* Stream-friendly simplified lobby */
+#page-collecting .lobby-topic-title{
+ font-size:clamp(31px,4.5vw,65px);line-height:1.28;
+ font-weight:900;max-width:950px;letter-spacing:-.6px;
+ overflow-wrap:anywhere;text-wrap:balance;margin:12px 0 10px;
+ color:#f4f7f0;
+}
+#page-collecting .invite-error:not([hidden]){
+ display:block;margin-top:11px;padding:10px 12px;
+ color:#ffc5b9;border:1px solid #9c5350;background:#47232366;
+ border-radius:9px;font-size:11px;line-height:1.7;
+}
+
 </style>
 </head>
 <body>
@@ -205,7 +219,7 @@
    </div>
   </section>
   <section class="page" id="page-collecting" aria-label="جمع‌آوری ویدیوها">
-   <div class="page-title"><div><span class="section-number">02 / THE LOBBY</span><h1>لینک‌ها رو <em>جمع کنیم!</em></h1><p id="lobbySubtitle">ویدیوها به ترتیب ورود اضافه می‌شن. هویت ارسال‌کننده تا پایان پنهانه.</p></div><div class="lobby-counter"><strong id="lobbyCount">00</strong><span>/ <b id="lobbyCapacity">16</b><small>VIDEOS COLLECTED</small></span></div></div>
+   <div class="page-title"><div><span class="section-number">02 / THE LOBBY</span><h1 id="lobbyTopicTitle" class="lobby-topic-title">موضوع مسابقه</h1><p id="lobbySubtitle">ویدیوها به ترتیب ورود اضافه می‌شن. هویت ارسال‌کننده تا پایان پنهانه.</p></div><div class="lobby-counter"><strong id="lobbyCount">00</strong><span>/ <b id="lobbyCapacity">16</b><small>VIDEOS COLLECTED</small></span></div></div>
    <div class="progress-track"><div id="collectionProgress"></div></div>
    <div class="lobby-grid">
     <section class="glass lobby-main"><div class="inside-heading"><h2>ورودی‌های مسابقه</h2><span id="lobbyAvailable" class="pill">16 جای خالی</span></div><div id="entryGrid" class="entry-grid"></div><div id="emptyEntries" class="empty-entries"><span>⤴</span><strong>منتظر اولین ویدیو هستیم</strong><p>لینک دعوت رو در چت قرار بده تا بیننده‌ها از صفحه اختصاصی ثبت کنن.</p></div></section>
@@ -221,9 +235,9 @@
         <a id="openInvite" href="#" class="secondary-btn" target="_blank" rel="noopener noreferrer" aria-disabled="true">↗ بازکردن فرم</a>
        </div>
        <button id="makeInvite" type="button" class="secondary-btn" hidden>ساخت لینک دعوت</button>
-       <div class="invite-state"><b id="inviteStatus">در حال آماده‌سازی...</b><small id="inviteStatusExtra"></small></div>
+       <div id="inviteError" class="invite-error" role="alert" hidden></div>
      </div>
-     <div class="glass side-card"><span class="section-number">KICK VOTING</span><h3 id="modeTitle">اتصال رأی‌گیری</h3><p id="modeMessage">در حال آماده‌سازی...</p><div class="connection-detail" id="connectionDetail">● آماده</div><button type="button" id="reconnectBtn" class="secondary-btn">↻ اتصال مجدد</button></div>
+     <div class="glass side-card"><span class="section-number">KICK VOTING</span><h3 id="modeTitle">اتصال رأی‌گیری</h3><button type="button" id="reconnectBtn" class="secondary-btn">↻ اتصال مجدد</button></div>
      <div id="demoPanel" class="glass side-card hidden"><span class="section-number">TEST TOOLS</span><h3>ابزار آزمایشی (فقط توسعه)</h3><form id="demoSubmissionForm"><input id="demoUsername" placeholder="username" value="viewer_01" dir="ltr" required><textarea id="demoLink" rows="2" dir="ltr" placeholder="لینک YouTube / TikTok / Instagram" required></textarea><button type="submit" class="secondary-btn">+ ارسال لینک آزمایشی</button></form><button type="button" id="fillDemoBtn" class="secondary-btn subtle-btn">پر کردن ظرفیت با نمونه‌های آزمایشی</button><p class="hint">نمونه‌های آزمایشی صرفاً برای تست منطق بازی هستند و پخش‌شدن همه ویدیوهای نمونه تضمین‌شده نیست.</p></div>
      <div class="glass side-card instruction-card"><span class="section-number">HOW IT WORKS</span><h3>قانون بازی</h3><p>هر بیننده از طریق لینک دعوت تا <b id="perUserDisplay">2</b> ویدیو ثبت می‌کنه. چت Kick فقط برای رأی‌های 1 و 2 استفاده می‌شه.</p><div class="three-platforms"><span>▶ YouTube</span><span>♪ TikTok</span><span>◎ Instagram</span></div></div>
      <button type="button" id="launchBtn" class="primary-btn" disabled>شروع رقابت <span>←</span></button></aside>
@@ -401,9 +415,9 @@
  function save(){if(game)safeStorage.set(STORE,JSON.stringify(game));}
  function load(){try{const g=JSON.parse(safeStorage.get(STORE));if(g?.version===1&&g?.settings&&['collecting','battle','finished'].includes(g.phase)&&Array.isArray(g.entries))return g;}catch{}return null;}
  function phasePage(phase){const lookup={collecting:'collecting',battle:'battle',finished:'results'};const target=lookup[phase]||'setup';qa('.page').forEach(e=>e.classList.toggle('active',e.id==='page-'+target));if(lastPage!==target){lastPage=target;window.scrollTo(0,0);requestAnimationFrame(()=>window.scrollTo(0,0));}}
- function setConnection(mode,label){const el=$('connectionStatus');el.className='connection-indicator '+mode;el.querySelector('span').textContent=label;if(game&&game.phase==='collecting'){text('connectionDetail',(mode==='connected'?'● ':'○ ')+label);}}
+ function setConnection(mode,label){const el=$('connectionStatus');el.className='connection-indicator '+mode;el.querySelector('span').textContent=label;if(game&&game.phase==='collecting'){const detail=$('connectionDetail');if(detail)detail.textContent=(mode==='connected'?'● ':'○ ')+label;}}
  function renderHeader(){text('headerPhase',!game?'آماده برای مسابقه':game.phase==='collecting'?'دریافت ویدیوها':game.phase==='battle'?'مسابقه در جریان': 'قهرمان مشخص شد');text('headerTopic',game?.settings.topic||'YOUR NEXT BIG BATTLE');}
- function updateConnectionDescription(message){text('modeMessage',message);}
+ function updateConnectionDescription(message){const el=$('modeMessage');if(el)el.textContent=message;}
  function iconFor(v){return v.platform==='youtube'?'▶':v.platform==='tiktok'?'♪':'◎'}
  function platformName(v){return v.platform==='youtube'?'YOUTUBE':v.platform==='tiktok'?'TIKTOK':'INSTAGRAM'}
  function thumbNode(v,klass){const holder=document.createElement('div');holder.className=klass;
@@ -414,7 +428,7 @@
   if(game.phase==='collecting')renderCollection();if(game.phase==='battle'){renderBattleMatch();refreshBattleControls();}if(game.phase==='finished')renderResults();
  }
  function renderCollection(){const count=game.entries.length,cap=game.settings.capacity;
-  text('lobbyCount',pad(count));text('lobbyCapacity',cap);text('lobbyAvailable',count>=cap?'ظرفیت تکمیل':number(cap-count)+' جای خالی');text('perUserDisplay',game.settings.perUser);
+  text('lobbyTopicTitle',game.settings.topic);text('lobbyCount',pad(count));text('lobbyCapacity',cap);text('lobbyAvailable',count>=cap?'ظرفیت تکمیل':number(cap-count)+' جای خالی');text('perUserDisplay',game.settings.perUser);
   $('collectionProgress').style.width=(count/cap*100)+'%';$('launchBtn').disabled=count!==cap;
   const demo=game.settings.mode==='demo'||fallback;
   $('demoPanel').classList.add('hidden');text('modeTitle',game.settings.mode==='demo'?'شبیه‌ساز رأی Kick':'اتصال به چت Kick (فقط رأی)');
