@@ -1,7 +1,7 @@
 import {
-  db, doc, collection, setDoc, getDocs, onSnapshot, query, orderBy,
+  db, doc, collection, setDoc, getDoc, getDocs, onSnapshot, query, orderBy,
   updateDoc, serverTimestamp, authReady, firebaseError
-} from './firebase-client.js';
+} from './firebase-client.js?v=20261010-authfix2';
 
 const bridge=window.ChatBattleBridge;
 const box=document.getElementById('invitePanel');
@@ -53,7 +53,7 @@ async function createSession(g){
   if(creating)return;
   if(!g||g.phase!=='collecting')return;
   if(g.cloudSessionId){await resume(g);return}
-  creating=true;status('در حال ساخت لینک دعوت','اتصال به Firebase و تأیید دسترسی...');
+  creating=true;let succeeded=false;status('در حال ساخت لینک دعوت','اتصال به Firebase و تأیید دسترسی...');
   try{
     const user=await authReady();
     if(bridge.getGame()!==g)return;
@@ -66,8 +66,10 @@ async function createSession(g){
     bridge.attachSession(g,ref.id);
     display();listen(ref.id);
     bridge.toast('✅ لینک دعوت ساخته شد! از پنل لابی کپی کن.');
-  }catch(error){status('لینک دعوت هنوز فعال نشده',firebaseError(error));bridge.toast(firebaseError(error))}
-  finally{creating=false;display()}
+    succeeded=true;
+  }catch(error){status('لینک دعوت هنوز فعال نشده','Firebase: '+firebaseError(error));bridge.toast(firebaseError(error))}
+  finally{creating=false;if(succeeded)display()}
+  return succeeded;
 }
 async function resume(g){
   if(!g?.cloudSessionId||g.phase!=='collecting')return;
@@ -76,7 +78,6 @@ async function resume(g){
     if(bridge.getGame()!==g)return;
     const ref=doc(db,'chatBattleSessions',g.cloudSessionId);
     // Reading the session verifies the Firebase setup, but ownership is enforced by Firestore rules.
-    const {getDoc}=await import('./firebase-client.js');
     const snap=await getDoc(ref);
     if(!snap.exists())throw Error('اتاق مسابقه در Firebase پیدا نشد.');
     if(snap.data().ownerUid!==user.uid)throw Error('این مسابقه به مرورگر/هویت استریمر دیگری تعلق دارد.');
@@ -89,7 +90,6 @@ async function closeSession(g){
   const id=g.cloudSessionId;
   const user=await authReady();
   const ref=doc(db,'chatBattleSessions',id);
-  const {getDoc}=await import('./firebase-client.js');
   const snap=await getDoc(ref);
   if(!snap.exists()||snap.data().ownerUid!==user.uid)throw Error('مجوز مدیریت این مسابقه در این مرورگر موجود نیست.');
   if(snap.data().status==='collecting')await updateDoc(ref,{status:'closed'});
