@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark"><title>Chat Battle | Firebase Health Check</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 5% 5%,#2c3c29,#0b0d12 55%);color:#f4f8f3;font-family:Vazirmatn,Arial,sans-serif;display:flex;align-items:center;justify-content:center;padding:20px}
+article{width:min(100%,640px);background:#1a211df2;border:1px solid #425446;border-radius:22px;padding:30px;box-shadow:0 30px 90px #0006}
+h1{font-size:25px;margin:0 0 10px}h1 em{color:#d7ff76;font-style:normal}p{color:#a9b5ad;font-size:13px;line-height:2}
+code{display:block;direction:ltr;text-align:left;white-space:pre-wrap;overflow-wrap:anywhere;background:#0b1110;border:1px solid #38493f;padding:15px;border-radius:12px;color:#c3ecc4;line-height:1.9;font-size:12px}
+a{color:#d7ff76}button{font:800 13px Vazirmatn;background:#d7ff76;border:0;border-radius:10px;padding:12px 20px;color:#111a11;cursor:pointer;margin:15px 0 0}
+button:disabled{opacity:.5}.hint{font-size:11px}
+</style></head>
+<body><article>
+<h1>Chat Battle <em>Firebase Check</em></h1>
+<p>این صفحه فقط اتصال Firebase Authentication را بررسی می‌کند؛ اتصال Kick و ساخت مسابقه در آن انجام نمی‌شود.</p>
+<code id="log">در حال بارگذاری Firebase SDK...</code>
+<button id="retry">آزمایش دوباره</button>
+<p class="hint">اگر خطا نمایش داده شد، متن خطا را کپی کن. کلید خصوصی یا فایل Service Account لازم نیست.</p>
+<a href="./">← بازگشت به Chat Battle</a>
+</article>
+<script type="module">
+const out=document.getElementById('log'),btn=document.getElementById('retry');
+const line=t=>{out.textContent+=t+'\n'};
+async function run(){
+ btn.disabled=true;out.textContent='Checking Firebase...\n';
+ try{
+  const firebase=await import('./firebase-client.js?v=20261010-authfix2');
+  line('Project: '+firebase.firebaseConfig.projectId);
+  line('Web app: '+firebase.firebaseConfig.appId.slice(0,23)+'...');
+  line('SDK: 11.10.0');
+  line('Initializing anonymous authentication...');
+  const user=await firebase.authReady();
+  line('✅ Firebase Authentication CONNECTED');
+  line('Anonymous user: '+(user.isAnonymous?'yes':'no'));
+  line('You can return to Chat Battle and generate an invite.');
+ }catch(error){
+  line('❌ Firebase connection failed');
+  line('Code: '+(error?.code||'unknown'));
+  line('Message: '+(error?.message||String(error)));
+ }
+ btn.disabled=false;
+}
+btn.onclick=run;run();
+</script></body></html>
