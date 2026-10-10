@@ -8,6 +8,7 @@ const box=document.getElementById('invitePanel');
 let unsubscribe=null;
 let currentId=null;
 let creating=false;
+let lastError='';
 const inviteUrl=id=>new URL('invite.html?s='+encodeURIComponent(id),location.href).href;
 function status(value,detail){
   const label=document.getElementById('inviteStatus');
@@ -27,7 +28,7 @@ function display(){
   if(copy)copy.disabled=!id;
   if(open){open.href=id?inviteUrl(id):'#';open.setAttribute('aria-disabled',String(!id))}
   if(make)make.hidden=!!id;
-  if(!id){status('منتظر ساخت لینک','لینک‌ها دیگر از چت Kick دریافت نمی‌شوند.');return}
+  if(!id){status(lastError?'خطا در اتصال Firebase':'منتظر ساخت لینک',lastError||'لینک‌ها دیگر از چت Kick دریافت نمی‌شوند.');return}
   status('لینک دعوت فعال','ثبت‌ها به محض تأیید در لابی ظاهر می‌شوند.');
 }
 function stopListening(){
@@ -53,7 +54,7 @@ async function createSession(g){
   if(creating)return;
   if(!g||g.phase!=='collecting')return;
   if(g.cloudSessionId){await resume(g);return}
-  creating=true;let succeeded=false;status('در حال ساخت لینک دعوت','اتصال به Firebase و تأیید دسترسی...');
+  creating=true;let succeeded=false;lastError='';status('در حال ساخت لینک دعوت','اتصال به Firebase و تأیید دسترسی...');
   try{
     const user=await authReady();
     if(bridge.getGame()!==g)return;
@@ -67,7 +68,7 @@ async function createSession(g){
     display();listen(ref.id);
     bridge.toast('✅ لینک دعوت ساخته شد! از پنل لابی کپی کن.');
     succeeded=true;
-  }catch(error){status('لینک دعوت هنوز فعال نشده','Firebase: '+firebaseError(error));bridge.toast(firebaseError(error))}
+  }catch(error){lastError=firebaseError(error);status('لینک دعوت هنوز فعال نشده','Firebase: '+lastError);bridge.toast(lastError)}
   finally{creating=false;if(succeeded)display()}
   return succeeded;
 }
