@@ -477,10 +477,10 @@
  function registerText(content,username,id,time,kickId){if(!game)return;
   if(id){const normalized=String(id);if(idsSeen.has(normalized))return;idsSeen.add(normalized);if(idsSeen.size>MAX_MSG_IDS){const old=idsSeen.values().next().value;idsSeen.delete(old)}}
   else {const key=String(username).toLowerCase()+'\0'+String(content)+'\0'+String(time||'');const t=Date.now();if(recentMessageKeys.get(key)&&t-recentMessageKeys.get(key)<3000)return;recentMessageKeys.set(key,t);if(recentMessageKeys.size>150)for(const [k,v] of recentMessageKeys){if(t-v>10000)recentMessageKeys.delete(k);}}
-  if(game.phase==='battle'&&String(content).trim().match(/^[12]$/)){
+  if(game.phase==='battle'&&(content==='1'||content==='2')){
    if(game.settings.mode==='kick'&&!kickId)return;
    const voterKey=game.settings.mode==='kick'?'kick:'+kickId:String(username);
-   const result=Core.vote(game,String(content).trim(),voterKey);if(result.ok){const m=Core.currentMatch(game);(m.voterNames??={})[voterKey.toLowerCase()]=username;}if(result.ok){save();refreshVotes(result.side)}
+   const result=Core.vote(game,content,voterKey);if(result.ok){const m=Core.currentMatch(game);(m.voterNames??={})[voterKey.toLowerCase()]=username;}if(result.ok){save();refreshVotes(result.side)}
   }
  }
  async function getJson(url,timeout=7000){const c=new AbortController();const timer=setTimeout(()=>c.abort(),timeout);try{const r=await fetch(url,{signal:c.signal,headers:{'Accept':'application/json'}});if(!r.ok)throw Error('HTTP '+r.status);return await r.json()}finally{clearTimeout(timer)}}
