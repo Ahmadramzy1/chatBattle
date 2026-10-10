@@ -1,6 +1,6 @@
 import {
   db, doc, getDoc, onSnapshot, runTransaction, serverTimestamp, authReady, firebaseError
-} from './firebase-client.js';
+} from './firebase-client.js?v=20261010-authfix2';
 
 const $=id=>document.getElementById(id);
 const params=new URLSearchParams(location.search);
