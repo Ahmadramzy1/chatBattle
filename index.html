@@ -183,6 +183,26 @@
 }
 
 .voter-frame{border:1px solid #485344;border-radius:12px;padding:12px;max-height:130px;overflow:auto;display:flex;flex-wrap:wrap;gap:7px;direction:ltr;margin-bottom:12px}.voter-frame[hidden]{display:none}.voter-frame span{background:#263328;border-radius:20px;padding:3px 9px;font-size:12px}.sender-label{direction:rtl;color:var(--lime)}.revealed-preview{width:100%;height:100%;display:grid;place-items:center}.revealed-preview img{width:100%;height:100%;object-fit:contain}.control-buttons{flex-wrap:wrap}.coin-scene{perspective:900px;height:240px;display:grid;place-items:center}.coin-3d{position:relative;width:170px;height:170px;transform-style:preserve-3d}.coin-edge{position:absolute;inset:0;border-radius:50%;background:repeating-conic-gradient(#d4a134 0deg 4deg,#755015 4deg 6deg)}.coin-face{position:absolute;inset:0;border-radius:50%;backface-visibility:hidden;background:radial-gradient(circle at 30% 25%,#fff3ae,#d4a134 65%,#755015);border:10px ridge #d7b157;display:grid;place-items:center;font:700 95px var(--latin);color:#654711;text-shadow:1px 2px #ffe8a5;box-shadow:0 0 25px #c99b4244;transform:translateZ(6px)}.coin-back{transform:rotateY(180deg) translateZ(6px)}
+
+/* Central vote clock and three-second dimensional coin. */
+.stage{grid-template-columns:minmax(0,1fr) 156px minmax(0,1fr);gap:12px}
+.stage-center{height:auto;align-self:stretch;min-height:350px;gap:20px;justify-content:center}
+.stage-center .vertical-line{flex:1;min-height:24px;max-height:110px}
+.stage-center .timer-block{min-width:0;width:100%;padding:16px 8px;background:#11171d;border:1px solid #3e4938;border-radius:16px;box-shadow:0 8px 30px #0004}
+.stage-center .timer-block strong{font-size:36px}
+#coinBtn{width:100%;font:700 13px var(--latin);padding:13px 6px;border-color:#b18b39;background:linear-gradient(145deg,#564018,#282011);color:#ffe2a0;box-shadow:0 4px 22px #d7a74020}
+#coinBtn[hidden]{display:none}
+#coinDialog .confirm-card{text-align:center;max-width:480px;overflow:visible}
+#coinDialog .coin-scene{position:relative;display:grid;place-items:center;margin:12px 0 20px;height:300px;perspective:1000px;isolation:isolate}
+.coin-scene:after{content:"";position:absolute;bottom:12px;width:160px;height:22px;border-radius:50%;background:#0009;filter:blur(9px);z-index:-1}
+#coin3d{width:190px;height:190px;transform-style:preserve-3d;will-change:transform}
+.coin-edge{background:repeating-conic-gradient(#e7bb56 0deg 3deg,#8c591c 3deg 5deg);border:1px solid #b98227}
+.coin-face{transform:translateZ(11px);border:9px solid #dfb24a;background:radial-gradient(ellipse at 28% 18%,#fff5b7 0%,#edc55b 38%,#bd7e20 78%,#ffdc79 100%);box-shadow:inset 0 0 0 3px #80521c,inset 0 0 0 6px #ffe4a0,inset 0 0 24px #88500080;font-size:108px;text-shadow:0 2px #fff3ba,0 -2px #6b420c;color:#774b12}
+.coin-face:after{content:"CHAT BATTLE";position:absolute;bottom:20px;font:700 9px var(--latin);letter-spacing:2px;text-shadow:0 1px #ffeeb3}
+.coin-back{transform:rotateY(180deg) translateZ(11px)}
+@media(max-width:800px) and (min-width:541px){.stage{grid-template-columns:minmax(0,1fr) 112px minmax(0,1fr);gap:6px}.stage-center .timer-block strong{font-size:29px}#coinBtn{font-size:11px}}
+@media(max-width:540px){.stage-center{min-height:0;height:auto;flex-direction:column;width:100%;gap:12px;padding:14px 0}.stage-center .vertical-line{display:none}.stage-center .timer-block,#coinBtn{width:170px}.stage-center .versus-medal{display:none}}
+
 </style>
 </head>
 <body>
@@ -255,14 +275,14 @@
      <div class="video-actions"><button class="play-action" type="button" data-play="1">▶ نمایش / پخش</button><button class="fullscreen-action" type="button" data-fullscreen="1">⛶ تمام‌صفحه</button><a id="original-1" class="external-action" href="#" target="_blank" rel="noopener noreferrer">↗ باز کردن در سایت اصلی</a></div>
      <p id="sender-1" class="sender-label"></p><div id="voters-1" class="voter-frame" hidden></div><div class="vote-display"><div class="votes-top"><span>VOTES FOR 01</span><strong id="votes-1">0</strong></div><div class="votes-meter"><div id="meter-1"></div></div><button type="button" class="advance-action" data-advance="1" disabled>🏆 صعود ویدیوی ۱</button></div>
     </div>
-    <div class="stage-center"><span class="vertical-line"></span><div class="versus-medal">VS</div><span class="vertical-line"></span></div>
+    <div class="stage-center"><span class="vertical-line"></span><button type="button" id="coinBtn" class="secondary-btn" hidden>FLIP a COIN</button><div class="timer-block"><span>VOTE TIMER</span><strong id="votingClock" aria-live="off">00:30</strong><div class="timer-track"><div id="timerMeter"></div></div></div><div class="versus-medal">VS</div><span class="vertical-line"></span></div>
     <div class="video-card right-card" id="card-2"><div class="card-heading"><div class="video-side-id">02<span>CONTENDER</span></div><span class="platform-tag" id="platform-2">VIDEO</span></div>
      <div class="video-frame" id="frame-2"><div class="video-cover" id="cover-2"><div class="cover-light"></div><img id="preview-2" alt="" class="cover-thumb" hidden><div class="video-lock"><span class="lock-symbol">◈</span><span>ویدیو مخفی است</span><small>برای پخش، دکمه پایین را بزنید</small></div></div><div class="frame-player" id="player-2"></div><span class="number-corner">2</span></div>
      <div class="video-actions"><button class="play-action" type="button" data-play="2">▶ نمایش / پخش</button><button class="fullscreen-action" type="button" data-fullscreen="2">⛶ تمام‌صفحه</button><a id="original-2" class="external-action" href="#" target="_blank" rel="noopener noreferrer">↗ باز کردن در سایت اصلی</a></div>
      <p id="sender-2" class="sender-label"></p><div id="voters-2" class="voter-frame" hidden></div><div class="vote-display"><div class="votes-top"><span>VOTES FOR 02</span><strong id="votes-2">0</strong></div><div class="votes-meter"><div id="meter-2"></div></div><button type="button" class="advance-action" data-advance="2" disabled>🏆 صعود ویدیوی ۲</button></div>
     </div>
    </div>
-   <div class="battle-controls glass"><div class="controls-text"><span class="section-number">THE CHAT DECIDES</span><strong id="battleInstruction">اول ویدیوها رو ببین، بعد رأی‌گیری رو شروع کن.</strong><span class="vote-command">برای رأی دادن فقط <kbd>1</kbd> یا <kbd>2</kbd> در چت ارسال شود.</span></div><div class="timer-block"><span>VOTE TIMER</span><strong id="votingClock" aria-live="off">00:30</strong><div class="timer-track"><div id="timerMeter"></div></div></div><div class="control-buttons"><button type="button" id="undoBtn" class="secondary-btn">↶ برگشت</button><button type="button" id="coinBtn" class="secondary-btn" hidden>FLIP a COIN</button><button type="button" id="voteStartBtn" class="primary-btn">⚡ شروع رأی‌گیری</button><button type="button" id="voteStopBtn" class="secondary-btn" disabled>■ پایان رأی‌گیری</button></div></div>
+   <div class="battle-controls glass"><div class="controls-text"><span class="section-number">THE CHAT DECIDES</span><strong id="battleInstruction">اول ویدیوها رو ببین، بعد رأی‌گیری رو شروع کن.</strong><span class="vote-command">برای رأی دادن فقط <kbd>1</kbd> یا <kbd>2</kbd> در چت ارسال شود.</span></div><div class="control-buttons"><button type="button" id="undoBtn" class="secondary-btn">↶ برگشت</button><button type="button" id="voteStartBtn" class="primary-btn">⚡ شروع رأی‌گیری</button><button type="button" id="voteStopBtn" class="secondary-btn" disabled>■ پایان رأی‌گیری</button></div></div>
    <div id="demoVoting" class="demo-voting hidden glass"><span class="section-number">SIMULATED CHAT</span><label for="demoVoter">شبیه‌سازی رأی کاربر در چت:</label><input id="demoVoter" dir="ltr" placeholder="viewer_01" value="voter_01"><button type="button" data-demo-vote="1">ارسال 1</button><button type="button" data-demo-vote="2">ارسال 2</button><button type="button" id="demoVoteBurst">+ ۱۰ رأی تصادفی</button><small>این دکمه‌ها فقط در حالت آزمایشی فعال هستند.</small></div>
    <section class="bracket-section glass"><div class="inside-heading"><div><span class="section-number">THE ROAD TO GLORY</span><h2>جدول حذفی مسابقه</h2></div><span class="pill">KNOCKOUT</span></div><div id="bracketScroller" class="bracket-scroller"><div id="bracket" class="bracket"></div></div></section>
   </section>
@@ -270,7 +290,7 @@
  </main>
  <footer class="site-footer"><span>CHAT BATTLE © 2026</span><span>MADE FOR THE CHAT. BUILT FOR THE HYPE.</span><a href="https://github.com/ahmadramzy1/instaQ" rel="noopener noreferrer" target="_blank">INSPIRED BY instaQ ↗</a></footer>
 </div>
-<div id="coinDialog" class="modal-backdrop hidden"><div class="confirm-card glass" role="dialog" aria-modal="true" aria-label="پرتاب سکه"><div class="coin-scene"><div id="coin3d" class="coin-3d"><span class="coin-edge" style="transform:translateZ(-5px)"></span><span class="coin-edge" style="transform:translateZ(-4px)"></span><span class="coin-edge" style="transform:translateZ(-3px)"></span><span class="coin-edge" style="transform:translateZ(-2px)"></span><span class="coin-edge" style="transform:translateZ(-1px)"></span><span class="coin-edge" style="transform:translateZ(0px)"></span><span class="coin-edge" style="transform:translateZ(1px)"></span><span class="coin-edge" style="transform:translateZ(2px)"></span><span class="coin-edge" style="transform:translateZ(3px)"></span><span class="coin-edge" style="transform:translateZ(4px)"></span><span class="coin-edge" style="transform:translateZ(5px)"></span><div class="coin-face">1</div><div class="coin-face coin-back">2</div></div></div><p id="coinResult" aria-live="polite"></p><button id="coinClose" class="primary-btn">بازگشت و انتخاب برنده</button></div></div>
+<div id="coinDialog" class="modal-backdrop hidden"><div class="confirm-card glass" role="dialog" aria-modal="true" aria-label="پرتاب سکه"><div class="coin-scene"><div id="coin3d" class="coin-3d"><span class="coin-edge" style="transform:translateZ(-10px)"></span><span class="coin-edge" style="transform:translateZ(-9px)"></span><span class="coin-edge" style="transform:translateZ(-8px)"></span><span class="coin-edge" style="transform:translateZ(-7px)"></span><span class="coin-edge" style="transform:translateZ(-6px)"></span><span class="coin-edge" style="transform:translateZ(-5px)"></span><span class="coin-edge" style="transform:translateZ(-4px)"></span><span class="coin-edge" style="transform:translateZ(-3px)"></span><span class="coin-edge" style="transform:translateZ(-2px)"></span><span class="coin-edge" style="transform:translateZ(-1px)"></span><span class="coin-edge" style="transform:translateZ(0px)"></span><span class="coin-edge" style="transform:translateZ(1px)"></span><span class="coin-edge" style="transform:translateZ(2px)"></span><span class="coin-edge" style="transform:translateZ(3px)"></span><span class="coin-edge" style="transform:translateZ(4px)"></span><span class="coin-edge" style="transform:translateZ(5px)"></span><span class="coin-edge" style="transform:translateZ(6px)"></span><span class="coin-edge" style="transform:translateZ(7px)"></span><span class="coin-edge" style="transform:translateZ(8px)"></span><span class="coin-edge" style="transform:translateZ(9px)"></span><span class="coin-edge" style="transform:translateZ(10px)"></span><div class="coin-face">1</div><div class="coin-face coin-back">2</div></div></div><p id="coinResult" aria-live="polite"></p><button id="coinClose" class="primary-btn">بازگشت و انتخاب برنده</button></div></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="modal-backdrop hidden" id="confirmDialog"><div class="confirm-card glass" role="dialog" aria-modal="true" aria-labelledby="dialogTitle"><span class="section-number">CONFIRM ACTION</span><h2 id="dialogTitle">مسابقه جدید؟</h2><p id="dialogBody">اطلاعات مسابقه فعلی پاک می‌شه.</p><div><button id="cancelConfirm" class="secondary-btn">انصراف</button><button id="confirmReset" class="primary-btn">بله، شروع مجدد</button></div></div></div>
 <script>
@@ -738,18 +758,31 @@
  }
  function reset(){cancelCoin();const prior=game;window.ChatBattleCloudHost?.stopListening();if(prior?.phase==='collecting'&&prior.cloudSessionId)window.ChatBattleCloudHost?.closeSession(prior).catch(()=>{});cancelWinFX();window.ChatBattlePlayer?.destroyAll();disconnect();game=null;fallback=false;lastBattleKey='';idsSeen.clear();recentMessageKeys.clear();safeStorage.remove(STORE);$('confirmDialog').classList.add('hidden');render();window.scrollTo({top:0,behavior:'smooth'});}
  function showReset(){if(!game){toast('هنوز مسابقه‌ای ساخته نشده.');return}$('confirmDialog').classList.remove('hidden')}
- let coinPending=false,coinTimer=null;
- function cancelCoin(){clearTimeout(coinTimer);coinPending=false;$('coinDialog').classList.add('hidden');}
+ let coinPending=false,coinTimer=null,coinAnimation=null;
+ function cancelCoin(){clearTimeout(coinTimer);coinAnimation?.cancel();coinAnimation=null;coinPending=false;$('coinDialog').classList.add('hidden');}
  function undoWinner(){if(!game||coinPending)return;cancelWinFX();if(!Core.undo(game))return;window.ChatBattlePlayer?.destroyAll();lastBattleKey='';save();render();if(game.settings.mode==='kick')connectKick();toast('رأی‌گیری قبلی برگشت؛ برنده را دوباره انتخاب کن.');}
  function flipCoin(){
   const m=Core.currentMatch(game);if(coinPending||winPending||game?.matchStatus!=='closed'||!m||m.votes[0]!==m.votes[1])return;
   coinPending=true;refreshBattleControls();qa('[data-advance]').forEach(b=>b.disabled=true);
   const side=m.coinResult||(crypto.getRandomValues(new Uint32Array(1))[0]%2+1);m.coinResult=side;save();
   const coin=$('coin3d');$('coinDialog').classList.remove('hidden');$('coinResult').textContent='سکه در حال چرخش…';$('coinClose').disabled=true;
-  coin.style.transition='none';coin.style.transform='rotateY(0deg)';void coin.offsetWidth;
+  coinAnimation?.cancel();
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
-  coin.style.transition=reduced?'none':'transform 2.8s cubic-bezier(.15,.65,.2,1)';coin.style.transform='rotateY('+(1800+(side===2?180:0))+'deg)';
-  coinTimer=setTimeout(()=>{coinPending=false;text('coinResult','نتیجه: ویدیوی '+side);$('coinClose').disabled=false;refreshBattleControls();},reduced?0:2900);
+  const landing=2160+(side===2?180:0);
+  const frames=reduced?[
+   {transform:'rotateX(12deg) rotateY('+landing+'deg)',opacity:.35},
+   {transform:'rotateX(12deg) rotateY('+landing+'deg)',opacity:1}
+  ]:[
+   {transform:'translateY(28px) rotateX(18deg) rotateY(0deg) rotateZ(-12deg)',offset:0},
+   {transform:'translateY(-40px) rotateX(34deg) rotateY(720deg) rotateZ(12deg)',offset:.3},
+   {transform:'translateY(-24px) rotateX(-24deg) rotateY(1440deg) rotateZ(-8deg)',offset:.6},
+   {transform:'translateY(8px) rotateX(20deg) rotateY('+(landing-180)+'deg) rotateZ(5deg)',offset:.86},
+   {transform:'translateY(0) rotateX(12deg) rotateY('+landing+'deg) rotateZ(0deg)',offset:1}
+  ];
+  coinAnimation=coin.animate(frames,{duration:3000,easing:'linear',fill:'forwards'});
+  const animation=coinAnimation;
+  animation.finished.then(()=>{if(coinAnimation!==animation)return;coinPending=false;text('coinResult','نتیجه: ویدیوی '+side);$('coinClose').disabled=false;refreshBattleControls();}).catch(()=>{});
+
  }
  $('coinBtn').addEventListener('click',flipCoin);$('coinClose').addEventListener('click',cancelCoin);
  $('undoBtn').addEventListener('click',undoWinner);$('undoFinalBtn').addEventListener('click',undoWinner);
