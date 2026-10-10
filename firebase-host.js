@@ -15,6 +15,7 @@ function status(value,detail){
   if(label)label.textContent=value;
   const extra=document.getElementById('inviteStatusExtra');
   if(extra)extra.textContent=detail||'';
+  // Successful connection counters are intentionally hidden in the lobby.
 }
 function display(){
   const g=bridge?.getGame();
@@ -61,7 +62,8 @@ async function createSession(g){
     const ref=doc(collection(db,'chatBattleSessions'));
     await setDoc(ref,{
       ownerUid:user.uid,topic:g.settings.topic,capacity:g.settings.capacity,
-      perUser:g.settings.perUser,status:'collecting',usedCount:0,createdAt:serverTimestamp()
+      perUser:g.settings.perUser,status:'collecting',usedCount:0,
+      schemaVersion:2,reservedVideoKeys:[],createdAt:serverTimestamp()
     });
     if(bridge.getGame()!==g)return;
     bridge.attachSession(g,ref.id);
