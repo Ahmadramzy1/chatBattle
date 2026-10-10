@@ -7,7 +7,7 @@ import {
 } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
 
 export const firebaseConfig = {
-  apiKey: 'AIzaSyB94S3enruEUS7MHWE4ZHgFVPqLV4nRgOI',
+  apiKey: 'AIzaSyB94S3enruEUS7MHWE4ZHgfVPqlV4nRgOI',
   authDomain: 'chat-battle-b976d.firebaseapp.com',
   projectId: 'chat-battle-b976d',
   storageBucket: 'chat-battle-b976d.firebasestorage.app',
@@ -33,6 +33,7 @@ export async function authReady(){
 }
 export function firebaseError(error){
   const code=error?.code||'';
+  if(code.includes('api-key-not-valid'))return 'کلید API پروژه Firebase معتبر نیست. کلید Web App را از Firebase Project settings → Your apps کپی و تنظیمات را به‌روزرسانی کن.';
   if(code.includes('operation-not-allowed'))return 'ورود ناشناس فعال نیست. در Firebase → Authentication → Sign-in method، Anonymous را فعال کن.';
   if(code.includes('permission-denied'))return 'اجازه دسترسی به Firestore صادر نشده. قوانین firestore.rules را در Firebase Console منتشر کن.';
   if(code.includes('unavailable'))return 'ارتباط با Firestore برقرار نشد؛ اینترنت و وضعیت Firebase را بررسی کن.';
