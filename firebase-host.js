@@ -11,11 +11,12 @@ let creating=false;
 let lastError='';
 const inviteUrl=id=>new URL('invite.html?s='+encodeURIComponent(id),location.href).href;
 function status(value,detail){
-  const label=document.getElementById('inviteStatus');
-  if(label)label.textContent=value;
-  const extra=document.getElementById('inviteStatusExtra');
-  if(extra)extra.textContent=detail||'';
-  // Successful connection counters are intentionally hidden in the lobby.
+  // Only expose actionable connection errors; hide routine Firebase/Kick statuses.
+  const errorBox=document.getElementById('inviteError');
+  if(!errorBox)return;
+  const failed=/خطا|ناموفق|فعال نشده|موجود نیست/.test(String(value));
+  errorBox.hidden=!failed;
+  errorBox.textContent=failed?String(detail||value):'';
 }
 function display(){
   const g=bridge?.getGame();
