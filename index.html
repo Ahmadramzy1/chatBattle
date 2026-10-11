@@ -221,6 +221,12 @@
 #coinDialog .coin-scene{height:min(440px,65vh);margin:0;perspective:none}
 #coinCanvas{display:block;width:min(440px,85vw);height:min(440px,85vw);max-height:65vh;object-fit:contain}
 #coinDialog .coin-scene:after{bottom:25px}
+
+/* Battle actions live directly beneath VS, without a separate bottom panel. */
+.stage-center .control-buttons{display:flex;flex-direction:column;gap:8px;width:100%;direction:rtl}
+.stage-center .control-buttons button{width:100%;padding:10px 5px;font-size:12px;white-space:nowrap}
+@media(max-width:800px) and (min-width:541px){.stage-center .control-buttons button{font-size:10px;padding:10px 2px}}
+@media(max-width:540px){.stage-center .versus-medal{display:flex}.stage-center .control-buttons{width:170px}}
 </style>
 </head>
 <body>
@@ -293,14 +299,14 @@
      <div class="video-actions"><button class="play-action" type="button" data-play="1">▶ نمایش / پخش</button><button class="fullscreen-action" type="button" data-fullscreen="1">⛶ تمام‌صفحه</button><a id="original-1" class="external-action" href="#" target="_blank" rel="noopener noreferrer">↗ باز کردن در سایت اصلی</a></div>
      <p id="sender-1" class="sender-label"></p><div id="voters-1" class="voter-frame" hidden></div><div class="vote-display"><div class="votes-top"><span>VOTES FOR 01</span><strong id="votes-1">0</strong></div><div class="votes-meter"><div id="meter-1"></div></div><button type="button" class="advance-action" data-advance="1" disabled>🏆 صعود ویدیوی ۱</button></div>
     </div>
-    <div class="stage-center"><span class="vertical-line"></span><button type="button" id="coinBtn" class="secondary-btn">FLIP a COIN</button><div class="timer-block"><span>VOTE TIMER</span><strong id="votingClock" aria-live="off">00:30</strong><div class="timer-track"><div id="timerMeter"></div></div></div><div class="versus-medal">VS</div><span class="vertical-line"></span></div>
+    <div class="stage-center"><span class="vertical-line"></span><button type="button" id="coinBtn" class="secondary-btn">FLIP a COIN</button><div class="timer-block"><span>VOTE TIMER</span><strong id="votingClock" aria-live="off">00:30</strong><div class="timer-track"><div id="timerMeter"></div></div></div><div class="versus-medal">VS</div><div class="control-buttons"><button type="button" id="undoBtn" class="secondary-btn">↶ برگشت</button><button type="button" id="voteStartBtn" class="primary-btn">⚡ شروع رأی‌گیری</button><button type="button" id="voteStopBtn" class="secondary-btn" disabled>■ پایان رأی‌گیری</button></div><span class="vertical-line"></span></div>
     <div class="video-card right-card" id="card-2"><div class="card-heading"><div class="video-side-id">02<span>CONTENDER</span></div><span class="platform-tag" id="platform-2">VIDEO</span></div>
      <div class="video-frame" id="frame-2"><div class="video-cover" id="cover-2"><div class="cover-light"></div><img id="preview-2" alt="" class="cover-thumb" hidden><div class="video-lock"><span class="lock-symbol">◈</span><span>ویدیو مخفی است</span><small>برای پخش، دکمه پایین را بزنید</small></div></div><div class="frame-player" id="player-2"></div><span class="number-corner">2</span></div>
      <div class="video-actions"><button class="play-action" type="button" data-play="2">▶ نمایش / پخش</button><button class="fullscreen-action" type="button" data-fullscreen="2">⛶ تمام‌صفحه</button><a id="original-2" class="external-action" href="#" target="_blank" rel="noopener noreferrer">↗ باز کردن در سایت اصلی</a></div>
      <p id="sender-2" class="sender-label"></p><div id="voters-2" class="voter-frame" hidden></div><div class="vote-display"><div class="votes-top"><span>VOTES FOR 02</span><strong id="votes-2">0</strong></div><div class="votes-meter"><div id="meter-2"></div></div><button type="button" class="advance-action" data-advance="2" disabled>🏆 صعود ویدیوی ۲</button></div>
     </div>
    </div>
-   <div class="battle-controls glass"><div class="controls-text"><span class="section-number">THE CHAT DECIDES</span><strong id="battleInstruction">اول ویدیوها رو ببین، بعد رأی‌گیری رو شروع کن.</strong><span class="vote-command">برای رأی دادن فقط <kbd>1</kbd> یا <kbd>2</kbd> در چت ارسال شود.</span></div><div class="control-buttons"><button type="button" id="undoBtn" class="secondary-btn">↶ برگشت</button><button type="button" id="voteStartBtn" class="primary-btn">⚡ شروع رأی‌گیری</button><button type="button" id="voteStopBtn" class="secondary-btn" disabled>■ پایان رأی‌گیری</button></div></div>
+   <strong id="battleInstruction" hidden></strong>
    <div id="demoVoting" class="demo-voting hidden glass"><span class="section-number">SIMULATED CHAT</span><label for="demoVoter">شبیه‌سازی رأی کاربر در چت:</label><input id="demoVoter" dir="ltr" placeholder="viewer_01" value="voter_01"><button type="button" data-demo-vote="1">ارسال 1</button><button type="button" data-demo-vote="2">ارسال 2</button><button type="button" id="demoVoteBurst">+ ۱۰ رأی تصادفی</button><small>این دکمه‌ها فقط در حالت آزمایشی فعال هستند.</small></div>
    <section class="bracket-section glass"><div class="inside-heading"><div><span class="section-number">THE ROAD TO GLORY</span><h2>جدول حذفی مسابقه</h2></div><span class="pill">KNOCKOUT</span></div><div id="bracketScroller" class="bracket-scroller"><div id="bracket" class="bracket"></div></div></section>
   </section>
