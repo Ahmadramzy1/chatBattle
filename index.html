@@ -227,6 +227,33 @@
 .stage-center .control-buttons button{width:100%;padding:10px 5px;font-size:12px;white-space:nowrap}
 @media(max-width:800px) and (min-width:541px){.stage-center .control-buttons button{font-size:10px;padding:10px 2px}}
 @media(max-width:540px){.stage-center .versus-medal{display:flex}.stage-center .control-buttons{width:170px}}
+
+/* Compact video previews for each knockout pairing. */
+.bracket-section{padding:22px;background:linear-gradient(150deg,#1a2028,#10151c)}
+.bracket{gap:22px;padding:4px 2px 8px}
+.round-col{width:220px;flex:none}
+.round-title{align-items:center;font-size:10px;letter-spacing:1px;padding:0 3px 12px}
+.round-title span{padding:3px 7px;border-radius:6px;background:#d7ff7610;letter-spacing:0}
+.bracket-list{gap:12px;max-height:420px;padding:2px 3px 4px;overflow-x:hidden}
+.mini-match{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:8px 18px;padding:10px;border-radius:13px;background:linear-gradient(145deg,#1c2430,#121922);border:1px solid #34404e;box-shadow:0 4px 12px #0002}
+.mini-match.current{border-color:#b4d96a;box-shadow:0 0 0 1px #d7ff7620,0 5px 18px #0003}
+.mini-match.bye{opacity:1}
+.mini-match-heading{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:5px;color:#8393a5;font:600 9px var(--latin);padding-bottom:2px}
+.mini-match-heading span:last-child{font:10px var(--f);letter-spacing:0}
+.mini-match.current .mini-match-heading span:last-child{color:var(--lime)}
+.mini-contender{display:flex;flex-direction:column;align-items:stretch;gap:6px;padding:0;min-width:0;position:relative}
+.mini-contender:nth-child(2){border-top:0}
+.bracket-thumb{position:relative;width:100%;height:47px;background:#0b1119;border:1px solid #3d4959;border-radius:7px;overflow:hidden;display:grid;place-items:center}
+.bracket-thumb img{display:block;width:100%;height:100%;object-fit:cover}
+.bracket-thumb .placeholder-symbol{font-size:20px}
+.bracket-empty{color:#778698;font:10px var(--f);border-style:dashed;background:#101720}
+.mini-contender.win .bracket-thumb{border-color:#c6ee78;box-shadow:0 0 0 1px #d7ff7625}
+.mini-contender .bracket-winner{position:absolute;bottom:3px;right:3px;min-width:16px;height:16px;display:grid;place-items:center;background:#d7ff76;color:#14200d;border-radius:50%;font:800 11px var(--latin);box-shadow:0 1px 5px #0008}
+.mini-contender .bracket-sender{max-width:100%;font:10px/1.6 var(--f);text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#abb9ca}
+.mini-contender.win .bracket-sender{color:var(--lime)}
+.bracket-vs{position:absolute;top:53px;left:50%;transform:translate(-50%,-50%);font:700 8px var(--latin);color:#8090a3}
+@media(max-width:540px){.bracket-section{padding:16px 12px}.round-col{width:210px}.bracket{gap:14px}.bracket-thumb{height:44px}}
+
 </style>
 </head>
 <body>
@@ -765,10 +792,17 @@
  function entryLabel(id){if(!id)return 'TBD';const n=game.entries.findIndex(e=>e.id===id);return n<0?'TBD':'VIDEO #'+pad(n+1)}
  function renderBracket(){if(game?.phase!=='battle')return;const root=$('bracket');root.replaceChildren();
   game.rounds.forEach((round,r)=>{const column=document.createElement('div');column.className='round-col';
-   const title=document.createElement('div');title.className='round-title';const name=document.createElement('b');name.textContent=formatRound(r);const counter=document.createElement('span');counter.textContent=round.filter(m=>m.status==='complete').length+'/'+round.length;title.append(name,counter);
+   const title=document.createElement('div');title.className='round-title';const name=document.createElement('b');name.textContent=formatRound(r);const counter=document.createElement('span');counter.textContent=round.filter(m=>m.winner).length+'/'+round.length;title.append(name,counter);
    const matches=document.createElement('div');matches.className='bracket-list';
    round.forEach((m,i)=>{const item=document.createElement('div');item.className='mini-match';if(m.status==='bye')item.classList.add('bye');if(game.current?.round===r&&game.current?.index===i)item.classList.add('current');
-    for(const id of [m.left,m.right]){const competitor=document.createElement('div');competitor.className='mini-contender';if(id&&id===m.winner)competitor.classList.add('win');const label=document.createElement('b');label.textContent=id&&id===m.winner?'✓':'—';const name=document.createElement('span');name.textContent=id?entryLabel(id):r===0?'BYE':'TBD';competitor.append(label,name);item.append(competitor)}matches.append(item)});
+    const heading=document.createElement('div');heading.className='mini-match-heading';const numberLabel=document.createElement('span');numberLabel.textContent='MATCH '+pad(i+1);const status=document.createElement('span');status.textContent=game.current?.round===r&&game.current?.index===i?'در حال نمایش':m.winner?'تمام‌شده':'در انتظار';heading.append(numberLabel,status);item.append(heading);
+    for(const id of [m.left,m.right]){const competitor=document.createElement('div');competitor.className='mini-contender';const entry=id?getEntry(id):null;
+     if(entry){const picture=thumbNode(entry.video,'bracket-thumb');competitor.append(picture);if(id===m.winner){competitor.classList.add('win');const badge=document.createElement('b');badge.className='bracket-winner';badge.textContent='✓';badge.setAttribute('aria-label','صعود کرده');picture.append(badge);}
+      if(game.settings.showSenders){const sender=document.createElement('span');sender.className='bracket-sender';sender.dir='auto';sender.textContent='@'+entry.sender;competitor.append(sender);}
+     }else{const placeholder=document.createElement('div');placeholder.className='bracket-thumb bracket-empty';const feedersSettled=r===0||game.rounds[r-1].slice(i*2,i*2+2).every(f=>f.winner||f.status==='empty');placeholder.textContent=feedersSettled?'بدون حریف':'؟';placeholder.setAttribute('aria-label',feedersSettled?'بدون حریف':'در انتظار برندهٔ مرحلهٔ قبل');competitor.append(placeholder);}
+     item.append(competitor);
+    }const versus=document.createElement('span');versus.className='bracket-vs';versus.textContent='VS';item.append(versus);matches.append(item)});
+
    column.append(title,matches);root.append(column);
   });
  }
