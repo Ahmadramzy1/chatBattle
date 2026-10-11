@@ -362,21 +362,31 @@
  function shuffle(arr,random=Math.random){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a;}
  function makeMatch(round,index){return {id:'r'+round+'m'+index,round,index,left:null,right:null,winner:null,status:'waiting',votes:[0,0],voters:{},endedAt:null};}
  function propagate(state,round,index,winnerId){const nr=state.rounds[round+1];if(!nr)return;const next=nr[Math.floor(index/2)];if(index%2===0)next.left=winnerId;else next.right=winnerId;}
- function nextMatch(state){for(let r=0;r<state.rounds.length;r++)for(let i=0;i<state.rounds[r].length;i++){const m=state.rounds[r][i];if(m.left&&m.right&&!m.winner)return {round:r,index:i};}return null;}
+ // Only settled feeder slots can create a manual bye; pending opponents must wait.
+ function nextMatch(state){
+  for(let r=0;r<state.rounds.length;r++){
+   const ready=[];
+   for(let i=0;i<state.rounds[r].length;i++){
+    const m=state.rounds[r][i];if(m.winner||m.status==='empty')continue;
+    if(r>0&&!state.rounds[r-1].slice(i*2,i*2+2).every(f=>f.winner||f.status==='empty'))continue;
+    if(!m.left&&!m.right){m.status='empty';continue;}
+    ready.push({round:r,index:i});
+   }
+   if(ready.length)return ready.find(p=>{const m=state.rounds[r][p.index];return !m.left||!m.right;})||ready[0];
+  }
+  return null;
+ }
  function startTournament(state,random=Math.random){
   if(state.phase!=='collecting'||state.entries.length<2)return {ok:false,reason:'not-enough'};
   const n=2**Math.ceil(Math.log2(state.entries.length));const ordered=shuffle(state.entries,random);const arranged=seeds(n).map(s=>ordered[s-1]?.id||null);
   state.rounds=[];for(let size=n,round=0;size>=2;size/=2,round++){state.rounds.push(Array.from({length:size/2},(_,i)=>makeMatch(round,i)));}
   arranged.forEach((id,i)=>{const m=state.rounds[0][Math.floor(i/2)];if(i%2===0)m.left=id;else m.right=id;});
-  for(let r=0;r<state.rounds.length;r++)for(let i=0;i<state.rounds[r].length;i++){
-   const m=state.rounds[r][i];if(r===0&&!!m.left!==!!m.right){m.winner=m.left||m.right;m.status='bye';propagate(state,r,i,m.winner);}
-  }
   state.current=nextMatch(state);state.phase='battle';state.matchStatus='preview';state.votingEndsAt=null;
   return {ok:true,rounds:state.rounds.length,byes:n-state.entries.length};
  }
  function currentMatch(state){return state.current?state.rounds[state.current.round]?.[state.current.index]||null:null;}
  function startVote(state,now=Date.now()){
-  const m=currentMatch(state);if(state.phase!=='battle'||!m||state.matchStatus!=='preview')return false;
+  const m=currentMatch(state);if(state.phase!=='battle'||!m||!m.left||!m.right||state.matchStatus!=='preview')return false;
   state.matchStatus='voting';m.status='voting';state.votingEndsAt=now+state.settings.voteSeconds*1000;return true;
  }
  function endVote(state,now=Date.now()){
@@ -394,12 +404,12 @@
   Object.defineProperty(m.voters,key,{value:next,writable:true,enumerable:true,configurable:true});m.votes[next]++;return {ok:true,side:next,changed:old!==undefined};
  }
  function advance(state,side,now=Date.now()){
-  const m=currentMatch(state);if(state.phase!=='battle'||state.matchStatus!=='closed'||!m||![0,1].includes(side))return {ok:false,reason:'not-ready'};
+  const m=currentMatch(state),solo=m&&!!m.left!==!!m.right;if(state.phase!=='battle'||!m||!(state.matchStatus==='closed'||solo&&state.matchStatus==='preview')||![0,1].includes(side))return {ok:false,reason:'not-ready'};
   const winner=side===0?m.left:m.right;const loser=side===0?m.right:m.left;
-  if(!winner||!loser)return {ok:false,reason:'invalid-side'};
+  if(!winner)return {ok:false,reason:'invalid-side'};
   const {history,...snapshot}=state;
   (state.history??=[]).push(JSON.parse(JSON.stringify(snapshot)));
-  m.winner=winner;m.status='complete';m.endedAt=now;
+  m.winner=winner;m.status=solo?'bye':'complete';m.endedAt=now;
   const l=state.entries.find(e=>e.id===loser);if(l){l.eliminatedRound=state.current.round;l.lastVotes=m.votes[1-side];l.lastShare=m.votes[0]+m.votes[1]?m.votes[1-side]/(m.votes[0]+m.votes[1]):0;}
   propagate(state,state.current.round,state.current.index,winner);
   const next=nextMatch(state);state.current=next;state.matchStatus='preview';state.votingEndsAt=null;
@@ -421,7 +431,7 @@
    return a.createdAt-b.createdAt;
   });
  }
- function matchProgress(state){const total=state.entries.length-1;const done=state.rounds.flat().filter(m=>m.status==='complete').length;return {done,total};}
+ function matchProgress(state){const total=state.rounds.flat().filter(m=>m.status!=='empty').length;const done=state.rounds.flat().filter(m=>m.winner).length;return {done,total};}
  return {CAPACITIES,defaults,newGame,parseVideo,linksIn,submitLink,startTournament,currentMatch,startVote,endVote,maybeExpire,vote,advance,undo,rankings,matchProgress,seeds};
 });
 
@@ -552,7 +562,11 @@
  }
  function getEntry(id){return game.entries.find(e=>e.id===id)||null}
  function formatRound(r){const total=game.rounds.length;return r===total-1?'GRAND FINAL':r===total-2?'SEMI FINALS':r===total-3?'QUARTER FINALS':'ROUND '+pad(r+1)}
- function loadBattleSlot(side,entry){window.ChatBattlePlayer?.destroy(side);const v=entry.video;
+ function loadBattleSlot(side,entry){window.ChatBattlePlayer?.destroy(side);
+  $('card-'+side).classList.toggle('empty-contender',!entry);
+  qa('#card-'+side+' .video-actions').forEach(el=>el.hidden=!entry);
+  if(!entry){$('player-'+side).replaceChildren();$('frame-'+side).classList.add('is-open');const label=document.createElement('p');label.textContent='بدون حریف — ویدیوی مقابل با تأیید دستی صعود می‌کند';label.style.cssText='padding:32px;text-align:center';$('player-'+side).append(label);text('sender-'+side,'');text('platform-'+side,'بدون حریف');return;}
+  const v=entry.video;
   text('platform-'+side,platformName(v));$('original-'+side).href=v.url;
   const cover=$('cover-'+side),img=$('preview-'+side);img.hidden=!v.thumbnail;if(v.thumbnail)img.src=v.thumbnail;else img.removeAttribute('src');
   $('player-'+side).replaceChildren();$('frame-'+side).classList.remove('is-open');
@@ -569,7 +583,7 @@
  function playSide(side){if(!game||game.phase!=='battle')return;
   const m=Core.currentMatch(game);if(!m)return;
   const selected=side===1?getEntry(m.left):getEntry(m.right),other=side===1?2:1;
-  window.ChatBattlePlayer.pause(other);
+  if(!selected)return;window.ChatBattlePlayer.pause(other);
   (game.revealed??={})[selected.id]=true;save();
   const container=$('player-'+side);const parent=$('frame-'+side);
   parent.classList.add('is-open');q('[data-play="'+side+'"]').textContent='↻ پخش مجدد';
@@ -581,7 +595,7 @@
   el.classList.remove('bump');void el.offsetWidth;el.classList.add('bump');
  }
  function refreshVotes(changedSide){if(game?.phase!=='battle')return;const m=Core.currentMatch(game);if(!m)return;
-  for(let side=1;side<=2;side++){const box=$('voters-'+side);box.hidden=!game.settings.showVoters;box.replaceChildren();if(!box.hidden){const names=Object.entries(m.voters).filter(([,v])=>v===side-1);for(const [key] of names){const chip=document.createElement('span');chip.textContent='@'+(m.voterNames?.[key]||key);box.append(chip)}if(!names.length)box.textContent='هنوز رأیی ثبت نشده';}}
+  for(let side=1;side<=2;side++){const box=$('voters-'+side);box.hidden=!game.settings.showVoters||!m.left||!m.right;box.replaceChildren();if(!box.hidden){const names=Object.entries(m.voters).filter(([,v])=>v===side-1);for(const [key] of names){const chip=document.createElement('span');chip.textContent='@'+(m.voterNames?.[key]||key);box.append(chip)}if(!names.length)box.textContent='هنوز رأیی ثبت نشده';}}
   const total=m.votes[0]+m.votes[1];for(let side=1;side<=2;side++){
    const n=m.votes[side-1];if(changedSide===side)countAnimate(side,n);else{cancelAnimationFrame(animIds[side-1]);visualCounts[side-1]=n;text('votes-'+side,number(n))}
    $('meter-'+side).style.width=(total?100*n/total:50)+'%';
@@ -589,15 +603,15 @@
   $('card-1').classList.toggle('leading',m.votes[0]>m.votes[1]);$('card-2').classList.toggle('leading',m.votes[1]>m.votes[0]);
  }
  function refreshBattleControls(){if(game?.phase!=='battle')return;
-  const match=Core.currentMatch(game);$('coinBtn').hidden=game.matchStatus!=='closed'||match.votes[0]!==match.votes[1];$('coinBtn').disabled=coinPending||winPending;
+  const match=Core.currentMatch(game),solo=!match.left||!match.right;$('coinBtn').hidden=solo||game.matchStatus!=='closed'||match.votes[0]!==match.votes[1];$('coinBtn').disabled=coinPending||winPending;
   $('undoBtn').disabled=!game.history?.length||coinPending||winPending;
   const status=game.matchStatus;const voting=status==='voting',closed=status==='closed';
-  $('voteStartBtn').disabled=status!=='preview';$('voteStopBtn').disabled=!voting;
-  qa('[data-advance]').forEach(b=>b.disabled=!closed);
-  text('battleInstruction',status==='preview'?'اول ویدیوها رو ببین، بعد رأی‌گیری رو شروع کن.':voting?'رأی‌گیری بازه! فقط پیام دقیق 1 یا 2 شمرده می‌شه.':'رأی‌گیری بسته شد؛ حالا برنده رو انتخاب کن.');
+  $('voteStartBtn').disabled=solo||status!=='preview';$('voteStopBtn').disabled=!voting;
+  qa('[data-advance]').forEach(b=>{const id=Number(b.dataset.advance)===1?match.left:match.right;b.disabled=!id||!(closed||solo&&status==='preview');b.textContent=solo?'🏆 صعود بدون حریف':'🏆 صعود ویدیوی '+b.dataset.advance;});
+  text('battleInstruction',solo?'ویدیو را پخش کن، سپس دکمهٔ صعود بدون حریف را بزن.':status==='preview'?'اول ویدیوها رو ببین، بعد رأی‌گیری رو شروع کن.':voting?'رأی‌گیری بازه! فقط پیام دقیق 1 یا 2 شمرده می‌شه.':'رأی‌گیری بسته شد؛ حالا برنده رو انتخاب کن.');
   updateClock();
  }
- function updateClock(){if(game?.phase!=='battle')return;const duration=game.settings.voteSeconds;
+ function updateClock(){if(game?.phase!=='battle')return;const duration=game.settings.voteSeconds;const m=Core.currentMatch(game);if(m&&(!m.left||!m.right)){text('votingClock','بدون حریف');$('timerMeter').style.width='0%';return;}
   const remain=game.matchStatus==='voting'?Math.max(0,game.votingEndsAt-Date.now()):game.matchStatus==='closed'?0:duration*1000;
   const sec=Math.ceil(remain/1000);text('votingClock',pad(Math.floor(sec/60))+':'+pad(sec%60));$('timerMeter').style.width=(100*remain/(duration*1000))+'%';
   $('timerMeter').style.background=sec<=5&&game.matchStatus==='voting'?'#ff8e82':'';
@@ -676,10 +690,11 @@
  }
  function advanceSide(side){
   if(winPending||coinPending)return;
-  if(!game||game.phase!=='battle'||game.matchStatus!=='closed'||!Core.currentMatch(game)){
+  const current=game&&Core.currentMatch(game),solo=current&&(!current.left||!current.right);
+  if(!game||game.phase!=='battle'||!current||!(game.matchStatus==='closed'||solo&&game.matchStatus==='preview')){
    toast('اول رأی‌گیری رو به پایان برسون.');return;
   }
-  if(side!==1&&side!==2)return;
+  if(side!==1&&side!==2)return;if(!(side===1?current.left:current.right))return;
   const originalGame=game,originalMatch=Core.currentMatch(game).id;
   winPending=true;
   celebrateWinner(side);
@@ -800,7 +815,7 @@
    if(!result.ok)throw Error('برای شروع حداقل دو ویدیو لازم است.');
    save();render();
    if(game.settings.mode==='kick')connectKick();
-   toast('⚔️ مسابقه شروع شد! '+(result.byes?' | '+result.byes+' صعود خودکار':''));
+   toast('⚔️ مسابقه شروع شد! '+(result.byes?' | '+result.byes+' ویدیوی بدون حریف؛ صعود دستی':''));
   }catch(error){toast(error.message||'شروع مسابقه ناموفق بود.');}
   finally{launching=false;if(game?.phase==='collecting')renderCollection()}
  });
