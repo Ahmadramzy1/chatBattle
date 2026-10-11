@@ -192,7 +192,12 @@
 .stage-center .timer-block strong{font-size:36px}
 #coinBtn{width:100%;font:700 13px var(--latin);padding:13px 6px;border-color:#b18b39;background:linear-gradient(145deg,#564018,#282011);color:#ffe2a0;box-shadow:0 4px 22px #d7a74020}
 #coinBtn[hidden]{display:none}
-#coinDialog .confirm-card{text-align:center;max-width:480px;overflow:visible}
+#coinDialog{background:transparent;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);overflow:hidden}
+#coinDialog .coin-presentation{width:min(480px,100%);text-align:center;padding:24px;background:none;border:0;box-shadow:none}
+#coinResult{font-size:24px;font-weight:800;color:#ffe8a5;text-shadow:0 2px 18px #000;min-height:44px;margin:12px 0 20px;transition:opacity .3s,transform .3s}
+#coinDialog.tossing #coinResult,#coinDialog.tossing #coinClose{opacity:0;pointer-events:none;transform:translateY(12px)}
+#coinClose{transition:opacity .3s,transform .3s}
+
 #coinDialog .coin-scene{position:relative;display:grid;place-items:center;margin:12px 0 20px;height:300px;perspective:1000px;isolation:isolate}
 .coin-scene:after{content:"";position:absolute;bottom:12px;width:160px;height:22px;border-radius:50%;background:#0009;filter:blur(9px);z-index:-1}
 #coin3d{width:190px;height:190px;transform-style:preserve-3d;will-change:transform}
@@ -290,7 +295,7 @@
  </main>
  <footer class="site-footer"><span>CHAT BATTLE © 2026</span><span>MADE FOR THE CHAT. BUILT FOR THE HYPE.</span><a href="https://github.com/ahmadramzy1/instaQ" rel="noopener noreferrer" target="_blank">INSPIRED BY instaQ ↗</a></footer>
 </div>
-<div id="coinDialog" class="modal-backdrop hidden"><div class="confirm-card glass" role="dialog" aria-modal="true" aria-label="پرتاب سکه"><div class="coin-scene"><div id="coin3d" class="coin-3d"><span class="coin-edge" style="transform:translateZ(-10px)"></span><span class="coin-edge" style="transform:translateZ(-9px)"></span><span class="coin-edge" style="transform:translateZ(-8px)"></span><span class="coin-edge" style="transform:translateZ(-7px)"></span><span class="coin-edge" style="transform:translateZ(-6px)"></span><span class="coin-edge" style="transform:translateZ(-5px)"></span><span class="coin-edge" style="transform:translateZ(-4px)"></span><span class="coin-edge" style="transform:translateZ(-3px)"></span><span class="coin-edge" style="transform:translateZ(-2px)"></span><span class="coin-edge" style="transform:translateZ(-1px)"></span><span class="coin-edge" style="transform:translateZ(0px)"></span><span class="coin-edge" style="transform:translateZ(1px)"></span><span class="coin-edge" style="transform:translateZ(2px)"></span><span class="coin-edge" style="transform:translateZ(3px)"></span><span class="coin-edge" style="transform:translateZ(4px)"></span><span class="coin-edge" style="transform:translateZ(5px)"></span><span class="coin-edge" style="transform:translateZ(6px)"></span><span class="coin-edge" style="transform:translateZ(7px)"></span><span class="coin-edge" style="transform:translateZ(8px)"></span><span class="coin-edge" style="transform:translateZ(9px)"></span><span class="coin-edge" style="transform:translateZ(10px)"></span><div class="coin-face">1</div><div class="coin-face coin-back">2</div></div></div><p id="coinResult" aria-live="polite"></p><button id="coinClose" class="primary-btn">بازگشت به مسابقه</button></div></div>
+<div id="coinDialog" class="modal-backdrop hidden"><div class="coin-presentation" role="dialog" aria-modal="true" aria-label="پرتاب سکه"><div class="coin-scene"><div id="coin3d" class="coin-3d"><span class="coin-edge" style="transform:translateZ(-10px)"></span><span class="coin-edge" style="transform:translateZ(-9px)"></span><span class="coin-edge" style="transform:translateZ(-8px)"></span><span class="coin-edge" style="transform:translateZ(-7px)"></span><span class="coin-edge" style="transform:translateZ(-6px)"></span><span class="coin-edge" style="transform:translateZ(-5px)"></span><span class="coin-edge" style="transform:translateZ(-4px)"></span><span class="coin-edge" style="transform:translateZ(-3px)"></span><span class="coin-edge" style="transform:translateZ(-2px)"></span><span class="coin-edge" style="transform:translateZ(-1px)"></span><span class="coin-edge" style="transform:translateZ(0px)"></span><span class="coin-edge" style="transform:translateZ(1px)"></span><span class="coin-edge" style="transform:translateZ(2px)"></span><span class="coin-edge" style="transform:translateZ(3px)"></span><span class="coin-edge" style="transform:translateZ(4px)"></span><span class="coin-edge" style="transform:translateZ(5px)"></span><span class="coin-edge" style="transform:translateZ(6px)"></span><span class="coin-edge" style="transform:translateZ(7px)"></span><span class="coin-edge" style="transform:translateZ(8px)"></span><span class="coin-edge" style="transform:translateZ(9px)"></span><span class="coin-edge" style="transform:translateZ(10px)"></span><div class="coin-face">1</div><div class="coin-face coin-back">2</div></div></div><p id="coinResult" aria-live="polite"></p><button id="coinClose" class="primary-btn">بازگشت به مسابقه</button></div></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="modal-backdrop hidden" id="confirmDialog"><div class="confirm-card glass" role="dialog" aria-modal="true" aria-labelledby="dialogTitle"><span class="section-number">CONFIRM ACTION</span><h2 id="dialogTitle">مسابقه جدید؟</h2><p id="dialogBody">اطلاعات مسابقه فعلی پاک می‌شه.</p><div><button id="cancelConfirm" class="secondary-btn">انصراف</button><button id="confirmReset" class="primary-btn">بله، شروع مجدد</button></div></div></div>
 <script>
@@ -774,13 +779,13 @@
  function reset(){cancelCoin();const prior=game;window.ChatBattleCloudHost?.stopListening();if(prior?.phase==='collecting'&&prior.cloudSessionId)window.ChatBattleCloudHost?.closeSession(prior).catch(()=>{});cancelWinFX();window.ChatBattlePlayer?.destroyAll();disconnect();game=null;fallback=false;lastBattleKey='';idsSeen.clear();recentMessageKeys.clear();safeStorage.remove(STORE);$('confirmDialog').classList.add('hidden');render();window.scrollTo({top:0,behavior:'smooth'});}
  function showReset(){if(!game){toast('هنوز مسابقه‌ای ساخته نشده.');return}$('confirmDialog').classList.remove('hidden')}
  let coinPending=false,coinTimer=null,coinAnimation=null;
- function cancelCoin(){clearTimeout(coinTimer);coinAnimation?.cancel();coinAnimation=null;coinPending=false;$('coinDialog').classList.add('hidden');}
+ function cancelCoin(){clearTimeout(coinTimer);coinAnimation?.cancel();coinAnimation=null;coinPending=false;$('coinDialog').classList.add('hidden');$('coinDialog').classList.remove('tossing');}
  function undoWinner(){if(!game||coinPending)return;cancelWinFX();if(!Core.undo(game))return;window.ChatBattlePlayer?.destroyAll();lastBattleKey='';save();render();if(game.settings.mode==='kick')connectKick();toast('رأی‌گیری قبلی برگشت؛ برنده را دوباره انتخاب کن.');}
  function flipCoin(){
   if(!game||game.phase!=='battle'||coinPending||winPending)return;const m=Core.currentMatch(game);if(!m)return;
   coinPending=true;refreshBattleControls();qa('[data-advance]').forEach(b=>b.disabled=true);
   const side=crypto.getRandomValues(new Uint32Array(1))[0]%2+1;m.coinResult=side;save();
-  const coin=$('coin3d');$('coinDialog').classList.remove('hidden');$('coinResult').textContent='سکه در حال چرخش…';$('coinClose').disabled=true;
+  const coin=$('coin3d');$('coinDialog').classList.remove('hidden');$('coinDialog').classList.add('tossing');$('coinResult').textContent='سکه در حال چرخش…';$('coinClose').disabled=true;
   coinAnimation?.cancel();
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
   const landing=2160+(side===2?180:0);
@@ -788,7 +793,8 @@
    {transform:'rotateX(12deg) rotateY('+landing+'deg)',opacity:.35},
    {transform:'rotateX(12deg) rotateY('+landing+'deg)',opacity:1}
   ]:[
-   {transform:'translateY(28px) rotateX(18deg) rotateY(0deg) rotateZ(-12deg)',offset:0},
+   {transform:'translateY(75vh) rotateX(18deg) rotateY(0deg) rotateZ(-12deg)',opacity:0,offset:0},
+   {transform:'translateY(0) rotateX(28deg) rotateY(360deg) rotateZ(8deg)',opacity:1,offset:.18},
    {transform:'translateY(-40px) rotateX(34deg) rotateY(720deg) rotateZ(12deg)',offset:.3},
    {transform:'translateY(-24px) rotateX(-24deg) rotateY(1440deg) rotateZ(-8deg)',offset:.6},
    {transform:'translateY(8px) rotateX(20deg) rotateY('+(landing-180)+'deg) rotateZ(5deg)',offset:.86},
@@ -796,7 +802,7 @@
   ];
   coinAnimation=coin.animate(frames,{duration:3000,easing:'linear',fill:'forwards'});
   const animation=coinAnimation;
-  animation.finished.then(()=>{if(coinAnimation!==animation)return;coinPending=false;text('coinResult','نتیجه: ویدیوی '+side);$('coinClose').disabled=false;refreshBattleControls();}).catch(()=>{});
+  animation.finished.then(()=>{if(coinAnimation!==animation)return;coinPending=false;$('coinDialog').classList.remove('tossing');text('coinResult','نتیجه: ویدیوی '+side);$('coinClose').disabled=false;refreshBattleControls();}).catch(()=>{});
 
  }
  $('coinBtn').addEventListener('click',flipCoin);$('coinClose').addEventListener('click',cancelCoin);
