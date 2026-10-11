@@ -219,7 +219,7 @@
 @media(max-width:540px){#coin3d{width:190px;height:190px}}
 
 #coinDialog .coin-scene{height:min(440px,65vh);margin:0;perspective:none}
-#coinCanvas{display:block;width:min(440px,85vw);height:min(440px,85vw);max-height:65vh;object-fit:contain}
+#coinCanvas{will-change:transform;display:block;width:min(440px,85vw);height:min(440px,85vw);max-height:65vh;object-fit:contain}
 #coinDialog .coin-scene:after{bottom:25px}
 
 /* Battle actions live directly beneath VS, without a separate bottom panel. */
@@ -317,7 +317,7 @@
 <div id="coinDialog" class="modal-backdrop hidden"><div class="coin-presentation" role="dialog" aria-modal="true" aria-label="پرتاب سکه"><div class="coin-scene"><canvas id="coinCanvas" width="720" height="720" aria-label="سکهٔ سه‌بعدی با دو روی ۱ و ۲"></canvas></div><p id="coinResult" aria-live="polite"></p><button id="coinClose" class="primary-btn">بازگشت به مسابقه</button></div></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="modal-backdrop hidden" id="confirmDialog"><div class="confirm-card glass" role="dialog" aria-modal="true" aria-labelledby="dialogTitle"><span class="section-number">CONFIRM ACTION</span><h2 id="dialogTitle">مسابقه جدید؟</h2><p id="dialogBody">اطلاعات مسابقه فعلی پاک می‌شه.</p><div><button id="cancelConfirm" class="secondary-btn">انصراف</button><button id="confirmReset" class="primary-btn">بله، شروع مجدد</button></div></div></div>
-<script src="./coin-renderer.js?v=solid-gold-1"></script>
+<script src="./coin-renderer.js?v=viewport-rise-2"></script>
 <script>
 /* Chat Battle tournament engine — dependency-free, browser + Node. */
 (function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;root.ChatBattleCore=api;})(typeof window!=='undefined'?window:globalThis,function(){
