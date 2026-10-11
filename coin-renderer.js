@@ -1,0 +1,30 @@
+/* Real 3D gold coin: beveled solid mesh, raised numerals, separate outward-facing sides. */
+(()=>{
+ const canvas=document.getElementById('coinCanvas'),gl=canvas.getContext('webgl',{alpha:true,antialias:true});
+ if(!gl){window.ChatBattleCoin={play:()=>Promise.reject(new Error('WebGL unavailable')),cancel(){}};return;}
+ const vertex=`attribute vec3 p,n;uniform vec3 rotation;uniform float lift;varying vec3 N,P;void main(){vec3 c=cos(rotation),s=sin(rotation);mat3 rx=mat3(1.,0.,0.,0.,c.x,s.x,0.,-s.x,c.x),ry=mat3(c.y,0.,-s.y,0.,1.,0.,s.y,0.,c.y),rz=mat3(c.z,s.z,0.,-s.z,c.z,0.,0.,0.,1.);mat3 r=rz*rx*ry;P=r*p;N=r*n;float depth=5.-P.z;gl_Position=vec4(P.x*3.4,P.y*3.4+lift,depth*1.02-.202,depth);}`;
+ const fragment=`precision highp float;varying vec3 N,P;void main(){vec3 n=normalize(N),v=normalize(vec3(0.,0.,5.)-P);vec3 l=normalize(vec3(-3.,4.,5.)),l2=normalize(vec3(4.,1.,2.));float d=max(dot(n,l),0.),d2=max(dot(n,l2),0.);float spec=pow(max(dot(n,normalize(l+v)),0.),70.);float spec2=pow(max(dot(n,normalize(l2+v)),0.),100.);float band=pow(max(0.,1.-abs(dot(reflect(-v,n),normalize(vec3(-.7,.9,.4))))),18.);vec3 gold=vec3(1.,.68,.14);vec3 color=gold*(.28+.55*d+.22*d2)+vec3(1.,.91,.62)*(spec*.95+spec2*.65+band*.13);gl_FragColor=vec4(color,1.);}`;
+ function shader(type,src){const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(s));return s;}
+ const program=gl.createProgram();gl.attachShader(program,shader(gl.VERTEX_SHADER,vertex));gl.attachShader(program,shader(gl.FRAGMENT_SHADER,fragment));gl.linkProgram(program);gl.useProgram(program);
+ const positions=[],normals=[];
+ function tri(a,b,c){const u=b.map((x,i)=>x-a[i]),v=c.map((x,i)=>x-a[i]),n=[u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]],len=Math.hypot(...n);for(const pt of [a,b,c]){positions.push(...pt);normals.push(...n.map(x=>x/len));}}
+ function lathe(profile){for(let i=0;i<160;i++){const a=i*Math.PI/80,b=(i+1)*Math.PI/80;for(let j=0;j<profile.length-1;j++){const [r,z]=profile[j],[r2,z2]=profile[j+1],p=[r*Math.cos(a),r*Math.sin(a),z],q=[r*Math.cos(b),r*Math.sin(b),z],t=[r2*Math.cos(b),r2*Math.sin(b),z2],u=[r2*Math.cos(a),r2*Math.sin(a),z2];tri(p,q,t);tri(p,t,u);}}}
+ lathe([[0,-.145],[.93,-.145],[.985,-.125],[1,-.095],[1,.095],[.985,.125],[.93,.145],[0,.145]]);
+ for(const sign of [-1,1]){
+  lathe([[.82,sign*.145],[.83,sign*.161],[.85,sign*.168],[.87,sign*.161],[.88,sign*.145]]);
+ }
+ // Ear clipping preserves the concave outline of 2, instead of mirroring a flat image.
+ function extrude(poly,back){const points=poly.map(([x,y])=>[x*.9,y*.9]),cross=(a,b,c)=>(b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0]);if(points.reduce((s,a,i)=>{const b=points[(i+1)%points.length];return s+a[0]*b[1]-b[0]*a[1]},0)<0)points.reverse();
+ const xyz=(p,z)=>back?[-p[0],p[1],-z]:[p[0],p[1],z];let ids=points.map((_,i)=>i),guard=0;
+ while(ids.length>2&&guard++<200){let found=false;for(let i=0;i<ids.length;i++){const a=points[ids[(i+ids.length-1)%ids.length]],b=points[ids[i]],c=points[ids[(i+1)%ids.length]];if(cross(a,b,c)<=0)continue;if(ids.some(id=>{const p=points[id];return p!==a&&p!==b&&p!==c&&cross(a,b,p)>=0&&cross(b,c,p)>=0&&cross(c,a,p)>=0}))continue;tri(xyz(a,.195),xyz(b,.195),xyz(c,.195));ids.splice(i,1);found=true;break;}if(!found)break;}
+ for(let i=0;i<points.length;i++){const a=points[i],b=points[(i+1)%points.length];tri(xyz(a,.145),xyz(b,.145),xyz(b,.195));tri(xyz(a,.145),xyz(b,.195),xyz(a,.195));}}
+ extrude([[-.23,.31],[-.03,.5],[.13,.5],[.13,-.34],[.3,-.34],[.3,-.49],[-.29,-.49],[-.29,-.34],[-.08,-.34],[-.08,.27],[-.23,.17]],false);
+ extrude([[-.34,.27],[-.28,.43],[-.12,.52],[.13,.52],[.3,.4],[.35,.23],[.29,.06],[-.13,-.31],[.35,-.31],[.35,-.49],[-.35,-.49],[-.35,-.29],[.13,.15],[.16,.26],[.1,.34],[-.08,.34],[-.16,.27],[-.17,.17],[-.34,.17]],true);
+ for(const [name,data] of [['p',positions],['n',normals]]){const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(data),gl.STATIC_DRAW);const loc=gl.getAttribLocation(program,name);gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,3,gl.FLOAT,false,0,0);}
+ gl.enable(gl.DEPTH_TEST);gl.disable(gl.CULL_FACE);const rot=gl.getUniformLocation(program,'rotation'),lift=gl.getUniformLocation(program,'lift');let raf=0,resolvePending;
+ function draw(x,y,z,h){gl.viewport(0,0,canvas.width,canvas.height);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.uniform3f(rot,x,y,z);gl.uniform1f(lift,h);gl.drawArrays(gl.TRIANGLES,0,positions.length/3);}
+ window.ChatBattleCoin={cancel(){cancelAnimationFrame(raf);resolvePending?.();resolvePending=null;},play(side,reduced){this.cancel();return new Promise(resolve=>{resolvePending=resolve;const start=performance.now(),end=(side===2?Math.PI:0)+Math.PI*12;
+ function frame(now){const t=Math.min(1,(now-start)/3000),e=1-Math.pow(1-t,2);let h=t<.2?-7*Math.pow(1-t/.2,2):Math.sin((t-.2)/.8*Math.PI)*.65;draw(reduced?-.25:-.25+Math.sin(t*Math.PI)*.8,reduced?end:end*e,reduced?-.12:Math.sin(t*Math.PI*3)*.14-.12,reduced?0:h);if(t<1)raf=requestAnimationFrame(frame);else{resolvePending=null;resolve();}}
+ raf=requestAnimationFrame(frame);});}};
+ draw(-.25,.35,-.12,0);
+})();
