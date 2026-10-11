@@ -25,7 +25,10 @@
  gl.enable(gl.DEPTH_TEST);gl.disable(gl.CULL_FACE);const rot=gl.getUniformLocation(program,'rotation'),lift=gl.getUniformLocation(program,'lift');let raf=0,resolvePending;
  function draw(x,y,z,h){gl.viewport(0,0,canvas.width,canvas.height);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.uniform3f(rot,x,y,z);gl.uniform1f(lift,h);gl.drawArrays(gl.TRIANGLES,0,positions.length/3);}
  window.ChatBattleCoin={cancel(){cancelAnimationFrame(raf);canvas.style.transform='';resolvePending?.();resolvePending=null;},play(side,reduced){this.cancel();return new Promise(resolve=>{resolvePending=resolve;canvas.style.transform='';const startY=window.innerHeight-canvas.getBoundingClientRect().top+24;canvas.style.transform=reduced?'':'translateY('+startY+'px)';const start=performance.now(),end=(side===2?Math.PI:0)+Math.PI*12;
- function frame(now){const t=Math.min(1,(now-start)/3000),e=1-Math.pow(1-t,2);const rise=Math.min(1,t/.38),y=t<.38?startY*Math.pow(1-rise,3):-24*Math.sin((t-.38)/.62*Math.PI);canvas.style.transform=reduced?'':'translateY('+y+'px)';draw(reduced?-.25:-.25+Math.sin(t*Math.PI)*.8,reduced?end:end*e,reduced?-.12:Math.sin(t*Math.PI*3)*.14-.12,0);if(t<1)raf=requestAnimationFrame(frame);else{resolvePending=null;resolve();}}
+ function frame(now){const t=Math.min(1,(now-start)/3000),e=1-Math.pow(1-t,2);const rise=Math.min(1,t/.38),y=t<.38?startY*Math.pow(1-rise,3):-24*Math.sin((t-.38)/.62*Math.PI);canvas.style.transform=reduced?'':'translateY('+y+'px)';draw(reduced?-.25:-.25+Math.sin(t*Math.PI)*.8,reduced?end:end*e,reduced?-.12:Math.sin(t*Math.PI*3)*.14-.12,0);if(t<1)raf=requestAnimationFrame(frame);else{resolvePending=null;resolve();
+ // Keep the landed face readable while it gently rocks and floats.
+ if(!reduced){const landedAt=now;function hover(time){const seconds=(time-landedAt)/1000,blend=Math.min(1,seconds/1.2);draw(-.25+Math.sin(seconds*1.15)*.065*blend,end+Math.sin(seconds*.85)*.09*blend,-.12+Math.sin(seconds*.7)*.035*blend,0);canvas.style.transform='translateY('+(-Math.sin(seconds*1.3)*7*blend)+'px)';raf=requestAnimationFrame(hover);}raf=requestAnimationFrame(hover);}
+ }}
  raf=requestAnimationFrame(frame);});}};
  draw(-.25,.35,-.12,0);
 })();
