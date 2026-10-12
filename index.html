@@ -346,6 +346,7 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="modal-backdrop hidden" id="confirmDialog"><div class="confirm-card glass" role="dialog" aria-modal="true" aria-labelledby="dialogTitle"><span class="section-number">CONFIRM ACTION</span><h2 id="dialogTitle">مسابقه جدید؟</h2><p id="dialogBody">اطلاعات مسابقه فعلی پاک می‌شه.</p><div><button id="cancelConfirm" class="secondary-btn">انصراف</button><button id="confirmReset" class="primary-btn">بله، شروع مجدد</button></div></div></div>
 <script src="./game-store.js?v=delta-undo-1"></script>
+<script src="./thumbnails.js?v=public-previews-1"></script>
 <script src="./coin-renderer.js?v=lazy-init-5"></script>
 <script>
 /* Chat Battle tournament engine — dependency-free, browser + Node. */
@@ -555,7 +556,7 @@
  function platformName(v){return v.platform==='youtube'?'YOUTUBE':v.platform==='tiktok'?'TIKTOK':'INSTAGRAM'}
  function thumbNode(v,klass){const holder=document.createElement('div');holder.className=klass;
   if(v.thumbnail){const img=document.createElement('img');img.loading='lazy';img.decoding='async';img.referrerPolicy='no-referrer';img.src=v.thumbnail;img.alt='تصویر بندانگشتی '+platformName(v);img.onerror=()=>{img.remove();const s=document.createElement('span');s.textContent=iconFor(v);s.className='placeholder-symbol';holder.append(s)};holder.append(img)}
-  else {const symbol=document.createElement('span');symbol.textContent=iconFor(v);symbol.className='placeholder-symbol';holder.append(symbol)}return holder;}
+  else {const symbol=document.createElement('span');symbol.textContent=iconFor(v);symbol.className='placeholder-symbol';holder.append(symbol);window.ChatBattleThumbnails?.attach(v,holder)}return holder;}
  function render(){renderHeader();if(!game){phasePage(null);setConnection('disconnected','آماده');return}phasePage(game.phase);
   if(game.settings.mode==='demo'){disconnect();setConnection('connected','DEMO MODE')}else if(!ws){setConnection('disconnected','آفلاین')}
   if(game.phase==='collecting')renderCollection();if(game.phase==='battle'){renderBattleMatch();refreshBattleControls();}if(game.phase==='finished')renderResults();
@@ -654,12 +655,14 @@
  function getEntry(id){return game.entries.find(e=>e.id===id)||null}
  function formatRound(r){const total=game.rounds.length;return r===total-1?'GRAND FINAL':r===total-2?'SEMI FINALS':r===total-3?'QUARTER FINALS':'ROUND '+pad(r+1)}
  function loadBattleSlot(side,entry){window.ChatBattlePlayer?.destroy(side);
+  window.ChatBattleThumbnails?.release($('preview-'+side));
   $('card-'+side).classList.toggle('empty-contender',!entry);
   qa('#card-'+side+' .video-actions').forEach(el=>el.hidden=!entry);
   if(!entry){$('player-'+side).replaceChildren();$('frame-'+side).classList.add('is-open');const label=document.createElement('p');label.textContent='بدون حریف — ویدیوی مقابل با تأیید دستی صعود می‌کند';label.style.cssText='padding:32px;text-align:center';$('player-'+side).append(label);text('sender-'+side,'');text('platform-'+side,'بدون حریف');return;}
   const v=entry.video;
   text('platform-'+side,platformName(v));$('original-'+side).href=v.url;
   const cover=$('cover-'+side),img=$('preview-'+side);img.hidden=!v.thumbnail;if(v.thumbnail)img.src=v.thumbnail;else img.removeAttribute('src');
+  if(!v.thumbnail)window.ChatBattleThumbnails?.bind(v,img);
   $('player-'+side).replaceChildren();$('frame-'+side).classList.remove('is-open');
   q('[data-play="'+side+'"]').textContent='▶ نمایش / پخش';
   text('sender-'+side,game.settings.showSenders?'ارسال‌کننده: \u2066@'+entry.sender+'\u2069':'');
