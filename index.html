@@ -254,6 +254,7 @@
 .bracket-vs{position:absolute;top:53px;left:50%;transform:translate(-50%,-50%);font:700 8px var(--latin);color:#8090a3}
 @media(max-width:540px){.bracket-section{padding:16px 12px}.round-col{width:210px}.bracket{gap:14px}.bracket-thumb{height:44px}}
 
+#coinCanvas[hidden]{display:none}#coinResult.coin-fallback{position:static;clip-path:none;width:auto;height:auto;margin:20px 0;font:700 110px/1.4 var(--latin);color:#f4cf71;white-space:normal;text-shadow:0 2px 20px #000}
 </style>
 </head>
 <body>
@@ -344,6 +345,7 @@
 <div id="coinDialog" class="modal-backdrop hidden"><div class="coin-presentation" role="dialog" aria-modal="true" aria-label="پرتاب سکه"><div class="coin-scene"><canvas id="coinCanvas" width="720" height="720" aria-label="سکهٔ سه‌بعدی با دو روی ۱ و ۲"></canvas></div><p id="coinResult" aria-live="polite"></p><button id="coinClose" class="primary-btn">بازگشت به مسابقه</button></div></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="modal-backdrop hidden" id="confirmDialog"><div class="confirm-card glass" role="dialog" aria-modal="true" aria-labelledby="dialogTitle"><span class="section-number">CONFIRM ACTION</span><h2 id="dialogTitle">مسابقه جدید؟</h2><p id="dialogBody">اطلاعات مسابقه فعلی پاک می‌شه.</p><div><button id="cancelConfirm" class="secondary-btn">انصراف</button><button id="confirmReset" class="primary-btn">بله، شروع مجدد</button></div></div></div>
+<script src="./game-store.js?v=delta-undo-1"></script>
 <script src="./coin-renderer.js?v=lazy-init-5"></script>
 <script>
 /* Chat Battle tournament engine — dependency-free, browser + Node. */
@@ -459,8 +461,12 @@
   const m=currentMatch(state),solo=m&&!!m.left!==!!m.right;if(state.phase!=='battle'||!m||!(state.matchStatus==='closed'||solo&&state.matchStatus==='preview')||![0,1].includes(side))return {ok:false,reason:'not-ready'};
   const winner=side===0?m.left:m.right;const loser=side===0?m.right:m.left;
   if(!winner)return {ok:false,reason:'invalid-side'};
-  const {history,...snapshot}=state;
-  (state.history??=[]).push(JSON.parse(JSON.stringify(snapshot)));
+  const nextRound=state.rounds[state.current.round+1],nextIndex=Math.floor(state.current.index/2),nextSide=state.current.index%2===0?'left':'right';
+  const eliminated=state.entries.find(e=>e.id===loser);
+  (state.history??=[]).push({undoVersion:2,current:{...state.current},match:JSON.parse(JSON.stringify(m)),
+   loser:eliminated?{id:loser,eliminatedRound:eliminated.eliminatedRound,lastVotes:eliminated.lastVotes,lastShare:eliminated.lastShare}:null,
+   parent:nextRound?{round:state.current.round+1,index:nextIndex,match:JSON.parse(JSON.stringify(nextRound[nextIndex]))}:null,
+   phase:state.phase,matchStatus:state.matchStatus,votingEndsAt:state.votingEndsAt,completedAt:state.completedAt});
   m.winner=winner;m.status=solo?'bye':'complete';m.endedAt=now;
   const l=state.entries.find(e=>e.id===loser);if(l){l.eliminatedRound=state.current.round;l.lastVotes=m.votes[1-side];l.lastShare=m.votes[0]+m.votes[1]?m.votes[1-side]/(m.votes[0]+m.votes[1]):0;}
   propagate(state,state.current.round,state.current.index,winner);
@@ -471,7 +477,27 @@
  function undo(state){
   if(!state.history?.length)return false;
   const snapshot=state.history.pop(),history=state.history,revealed=state.revealed||{};
-  Object.assign(state,snapshot,{history,revealed});return true;
+  if(snapshot.undoVersion===2){
+   const abandoned=currentMatch(state);
+   if(abandoned&&(state.current.round!==snapshot.current.round||state.current.index!==snapshot.current.index)){
+    Object.assign(abandoned,{winner:null,status:'waiting',votes:[0,0],voters:{},endedAt:null});delete abandoned.coinResult;
+   }
+   const {current,match,loser,parent,phase,matchStatus,votingEndsAt,completedAt}=snapshot;
+   state.rounds[current.round][current.index]=match;
+   if(parent)state.rounds[parent.round][parent.index]=parent.match;
+   if(loser){const entry=state.entries.find(e=>e.id===loser.id);if(entry)Object.assign(entry,loser);}
+   Object.assign(state,{current,phase,matchStatus,votingEndsAt,completedAt,history,revealed});
+  }else Object.assign(state,snapshot,{history,revealed});return true;
+ }
+ function compactHistory(state){
+  let changed=false;
+  state.history=(state.history||[]).map(h=>{
+   if(h.undoVersion===2||!h.current||!h.rounds)return h;
+   const {round,index}=h.current,match=h.rounds[round][index],winner=state.rounds[round][index].winner;
+   const loser=winner===match.left?match.right:match.left,entry=h.entries.find(e=>e.id===loser),parent=h.rounds[round+1]?.[Math.floor(index/2)];changed=true;
+   return {undoVersion:2,current:h.current,match,loser:entry?{id:entry.id,eliminatedRound:entry.eliminatedRound,lastVotes:entry.lastVotes,lastShare:entry.lastShare}:null,
+    parent:parent?{round:round+1,index:Math.floor(index/2),match:parent}:null,phase:h.phase,matchStatus:h.matchStatus,votingEndsAt:h.votingEndsAt,completedAt:h.completedAt};
+  });return changed;
  }
  function rankings(state){if(state.phase!=='finished')return [];
   const winner=state.rounds.at(-1)?.[0]?.winner;
@@ -484,7 +510,7 @@
   });
  }
  function matchProgress(state){const total=state.rounds.flat().filter(m=>m.status!=='empty').length;const done=state.rounds.flat().filter(m=>m.winner).length;return {done,total};}
- return {CAPACITIES,defaults,newGame,parseVideo,linksIn,submitLink,startTournament,currentMatch,startVote,endVote,maybeExpire,vote,advance,undo,rankings,matchProgress,seeds};
+ return {CAPACITIES,defaults,newGame,parseVideo,linksIn,submitLink,startTournament,currentMatch,startVote,endVote,maybeExpire,vote,advance,undo,compactHistory,rankings,matchProgress,seeds};
 });
 
 </script>
@@ -501,13 +527,17 @@
  let toastTimer=0, lastBattleKey='', lastPage='', visualCounts=[0,0], animIds=[0,0], demoVoterCounter=1, fallback=false;
  const idsSeen=new Set(), recentMessageKeys=new Map();
  const shortReason={closed:'پذیرش لینک بسته شده',full:'ظرفیت مسابقه تکمیل شده',username:'نام کاربری معتبر نیست',invalid:'لینک معتبر پیدا نشد',duplicate:'این ویدیو قبلاً ارسال شده', 'per-user':'سقف لینک‌های این کاربر تکمیل شده'};
- const safeStorage={get(k){try{return localStorage.getItem(k)}catch{return null}},set(k,v){try{localStorage.setItem(k,v)}catch{}},remove(k){try{localStorage.removeItem(k)}catch{}}};
+ const safeStorage={get(k){try{return localStorage.getItem(k)}catch{return null}},set(k,v){try{localStorage.setItem(k,v);return true}catch{return false}},remove(k){try{localStorage.removeItem(k)}catch{}}};
  const text=(id,val)=>{const el=$(id),next=String(val);if(el.textContent!==next)el.textContent=next};
  const pad=n=>String(n).padStart(2,'0');
  const number=n=>Number(n).toLocaleString('en-US');
  function toast(s){const el=$('toast');el.textContent=s;el.classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('visible'),3000)}
- let votePaintFrame=0,voteSaveTimer=0,pendingVoteSide;
- function save(){clearTimeout(voteSaveTimer);voteSaveTimer=0;if(game)safeStorage.set(STORE,JSON.stringify(game));}
+ let votePaintFrame=0,voteSaveTimer=0,pendingVoteSide,restoring=true,storageWarning=false;
+ function save(){clearTimeout(voteSaveTimer);voteSaveTimer=0;if(!game)return;game.savedAt=Date.now();
+  const stored=safeStorage.set(STORE,JSON.stringify(game));
+  const warn=()=>{if(!stored&&!storageWarning){storageWarning=true;toast('ذخیرهٔ مسابقه ناموفق بود؛ قبل از بستن صفحه، فضای ذخیرهٔ مرورگر را بررسی کن.');}};
+  if(window.ChatBattleStore)window.ChatBattleStore.write(game).catch(warn);else warn();
+ }
  function queueVoteUpdate(side){
   pendingVoteSide=side;
   if(!votePaintFrame)votePaintFrame=requestAnimationFrame(()=>{votePaintFrame=0;refreshVotes(pendingVoteSide)});
@@ -595,7 +625,7 @@
  }
  function decodeData(x){if(typeof x==='string'){try{return JSON.parse(x)}catch{return null}}return x||null}
  function scheduleRetry(room,generation){if(generation!==sockGeneration||manuallyDisconnected)return;const ms=Math.min(12000,800*2**Math.min(retryAttempt++,4));setConnection('disconnected','اتصال مجدد...');clearTimeout(retryTimer);retryTimer=setTimeout(()=>openSocket(room,generation),ms)}
- async function submitSettings(e){e.preventDefault();const form=$('setupForm');const radios=n=>q('input[name="'+n+'"]:checked',form)?.value;
+ async function submitSettings(e){e.preventDefault();if(restoring)return;const form=$('setupForm');const radios=n=>q('input[name="'+n+'"]:checked',form)?.value;
   const channel=$('channelInput').value.trim().replace(/^https?:\/\/(www\.)?kick\.com\//i,'').replace(/[@/?#].*$/,'').toLowerCase();
   const mode=radios('mode');if(mode==='kick'&&!channel){$('channelInput').focus();toast('نام کانال Kick را وارد کنید.');return}
   const settings={topic:$('topicInput').value,channel,mode,capacity:Number(radios('capacity')),perUser:Number($('perUserInput').value),voteSeconds:Number($('secondsInput').value),showVoters:$('showVotersInput').checked,showSenders:$('showSendersInput').checked,allowChange:$('allowChangeInput').checked,pusherKey:$('pusherInput').value.trim()};
@@ -851,7 +881,7 @@
   const result={app:'Chat Battle',topic:game.settings.topic,finishedAt:new Date(game.completedAt).toISOString(),capacity:game.settings.capacity,rankingRule:'Champion, elimination round, final vote share, votes',rankings:Core.rankings(game).map((e,i)=>({position:i+1,platform:e.video.platform,url:e.video.url,sender:e.sender,eliminatedRound:e.eliminatedRound,finalVoteShare:e.lastShare,finalVotes:e.lastVotes}))};
   const blob=new Blob([JSON.stringify(result,null,2)],{type:'application/json;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='chat-battle-results.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);
  }
- function reset(){cancelCoin();const prior=game;window.ChatBattleCloudHost?.stopListening();if(prior?.phase==='collecting'&&prior.cloudSessionId)window.ChatBattleCloudHost?.closeSession(prior).catch(()=>{});cancelWinFX();window.ChatBattlePlayer?.destroyAll();disconnect();game=null;fallback=false;lastBattleKey='';idsSeen.clear();recentMessageKeys.clear();safeStorage.remove(STORE);$('confirmDialog').classList.add('hidden');render();window.scrollTo({top:0,behavior:'smooth'});}
+ function reset(){cancelCoin();const prior=game;window.ChatBattleCloudHost?.stopListening();if(prior?.phase==='collecting'&&prior.cloudSessionId)window.ChatBattleCloudHost?.closeSession(prior).catch(()=>{});cancelWinFX();window.ChatBattlePlayer?.destroyAll();disconnect();game=null;fallback=false;lastBattleKey='';idsSeen.clear();recentMessageKeys.clear();safeStorage.remove(STORE);window.ChatBattleStore?.clear().catch(()=>toast('پاک کردن ذخیرهٔ مسابقه ناموفق بود.'));$('confirmDialog').classList.add('hidden');render();window.scrollTo({top:0,behavior:'smooth'});}
  function showReset(){if(!game){toast('هنوز مسابقه‌ای ساخته نشده.');return}$('confirmDialog').classList.remove('hidden')}
  let coinPending=false,coinTimer=null,coinAnimation=null;
  function cancelCoin(){clearTimeout(coinTimer);coinAnimation?.cancel();coinAnimation=null;coinPending=false;$('coinDialog').classList.add('hidden');$('coinDialog').classList.remove('tossing');}
@@ -862,10 +892,14 @@
   const side=crypto.getRandomValues(new Uint32Array(1))[0]%2+1;m.coinResult=side;save();
   $('coinDialog').classList.remove('hidden');$('coinDialog').classList.add('tossing');$('coinResult').textContent='سکه در حال چرخش…';$('coinClose').disabled=true;
   coinAnimation?.cancel();
-  const animationHandle={cancel:()=>window.ChatBattleCoin.cancel()};coinAnimation=animationHandle;
-  animationHandle.finished=window.ChatBattleCoin.play(side,matchMedia('(prefers-reduced-motion: reduce)').matches);
-  const animation=coinAnimation;
-  animation.finished.then(()=>{if(coinAnimation!==animation)return;coinPending=false;$('coinDialog').classList.remove('tossing');text('coinResult','نتیجه: ویدیوی '+side);$('coinClose').disabled=false;refreshBattleControls();}).catch(()=>{});
+  const animationHandle={cancel:()=>window.ChatBattleCoin?.cancel()};coinAnimation=animationHandle;
+  const animation=animationHandle;
+  const finish=(failed=false)=>{if(coinAnimation!==animation||animation.settled)return;animation.settled=true;clearTimeout(coinTimer);coinPending=false;$('coinDialog').classList.remove('tossing');if(failed){$('coinCanvas').hidden=true;$('coinResult').classList.add('coin-fallback');}text('coinResult',failed?String(side):'نتیجه: ویدیوی '+side);$('coinClose').disabled=false;refreshBattleControls();};
+  const fallback=()=>{if(coinAnimation!==animation||animation.settled)return;try{animation.cancel();}catch{}finish(true);};
+  $('coinCanvas').hidden=false;$('coinResult').classList.remove('coin-fallback');
+  coinTimer=setTimeout(fallback,7000);
+  animationHandle.finished=Promise.resolve().then(()=>window.ChatBattleCoin.play(side,matchMedia('(prefers-reduced-motion: reduce)').matches));
+  animationHandle.finished.then(()=>finish()).catch(fallback);
 
  }
  $('coinBtn').addEventListener('click',flipCoin);$('coinClose').addEventListener('click',cancelCoin);
@@ -901,7 +935,14 @@
  $('confirmDialog').addEventListener('click',e=>{if(e.target===$('confirmDialog'))$('confirmDialog').classList.add('hidden')});
  window.addEventListener('keydown',e=>{if(e.key==='Escape')$('confirmDialog').classList.add('hidden')});
  window.addEventListener('beforeunload',()=>{flushVoteSave();if(ws)try{ws.close()}catch{}});
- game=load();if(game&&game.phase==='battle'&&Core.maybeExpire(game))save();render();if(game&&game.settings.mode==='kick'&&game.phase!=='finished')connectKick();
+ async function restoreGame(){
+  game=load();
+  try{const disk=await window.ChatBattleStore?.read();if(disk?.version===1&&Array.isArray(disk.entries)&&['collecting','battle','finished'].includes(disk.phase)&&(!game||(disk.savedAt||0)>(game.savedAt||0)))game=disk;}catch{}
+  restoring=false;const migrated=game&&Core.compactHistory(game),expired=game&&game.phase==='battle'&&Core.maybeExpire(game);if(migrated||expired)save();render();
+  if(game?.phase==='collecting')window.ChatBattleCloudHost?.resume(game);
+  if(game&&game.settings.mode==='kick'&&game.phase!=='finished')connectKick();
+ }
+ restoreGame();
  setInterval(tick,180);
 
 // Public bridge between the local tournament engine and Firestore host adapter.
@@ -972,7 +1013,12 @@ function mount(side,video){
    return;
  }
  if(video.platform==='tiktok'){
-  if(!/^[0-9]{12,25}$/.test(video.id)){notice(el,'این لینک کوتاه TikTok شناسه پخش قابل استفاده ندارد.',video);return}
+  if(!/^[0-9]{12,25}$/.test(video.id)){
+   el.innerHTML='<div class="cb-message"><strong>در حال باز کردن لینک کوتاه TikTok…</strong></div>';
+   import('./media-links.js?v=tiktok-short-1').then(({resolveTikTokLink})=>resolveTikTokLink(video.url,{signal:ctrl.signal})).then(url=>{
+    if(!current())return;const id=new URL(url).pathname.match(/\/video\/(\d{12,25})/)?.[1];if(!id)throw Error('شناسه ویدیو پیدا نشد.');mount(side,{...video,id,url});
+   }).catch(error=>{if(current())notice(el,error.message||'باز کردن لینک TikTok ناموفق بود.',video)});return;
+  }
   const wrapper=document.createElement('div');wrapper.className='cb-fit portrait';el.append(wrapper);
   frame(wrapper,'https://www.tiktok.com/player/v1/'+encodeURIComponent(video.id)+'?autoplay=1&controls=1&description=0&music_info=0','TikTok video');return;
  }
@@ -1048,9 +1094,10 @@ function mount(side,video){
   v.onloadedmetadata=()=>done(v.videoWidth>0);v.onerror=()=>done(false);v.src=src;
  })}
 
- const failedSources=new Set();
+ const failedSources=new Set();let recoveringSources=0;
  function retryDirect(src){
   if(!current())return;if(src)failedSources.add(src);clean();clean=()=>{};
+  if(src&&++recoveringSources<4){attemptDirect();return;}
   igEmbed();
  }
  async function attemptDirect(){
