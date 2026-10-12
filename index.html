@@ -182,7 +182,7 @@
  border-radius:9px;font-size:11px;line-height:1.7;
 }
 
-.voter-frame{border:1px solid #485344;border-radius:12px;padding:12px;max-height:130px;overflow:auto;display:flex;flex-wrap:wrap;gap:7px;direction:ltr;margin-bottom:12px}.voter-frame[hidden]{display:none}.voter-frame span{background:#263328;border-radius:20px;padding:3px 9px;font-size:12px}.sender-label{direction:rtl;color:var(--lime)}.revealed-preview{width:100%;height:100%;display:grid;place-items:center}.revealed-preview img{width:100%;height:100%;object-fit:contain}.control-buttons{flex-wrap:wrap}.coin-scene{perspective:900px;height:240px;display:grid;place-items:center}.coin-3d{position:relative;width:170px;height:170px;transform-style:preserve-3d}.coin-edge{position:absolute;inset:0;border-radius:50%;background:repeating-conic-gradient(#d4a134 0deg 4deg,#755015 4deg 6deg)}.coin-face{position:absolute;inset:0;border-radius:50%;backface-visibility:hidden;background:radial-gradient(circle at 30% 25%,#fff3ae,#d4a134 65%,#755015);border:10px ridge #d7b157;display:grid;place-items:center;font:700 95px var(--latin);color:#654711;text-shadow:1px 2px #ffe8a5;box-shadow:0 0 25px #c99b4244;transform:translateZ(6px)}.coin-back{transform:rotateY(180deg) translateZ(6px)}
+.voter-frame{border:1px solid #485344;border-radius:12px;padding:12px;max-height:130px;overflow:auto;display:flex;flex-wrap:wrap;gap:7px;direction:ltr;margin-bottom:12px}.voter-frame[hidden]{display:none}.voter-frame span{background:#263328;border-radius:20px;padding:3px 9px;font-size:12px}.sender-label{direction:rtl;color:var(--lime)}.revealed-preview{width:100%;height:100%;display:grid;place-items:center}.revealed-preview img{width:100%;height:100%;object-fit:contain}.control-buttons{flex-wrap:wrap}.coin-scene{perspective:900px;height:240px;display:grid;place-items:center}
 
 /* Central vote clock and three-second dimensional coin. */
 .stage{grid-template-columns:minmax(0,1fr) 156px minmax(0,1fr);gap:12px}
@@ -200,23 +200,23 @@
 
 #coinDialog .coin-scene{position:relative;display:grid;place-items:center;margin:12px 0 20px;height:300px;perspective:1000px;isolation:isolate}
 .coin-scene:after{content:"";position:absolute;bottom:12px;width:160px;height:22px;border-radius:50%;background:#0009;filter:blur(9px);z-index:-1}
-#coin3d{width:190px;height:190px;transform-style:preserve-3d;will-change:transform}
-.coin-edge{background:repeating-conic-gradient(#e7bb56 0deg 3deg,#8c591c 3deg 5deg);border:1px solid #b98227}
-.coin-face{transform:translateZ(11px);border:9px solid #dfb24a;background:radial-gradient(ellipse at 28% 18%,#fff5b7 0%,#edc55b 38%,#bd7e20 78%,#ffdc79 100%);box-shadow:inset 0 0 0 3px #80521c,inset 0 0 0 6px #ffe4a0,inset 0 0 24px #88500080;font-size:108px;text-shadow:0 2px #fff3ba,0 -2px #6b420c;color:#774b12}
-.coin-face:after{content:"CHAT BATTLE";position:absolute;bottom:20px;font:700 9px var(--latin);letter-spacing:2px;text-shadow:0 1px #ffeeb3}
-.coin-back{transform:rotateY(180deg) translateZ(11px)}
+
+
+
+
+
 @media(max-width:800px) and (min-width:541px){.stage{grid-template-columns:minmax(0,1fr) 112px minmax(0,1fr);gap:6px}.stage-center .timer-block strong{font-size:29px}#coinBtn{font-size:11px}}
 @media(max-width:540px){.stage-center{min-height:0;height:auto;flex-direction:column;width:100%;gap:12px;padding:14px 0}.stage-center .vertical-line{display:none}.stage-center .timer-block,#coinBtn{width:170px}.stage-center .versus-medal{display:none}}
 
 
 /* Machined coin faces and a stacked, reeded metal rim keep real depth during rotation. */
-#coin3d{width:220px;height:220px}
-#coinDialog .coin-face{border:0;background:none;box-shadow:none;overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden}
-#coinDialog .coin-face:after{content:none}
-.coin-face svg{display:block;width:100%;height:100%}
-#coinDialog .coin-edge{background:repeating-conic-gradient(from 1deg,#70501f 0deg 1deg,#f6d990 1deg 2.3deg,#b18336 2.3deg 3.75deg);border:1px solid #bd9547;box-shadow:inset 0 0 2px #fff2bb}
+
+
+
+
+
 #coinDialog .coin-scene:after{width:190px;background:#0008;filter:blur(12px)}
-@media(max-width:540px){#coin3d{width:190px;height:190px}}
+@media(max-width:540px){}
 
 #coinDialog .coin-scene{height:min(440px,65vh);margin:0;perspective:none}
 #coinCanvas{will-change:transform;display:block;width:min(440px,85vw);height:min(440px,85vw);max-height:65vh;object-fit:contain}
@@ -344,7 +344,7 @@
 <div id="coinDialog" class="modal-backdrop hidden"><div class="coin-presentation" role="dialog" aria-modal="true" aria-label="پرتاب سکه"><div class="coin-scene"><canvas id="coinCanvas" width="720" height="720" aria-label="سکهٔ سه‌بعدی با دو روی ۱ و ۲"></canvas></div><p id="coinResult" aria-live="polite"></p><button id="coinClose" class="primary-btn">بازگشت به مسابقه</button></div></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="modal-backdrop hidden" id="confirmDialog"><div class="confirm-card glass" role="dialog" aria-modal="true" aria-labelledby="dialogTitle"><span class="section-number">CONFIRM ACTION</span><h2 id="dialogTitle">مسابقه جدید؟</h2><p id="dialogBody">اطلاعات مسابقه فعلی پاک می‌شه.</p><div><button id="cancelConfirm" class="secondary-btn">انصراف</button><button id="confirmReset" class="primary-btn">بله، شروع مجدد</button></div></div></div>
-<script src="./coin-renderer.js?v=smooth-hover-4"></script>
+<script src="./coin-renderer.js?v=lazy-init-5"></script>
 <script>
 /* Chat Battle tournament engine — dependency-free, browser + Node. */
 (function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;root.ChatBattleCore=api;})(typeof window!=='undefined'?window:globalThis,function(){
@@ -502,11 +502,20 @@
  const idsSeen=new Set(), recentMessageKeys=new Map();
  const shortReason={closed:'پذیرش لینک بسته شده',full:'ظرفیت مسابقه تکمیل شده',username:'نام کاربری معتبر نیست',invalid:'لینک معتبر پیدا نشد',duplicate:'این ویدیو قبلاً ارسال شده', 'per-user':'سقف لینک‌های این کاربر تکمیل شده'};
  const safeStorage={get(k){try{return localStorage.getItem(k)}catch{return null}},set(k,v){try{localStorage.setItem(k,v)}catch{}},remove(k){try{localStorage.removeItem(k)}catch{}}};
- const text=(id,val)=>{$(id).textContent=String(val)};
+ const text=(id,val)=>{const el=$(id),next=String(val);if(el.textContent!==next)el.textContent=next};
  const pad=n=>String(n).padStart(2,'0');
  const number=n=>Number(n).toLocaleString('en-US');
  function toast(s){const el=$('toast');el.textContent=s;el.classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('visible'),3000)}
- function save(){if(game)safeStorage.set(STORE,JSON.stringify(game));}
+ let votePaintFrame=0,voteSaveTimer=0,pendingVoteSide;
+ function save(){clearTimeout(voteSaveTimer);voteSaveTimer=0;if(game)safeStorage.set(STORE,JSON.stringify(game));}
+ function queueVoteUpdate(side){
+  pendingVoteSide=side;
+  if(!votePaintFrame)votePaintFrame=requestAnimationFrame(()=>{votePaintFrame=0;refreshVotes(pendingVoteSide)});
+  if(!voteSaveTimer)voteSaveTimer=setTimeout(save,100);
+ }
+ function flushVoteSave(){if(voteSaveTimer)save();}
+ window.addEventListener('pagehide',flushVoteSave);
+ document.addEventListener('visibilitychange',()=>{if(document.hidden)flushVoteSave();});
  function load(){try{const g=JSON.parse(safeStorage.get(STORE));if(g?.version===1&&g?.settings&&['collecting','battle','finished'].includes(g.phase)&&Array.isArray(g.entries))return g;}catch{}return null;}
  function phasePage(phase){const lookup={collecting:'collecting',battle:'battle',finished:'results'};const target=lookup[phase]||'setup';qa('.page').forEach(e=>e.classList.toggle('active',e.id==='page-'+target));if(lastPage!==target){lastPage=target;window.scrollTo(0,0);requestAnimationFrame(()=>window.scrollTo(0,0));}}
  function setConnection(mode,label){const el=$('connectionStatus');el.className='connection-indicator '+mode;el.querySelector('span').textContent=label;if(game&&game.phase==='collecting'){const detail=$('connectionDetail');if(detail)detail.textContent=(mode==='connected'?'● ':'○ ')+label;}}
@@ -515,7 +524,7 @@
  function iconFor(v){return v.platform==='youtube'?'▶':v.platform==='tiktok'?'♪':'◎'}
  function platformName(v){return v.platform==='youtube'?'YOUTUBE':v.platform==='tiktok'?'TIKTOK':'INSTAGRAM'}
  function thumbNode(v,klass){const holder=document.createElement('div');holder.className=klass;
-  if(v.thumbnail){const img=document.createElement('img');img.loading='lazy';img.referrerPolicy='no-referrer';img.src=v.thumbnail;img.alt='تصویر بندانگشتی '+platformName(v);img.onerror=()=>{img.remove();const s=document.createElement('span');s.textContent=iconFor(v);s.className='placeholder-symbol';holder.append(s)};holder.append(img)}
+  if(v.thumbnail){const img=document.createElement('img');img.loading='lazy';img.decoding='async';img.referrerPolicy='no-referrer';img.src=v.thumbnail;img.alt='تصویر بندانگشتی '+platformName(v);img.onerror=()=>{img.remove();const s=document.createElement('span');s.textContent=iconFor(v);s.className='placeholder-symbol';holder.append(s)};holder.append(img)}
   else {const symbol=document.createElement('span');symbol.textContent=iconFor(v);symbol.className='placeholder-symbol';holder.append(symbol)}return holder;}
  function render(){renderHeader();if(!game){phasePage(null);setConnection('disconnected','آماده');return}phasePage(game.phase);
   if(game.settings.mode==='demo'){disconnect();setConnection('connected','DEMO MODE')}else if(!ws){setConnection('disconnected','آفلاین')}
@@ -542,7 +551,7 @@
   if(game.phase==='battle'&&(content==='1'||content==='2')){
    if(game.settings.mode==='kick'&&!kickId)return;
    const voterKey=game.settings.mode==='kick'?'kick:'+kickId:String(username);
-   const result=Core.vote(game,content,voterKey);if(result.ok){const m=Core.currentMatch(game);(m.voterNames??={})[voterKey.toLowerCase()]=username;}if(result.ok){save();refreshVotes(result.side)}
+   const result=Core.vote(game,content,voterKey);if(result.ok){const m=Core.currentMatch(game);(m.voterNames??={})[voterKey.toLowerCase()]=username;}if(result.ok)queueVoteUpdate(result.side)
   }
  }
  async function getJson(url,timeout=7000){const c=new AbortController();const timer=setTimeout(()=>c.abort(),timeout);try{const r=await fetch(url,{signal:c.signal,headers:{'Accept':'application/json'}});if(!r.ok)throw Error('HTTP '+r.status);return await r.json()}finally{clearTimeout(timer)}}
@@ -647,7 +656,19 @@
   el.classList.remove('bump');void el.offsetWidth;el.classList.add('bump');
  }
  function refreshVotes(changedSide){if(game?.phase!=='battle')return;const m=Core.currentMatch(game);if(!m)return;
-  for(let side=1;side<=2;side++){const box=$('voters-'+side);box.hidden=!game.settings.showVoters||!m.left||!m.right;box.replaceChildren();if(!box.hidden){const names=Object.entries(m.voters).filter(([,v])=>v===side-1);for(const [key] of names){const chip=document.createElement('span');chip.textContent='@'+(m.voterNames?.[key]||key);box.append(chip)}if(!names.length)box.textContent='هنوز رأیی ثبت نشده';}}
+  const groups=[[],[]];if(game.settings.showVoters&&m.left&&m.right)for(const [key,side] of Object.entries(m.voters))groups[side].push(key);
+  for(let side=1;side<=2;side++){
+   const box=$('voters-'+side),hidden=!game.settings.showVoters||!m.left||!m.right;box.hidden=hidden;
+   if(hidden){if(box.childNodes.length)box.replaceChildren();box._voterView=null;continue;}
+   if(box._voterView?.match!==m){box.replaceChildren();box._voterView={match:m,chips:new Map()};}
+   const chips=box._voterView.chips,keys=groups[side-1],present=new Set(keys);
+   for(const [key,chip] of chips)if(!present.has(key)){chip.remove();chips.delete(key);}
+   if(!keys.length){if(box.textContent!=='هنوز رأیی ثبت نشده')box.textContent='هنوز رأیی ثبت نشده';continue;}
+   if(!chips.size)box.replaceChildren();
+   const fragment=document.createDocumentFragment();
+   for(const key of keys){let chip=chips.get(key);if(!chip){chip=document.createElement('span');chips.set(key,chip);fragment.append(chip);}const label='@'+(m.voterNames?.[key]||key);if(chip.textContent!==label)chip.textContent=label;}
+   if(fragment.childNodes.length)box.append(fragment);
+  }
   const total=m.votes[0]+m.votes[1];for(let side=1;side<=2;side++){
    const n=m.votes[side-1];if(changedSide===side)countAnimate(side,n);else{cancelAnimationFrame(animIds[side-1]);visualCounts[side-1]=n;text('votes-'+side,number(n))}
    $('meter-'+side).style.width=(total?100*n/total:50)+'%';
@@ -879,7 +900,7 @@
  $('confirmReset').addEventListener('click',reset);
  $('confirmDialog').addEventListener('click',e=>{if(e.target===$('confirmDialog'))$('confirmDialog').classList.add('hidden')});
  window.addEventListener('keydown',e=>{if(e.key==='Escape')$('confirmDialog').classList.add('hidden')});
- window.addEventListener('beforeunload',()=>{if(ws)try{ws.close()}catch{}});
+ window.addEventListener('beforeunload',()=>{flushVoteSave();if(ws)try{ws.close()}catch{}});
  game=load();if(game&&game.phase==='battle'&&Core.maybeExpire(game))save();render();if(game&&game.settings.mode==='kick'&&game.phase!=='finished')connectKick();
  setInterval(tick,180);
 
@@ -973,7 +994,15 @@ function mount(side,video){
    const d=document.createElement('div');d.className='cb-controls';
    d.innerHTML='<button type="button" data-f="play">❚❚</button><button type="button" data-f="back">-5</button><span class="cb-time">00:00/00:00</span><input type="range" min="0" max="1000" value="0" aria-label="تایم‌لاین ویدیو"><button type="button" data-f="forward">+5</button><button type="button" data-f="mute">♫</button><button type="button" data-f="speed">1×</button><button type="button" data-f="full">⛶</button>';
    box.append(d);const $=s=>d.querySelector(s),play=$('[data-f=play]'),range=$('input'),clock=$('.cb-time'),mute=$('[data-f=mute]'),speed=$('[data-f=speed]');
-   let timer=0;const update=()=>{if(!current())return;const total=isFinite(v.duration)?v.duration:0;range.value=total?Math.floor(v.currentTime/total*1000):0;clock.textContent=time(v.currentTime)+' / '+time(total);play.textContent=v.paused?'▶':'❚❚';mute.textContent=v.muted?'🔇':'♫';timer=requestAnimationFrame(update)};update();
+   let timer=0,lastPaint=-Infinity;
+   const put=(node,value)=>{if(node.textContent!==value)node.textContent=value};
+   function paint(){const total=isFinite(v.duration)?v.duration:0,next=String(total?Math.floor(v.currentTime/total*1000):0);if(range.value!==next)range.value=next;put(clock,time(v.currentTime)+' / '+time(total));put(play,v.paused?'▶':'❚❚');put(mute,v.muted?'🔇':'♫');}
+   function update(now){timer=0;if(!current()||document.hidden)return;if(now-lastPaint>=100){lastPaint=now;paint();}if(!v.paused&&!v.ended)timer=requestAnimationFrame(update);}
+   function wake(){if(!current())return;paint();if(!document.hidden&&!v.paused&&!v.ended&&!timer)timer=requestAnimationFrame(update);}
+   const events=['playing','pause','ended','timeupdate','loadedmetadata','durationchange','volumechange','seeked'];
+   events.forEach(event=>v.addEventListener(event,wake));
+   const visibility=()=>{if(document.hidden){cancelAnimationFrame(timer);timer=0;}else wake();};
+   document.addEventListener('visibilitychange',visibility);wake();
    play.onclick=()=>v.paused?v.play().catch(()=>{}):v.pause();
    $('[data-f=back]').onclick=()=>v.currentTime=Math.max(0,v.currentTime-5);
    $('[data-f=forward]').onclick=()=>v.currentTime=Math.min(v.duration||Infinity,v.currentTime+5);
@@ -985,7 +1014,7 @@ function mount(side,video){
    const recover=()=>{if(!current()||recovering)return;recovering=true;clearTimeout(readyTimer);onFailure(src)};
    v.onerror=recover;v.onloadeddata=()=>clearTimeout(readyTimer);
    readyTimer=setTimeout(()=>{if(v.readyState<2)recover()},10000);
-   clean=()=>{recovering=true;clearTimeout(readyTimer);cancelAnimationFrame(timer);v.onerror=v.onloadeddata=null;v.pause();v.removeAttribute('src');v.load()};
+   clean=()=>{recovering=true;clearTimeout(readyTimer);cancelAnimationFrame(timer);events.forEach(event=>v.removeEventListener(event,wake));document.removeEventListener('visibilitychange',visibility);v.onerror=v.onloadeddata=null;v.pause();v.removeAttribute('src');v.load()};
    v.play().catch(()=>{if(!current()||recovering)return;v.muted=true;v.play().catch(()=>{})});
  }
  el.innerHTML='<div class="cb-message"><strong>در حال آماده کردن پلیر اختصاصی اینستاگرام…</strong><small>اگر منبع مستقیم در دسترس نباشد، پلیر جایگزین نمایش داده می‌شود.</small></div>';
