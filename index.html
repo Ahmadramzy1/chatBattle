@@ -966,7 +966,7 @@ function mount(side,video){
    const onMessage=e=>{if(e.source!==i.contentWindow||!/^https:\/\/(www\.)?instagram\.com$/.test(e.origin))return;let d=e.data;try{if(typeof d==='string')d=JSON.parse(d)}catch{return}const h=Number(d?.details?.height);if(d?.type==='MEASURE'&&h>150&&h<3000){eh=h;fit()}};
    const ro=new ResizeObserver(fit);ro.observe(wrapper);addEventListener('message',onMessage);clean=()=>{ro.disconnect();removeEventListener('message',onMessage)};fit();
  }
- function native(src){
+ function native(src,onFailure){
    if(!current())return;el.replaceChildren();
    const box=document.createElement('div');box.className='cb-native';el.append(box);
    const v=document.createElement('video');v.src=src;v.playsInline=true;v.autoplay=true;v.preload='auto';v.controls=false;box.append(v);
@@ -981,38 +981,64 @@ function mount(side,video){
    mute.onclick=()=>{v.muted=!v.muted};
    const rates=[1,1.25,1.5,2];speed.onclick=()=>{v.playbackRate=rates[(rates.indexOf(v.playbackRate)+1)%rates.length];speed.textContent=v.playbackRate+'×'};
    range.oninput=()=>{if(isFinite(v.duration)&&v.duration>0)v.currentTime=v.duration*range.value/1000};
-   v.onerror=()=>igEmbed();
-   clean=()=>{cancelAnimationFrame(timer);v.pause();v.removeAttribute('src');v.load()};
+   let recovering=false,readyTimer=0;
+   const recover=()=>{if(!current()||recovering)return;recovering=true;clearTimeout(readyTimer);onFailure(src)};
+   v.onerror=recover;v.onloadeddata=()=>clearTimeout(readyTimer);
+   readyTimer=setTimeout(()=>{if(v.readyState<2)recover()},10000);
+   clean=()=>{recovering=true;clearTimeout(readyTimer);cancelAnimationFrame(timer);v.onerror=v.onloadeddata=null;v.pause();v.removeAttribute('src');v.load()};
    v.play().catch(()=>{});
  }
  el.innerHTML='<div class="cb-message"><strong>در حال آماده کردن پلیر اختصاصی اینستاگرام…</strong><small>اگر منبع مستقیم در دسترس نباشد، پلیر جایگزین نمایش داده می‌شود.</small></div>';
  const sourceUrls=[];
  for(const host of ['d.ddinstagram.com','d.instagramfix.com','d.instagram7.com','kkinstagram.com']){sourceUrls.push('https://'+host+'/'+kind+'/'+shortcode);sourceUrls.push('https://'+host+'/p/'+shortcode)}
  sourceUrls.push('https://ddinstagram.com/videos/'+shortcode+'/1');
- async function resolve(){
+ async function resolve(signal){
   const url='https://www.instagram.com/'+kind+'/'+shortcode+'/embed/captioned/';
   const proxies=[url,'https://corsproxy.io/?url='+encodeURIComponent(url),'https://api.allorigins.win/raw?url='+encodeURIComponent(url)];
   return Promise.any(proxies.map(async p=>{
-   const ac=new AbortController(),t=setTimeout(()=>ac.abort(),8000);
    try{
-    const r=await fetch(p,{signal:ac.signal,credentials:'omit'});if(!r.ok)throw Error();
+    const r=await fetch(p,{signal,credentials:'omit',cache:'no-store'});if(!r.ok)throw Error();
     const html=await r.text();
     const m=html.match(/"video_url"\s*:\s*"([^"]+)"/)||html.match(/video_url\\\*"\s*:\s*\\\*"(.+?)\\\*"/);
     if(!m)throw Error();
     const src=m[1].replace(/\\u0026/gi,'&').replace(/\\\//g,'/').replace(/&amp;/g,'&');
     if(!/^https:\/\/[\w.-]+\//i.test(src))throw Error();
-    return src;
-   }finally{clearTimeout(t)}
+    if(failedSources.has(src))throw Error('source failed playback');
+    return await probe(src,signal);
+   }catch(error){throw error}
   }));
  }
- function probe(src){return new Promise((yes,no)=>{
-  if(ctrl.signal.aborted)return no(Error('cancelled'));
-  const v=document.createElement('video');v.preload='metadata';v.muted=true;const t=setTimeout(()=>done(false),7000);
-  function done(ok){clearTimeout(t);v.onloadedmetadata=v.onerror=null;ctrl.signal.removeEventListener('abort',ab);v.removeAttribute('src');v.load();ok?yes(src):no(Error('video not available'))}
-  const ab=()=>done(false);ctrl.signal.addEventListener('abort',ab,{once:true});
+ function probe(src,signal){return new Promise((yes,no)=>{
+  if(signal.aborted||failedSources.has(src))return no(Error('cancelled or failed source'));
+  const v=document.createElement('video');v.preload='metadata';v.muted=true;let settled=false;const t=setTimeout(()=>done(false),5000);
+  function done(ok){if(settled)return;settled=true;clearTimeout(t);v.onloadedmetadata=v.onerror=null;signal.removeEventListener('abort',ab);v.removeAttribute('src');v.load();ok?yes(src):no(Error('video not available'))}
+  const ab=()=>done(false);signal.addEventListener('abort',ab,{once:true});
   v.onloadedmetadata=()=>done(v.videoWidth>0);v.onerror=()=>done(false);v.src=src;
  })}
- Promise.any([resolve().then(probe),...sourceUrls.slice(0,6).map(probe)]).then(src=>{if(current())native(src)}).catch(()=>{if(current())igEmbed()});
+
+ let attempt=0;const failedSources=new Set();
+ function retryDirect(src){
+  if(!current())return;if(src)failedSources.add(src);clean();clean=()=>{};
+  if(attempt>=3){igEmbed();return;}
+  el.innerHTML='<div class="cb-message"><strong>در حال تلاش مجدد برای پخش مستقیم…</strong></div>';
+  const timer=setTimeout(()=>{clean=()=>{};attemptDirect()},700);clean=()=>clearTimeout(timer);
+ }
+ async function attemptDirect(){
+  if(!current())return;clean();clean=()=>{};attempt++;
+  el.innerHTML='<div class="cb-message"><strong>در حال آماده کردن پلیر اختصاصی اینستاگرام…</strong><small>تلاش '+attempt+' از ۳؛ پخش Embed فقط بعد از ناموفق بودن همهٔ تلاش‌ها فعال می‌شود.</small></div>';
+  const request=new AbortController(),abort=()=>request.abort();
+  ctrl.signal.addEventListener('abort',abort,{once:true});
+  const deadline=setTimeout(abort,9000);
+  try{
+   // Each round tries a different group of media hosts plus fresh URL resolution.
+   const candidates=sourceUrls.slice((attempt-1)*3,attempt*3);
+   const src=await Promise.any([resolve(request.signal),...candidates.map(url=>probe(url,request.signal))]);
+   if(current())native(src,retryDirect);
+  }catch(error){if(current())retryDirect();}
+  finally{clearTimeout(deadline);ctrl.signal.removeEventListener('abort',abort);request.abort();}
+ }
+ attemptDirect();
+
 }
 function pause(side){const el=document.getElementById('player-'+side);el?.querySelectorAll('video').forEach(v=>v.pause());el?.querySelectorAll('iframe').forEach(f=>{try{const origin=new URL(f.src).origin;f.contentWindow.postMessage(JSON.stringify({event:'command',func:'pauseVideo',args:[]}),origin);f.contentWindow.postMessage({'x-tiktok-player':true,type:'pause'},origin)}catch{}})}
 window.ChatBattlePlayer={mount,destroy,destroyAll,fullscreen,pause};
