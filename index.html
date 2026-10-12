@@ -255,6 +255,11 @@
 @media(max-width:540px){.bracket-section{padding:16px 12px}.round-col{width:210px}.bracket{gap:14px}.bracket-thumb{height:44px}}
 
 #coinCanvas[hidden]{display:none}#coinResult.coin-fallback{position:static;clip-path:none;width:auto;height:auto;margin:20px 0;font:700 110px/1.4 var(--latin);color:#f4cf71;white-space:normal;text-shadow:0 2px 20px #000}
+/* Persistent centered creator logo across every tournament phase. */
+.topbar{position:relative;height:104px;min-height:104px}
+.header-mid{display:grid;place-items:center;position:absolute;left:50%;top:0;transform:translateX(-50%);height:104px;width:132px;overflow:visible;pointer-events:none}
+.header-logo{display:block;width:104px;height:104px;object-fit:contain}
+@media(max-width:650px){.topbar{height:158px;min-height:158px;align-items:flex-end;padding-bottom:14px}.header-mid{height:104px;width:132px}.header-logo{width:104px;height:104px}}
 </style>
 </head>
 <body>
@@ -265,7 +270,7 @@
    <span class="brand-icon"><svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="m13 8 27 27-5 5L8 13z" fill="#d7ff76"/><path d="M35 8 8 35l5 5L40 13z" fill="#fff"/><path d="m7 7 8 2-6 6zM41 7l-8 2 6 6z" fill="#ff8f80"/></svg></span>
    <span><strong>CHAT<span>BATTLE</span></strong><small>THE CHAT DECIDES.</small></span>
   </a>
-  <div class="header-mid"><span class="live-dot"></span><span id="headerPhase">آماده برای مسابقه</span><span class="header-sep">/</span><span id="headerTopic">YOUR NEXT BIG BATTLE</span></div>
+  <div class="header-mid"><img class="header-logo" src="./assets/ahmad-ramzy-logo.png" width="1254" height="1254" alt="Ahmad Ramzy" decoding="async" fetchpriority="high"></div>
   <div class="header-actions"><span class="connection-indicator disconnected" id="connectionStatus"><i></i><span>قطع</span></span><button class="icon-btn" id="resetBtn" title="مسابقه جدید" type="button">↻ <span>مسابقه جدید</span></button></div>
  </header>
  <main>
@@ -550,14 +555,13 @@
  function load(){try{const g=JSON.parse(safeStorage.get(STORE));if(g?.version===1&&g?.settings&&['collecting','battle','finished'].includes(g.phase)&&Array.isArray(g.entries))return g;}catch{}return null;}
  function phasePage(phase){const lookup={collecting:'collecting',battle:'battle',finished:'results'};const target=lookup[phase]||'setup';qa('.page').forEach(e=>e.classList.toggle('active',e.id==='page-'+target));if(lastPage!==target){lastPage=target;window.scrollTo(0,0);requestAnimationFrame(()=>window.scrollTo(0,0));}}
  function setConnection(mode,label){const el=$('connectionStatus');el.className='connection-indicator '+mode;el.querySelector('span').textContent=label;if(game&&game.phase==='collecting'){const detail=$('connectionDetail');if(detail)detail.textContent=(mode==='connected'?'● ':'○ ')+label;}}
- function renderHeader(){text('headerPhase',!game?'آماده برای مسابقه':game.phase==='collecting'?'دریافت ویدیوها':game.phase==='battle'?'مسابقه در جریان': 'قهرمان مشخص شد');text('headerTopic',game?.settings.topic||'YOUR NEXT BIG BATTLE');}
  function updateConnectionDescription(message){const el=$('modeMessage');if(el)el.textContent=message;}
  function iconFor(v){return v.platform==='youtube'?'▶':v.platform==='tiktok'?'♪':'◎'}
  function platformName(v){return v.platform==='youtube'?'YOUTUBE':v.platform==='tiktok'?'TIKTOK':'INSTAGRAM'}
  function thumbNode(v,klass){const holder=document.createElement('div');holder.className=klass;
   if(v.thumbnail){const img=document.createElement('img');img.loading='lazy';img.decoding='async';img.referrerPolicy='no-referrer';img.src=v.thumbnail;img.alt='تصویر بندانگشتی '+platformName(v);img.onerror=()=>{img.remove();const s=document.createElement('span');s.textContent=iconFor(v);s.className='placeholder-symbol';holder.append(s)};holder.append(img)}
   else {const symbol=document.createElement('span');symbol.textContent=iconFor(v);symbol.className='placeholder-symbol';holder.append(symbol);window.ChatBattleThumbnails?.attach(v,holder)}return holder;}
- function render(){renderHeader();if(!game){phasePage(null);setConnection('disconnected','آماده');return}phasePage(game.phase);
+ function render(){if(!game){phasePage(null);setConnection('disconnected','آماده');return}phasePage(game.phase);
   if(game.settings.mode==='demo'){disconnect();setConnection('connected','DEMO MODE')}else if(!ws){setConnection('disconnected','آفلاین')}
   if(game.phase==='collecting')renderCollection();if(game.phase==='battle'){renderBattleMatch();refreshBattleControls();}if(game.phase==='finished')renderResults();
  }
