@@ -1,3 +1,4 @@
+import { resolveTikTokLink } from './media-links.js?v=tiktok-short-1';
 import { kickUser, loginWithKick } from './kick-auth.js';
 import {
   db, doc, getDoc, onSnapshot, runTransaction, serverTimestamp, authReady, firebaseError
@@ -141,7 +142,13 @@ async function submit(event){
   if(Number(current.schemaVersion)!==2){status(LEGACY,'error');return}
   const name=anonymousUser.kickName;
   if(!name||name.length>64){status('نام Kick باید ۲ تا ۳۲ کاراکتر انگلیسی، عدد، زیرخط یا نقطه باشه.','error');return}
-  const clips=linksFromForm().map(normalize);
+  let clips;pending=true;$('confirm').disabled=true;refreshControls();
+  try{status('در حال بررسی لینک‌ها و باز کردن لینک کوتاه TikTok…','info');clips=await Promise.all(linksFromForm().map(async raw=>{
+   let value=raw;try{const host=new URL(raw).hostname;if(['vt.tiktok.com','vm.tiktok.com'].includes(host))value=await resolveTikTokLink(raw);}catch(error){if(/https:\/\/(vt|vm)\.tiktok\.com/i.test(raw))throw error;}
+   return normalize(value);
+  }));}catch(error){status(error.message||'بررسی لینک ناموفق بود.','error');return;}
+  finally{pending=false;$('confirm').disabled=false;refreshControls();}
+
   if(!clips.length||clips.some(v=>!v)){status('یک یا چند لینک معتبر نیست. لینک مستقیم و عمومی YouTube، Instagram یا TikTok بذار.','error');return}
   const keys=clips.map(c=>c.key);
   if(new Set(keys).size!==keys.length){highlightDuplicates();status('این ویدیو قبلاً وارد شده. لینک تکراری رو حذف کن.','error');return}
