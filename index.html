@@ -1016,22 +1016,20 @@ function mount(side,video){
   v.onloadedmetadata=()=>done(v.videoWidth>0);v.onerror=()=>done(false);v.src=src;
  })}
 
- let attempt=0;const failedSources=new Set();
+ const failedSources=new Set();
  function retryDirect(src){
   if(!current())return;if(src)failedSources.add(src);clean();clean=()=>{};
-  if(attempt>=3){igEmbed();return;}
-  el.innerHTML='<div class="cb-message"><strong>در حال تلاش مجدد برای پخش مستقیم…</strong></div>';
-  const timer=setTimeout(()=>{clean=()=>{};attemptDirect()},700);clean=()=>clearTimeout(timer);
+  igEmbed();
  }
  async function attemptDirect(){
-  if(!current())return;clean();clean=()=>{};attempt++;
-  el.innerHTML='<div class="cb-message"><strong>در حال آماده کردن پلیر اختصاصی اینستاگرام…</strong><small>تلاش '+attempt+' از ۳؛ پخش Embed فقط بعد از ناموفق بودن همهٔ تلاش‌ها فعال می‌شود.</small></div>';
+  if(!current())return;clean();clean=()=>{};
+  el.innerHTML='<div class="cb-message"><strong>در حال آماده کردن پلیر اختصاصی اینستاگرام…</strong><small>یک تلاش برای پخش مستقیم؛ در صورت ناموفق بودن، پلیر جایگزین نمایش داده می‌شود.</small></div>';
   const request=new AbortController(),abort=()=>request.abort();
   ctrl.signal.addEventListener('abort',abort,{once:true});
   const deadline=setTimeout(abort,9000);
   try{
-   // Each round tries a different group of media hosts plus fresh URL resolution.
-   const candidates=sourceUrls.slice((attempt-1)*3,attempt*3);
+   // One bounded attempt checks all available direct sources in parallel.
+   const candidates=sourceUrls;
    const src=await Promise.any([resolve(request.signal),...candidates.map(url=>probe(url,request.signal))]);
    if(current())native(src,retryDirect);
   }catch(error){if(current())retryDirect();}
