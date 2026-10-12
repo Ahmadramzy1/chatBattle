@@ -2,7 +2,7 @@
 (()=>{
  const cache=new Map(),pending=new Map(),bindings=new WeakMap(),waiting=new Map(),queue=[];let running=0;
  const routes=[x=>x,x=>'https://corsproxy.io/?url='+encodeURIComponent(x),x=>'https://api.allorigins.win/raw?url='+encodeURIComponent(x)];
- function imageUrl(value){try{const u=new URL(value);return u.protocol==='https:'&&!u.username&&!u.password?u.href:null;}catch{return null;}}
+ function imageUrl(value){try{const u=new URL(value);return u.protocol==='https:'&&!u.username&&!u.password&&!u.pathname.includes('/rsrc.php/')?u.href:null;}catch{return null;}}
  function extract(text){
   try{const data=JSON.parse(text),url=imageUrl(data.thumbnail_url);if(url)return url;}catch{}
   const doc=new DOMParser().parseFromString(text,'text/html');
@@ -20,7 +20,7 @@
   if(video.platform==='tiktok'&&['vt.tiktok.com','vm.tiktok.com'].includes(new URL(url).hostname)){
    const {resolveTikTokLink}=await import('./media-links.js?v=tiktok-short-1');url=await resolveTikTokLink(url);
   }
-  const sources=video.platform==='tiktok'?['https://www.tiktok.com/oembed?url='+encodeURIComponent(url)]:[url.replace(/\/$/,'')+'/embed/captioned/',url];
+  const sources=video.platform==='tiktok'?['https://www.tiktok.com/oembed?url='+encodeURIComponent(url)]:[url.replace(/\/$/,'')+'/embed/captioned/',url.replace('www.instagram.com','ddinstagram.com'),url];
   for(const source of sources){
    const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),8000);
    try{return await Promise.any(routes.map(async route=>{const r=await fetch(route(source),{signal:controller.signal,credentials:'omit'});if(!r.ok)throw Error('Preview unavailable');return extract(await r.text());}));}
