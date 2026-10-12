@@ -1,7 +1,10 @@
 /* Real 3D gold coin: beveled solid mesh, raised numerals, separate outward-facing sides. */
 (()=>{
+ let instance=null;
+ window.ChatBattleCoin={play(side,reduced){instance??=initialize();return instance.play(side,reduced);},cancel(){instance?.cancel();}};
+ function initialize(){
  const canvas=document.getElementById('coinCanvas'),gl=canvas.getContext('webgl',{alpha:true,antialias:true});
- if(!gl){window.ChatBattleCoin={play:()=>Promise.reject(new Error('WebGL unavailable')),cancel(){}};return;}
+ if(!gl)return {play:()=>Promise.reject(new Error('WebGL unavailable')),cancel(){}};
  const vertex=`attribute vec3 p,n;attribute float tone;varying float T;uniform vec3 rotation;uniform float lift;varying vec3 N,P;void main(){vec3 c=cos(rotation),s=sin(rotation);mat3 rx=mat3(1.,0.,0.,0.,c.x,s.x,0.,-s.x,c.x),ry=mat3(c.y,0.,-s.y,0.,1.,0.,s.y,0.,c.y),rz=mat3(c.z,s.z,0.,-s.z,c.z,0.,0.,0.,1.);mat3 r=rz*rx*ry;P=r*p;N=r*n;T=tone;float depth=5.-P.z;gl_Position=vec4(P.x*3.4,P.y*3.4+lift,depth*1.02-.202,depth);}`;
  const fragment=`precision highp float;varying vec3 N,P;varying float T;void main(){vec3 n=normalize(N),v=normalize(vec3(0.,0.,5.)-P);vec3 l=normalize(vec3(-3.,4.,5.)),l2=normalize(vec3(4.,1.,2.));float d=max(dot(n,l),0.),d2=max(dot(n,l2),0.);float spec=pow(max(dot(n,normalize(l+v)),0.),70.);float spec2=pow(max(dot(n,normalize(l2+v)),0.),100.);float band=pow(max(0.,1.-abs(dot(reflect(-v,n),normalize(vec3(-.7,.9,.4))))),18.);vec3 gold=vec3(1.,.68,.14);vec3 color=gold*(.28+.55*d+.22*d2)+vec3(1.,.91,.62)*(spec*.95+spec2*.65+band*.13);gl_FragColor=vec4(color*T,1.);}`;
  function shader(type,src){const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(s));return s;}
@@ -23,8 +26,8 @@
  extrude([[-.34,.27],[-.28,.43],[-.12,.52],[.13,.52],[.3,.4],[.35,.23],[.29,.06],[-.13,-.31],[.35,-.31],[.35,-.49],[-.35,-.49],[-.35,-.29],[.13,.15],[.16,.26],[.1,.34],[-.08,.34],[-.16,.27],[-.17,.17],[-.34,.17]],true);
  for(const [name,data] of [['p',positions],['n',normals],['tone',tones]]){const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(data),gl.STATIC_DRAW);const loc=gl.getAttribLocation(program,name);gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,name==='tone'?1:3,gl.FLOAT,false,0,0);}
  gl.enable(gl.DEPTH_TEST);gl.disable(gl.CULL_FACE);const rot=gl.getUniformLocation(program,'rotation'),lift=gl.getUniformLocation(program,'lift');let raf=0,resolvePending;
- function draw(x,y,z,h){gl.viewport(0,0,canvas.width,canvas.height);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.uniform3f(rot,x,y,z);gl.uniform1f(lift,h);gl.drawArrays(gl.TRIANGLES,0,positions.length/3);}
- window.ChatBattleCoin={cancel(){cancelAnimationFrame(raf);canvas.style.transform='';resolvePending?.();resolvePending=null;},play(side,reduced){this.cancel();return new Promise(resolve=>{resolvePending=resolve;canvas.style.transform='';const startY=window.innerHeight-canvas.getBoundingClientRect().top+24;canvas.style.transform=reduced?'':'translateY('+startY+'px)';const start=performance.now(),end=(side===2?Math.PI:0)+Math.PI*12;
+ function draw(x,y,z,h){if(document.hidden)return;gl.viewport(0,0,canvas.width,canvas.height);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.uniform3f(rot,x,y,z);gl.uniform1f(lift,h);gl.drawArrays(gl.TRIANGLES,0,positions.length/3);}
+ const renderer={cancel(){cancelAnimationFrame(raf);canvas.style.transform='';resolvePending?.();resolvePending=null;},play(side,reduced){this.cancel();return new Promise(resolve=>{resolvePending=resolve;canvas.style.transform='';const startY=window.innerHeight-canvas.getBoundingClientRect().top+24;canvas.style.transform=reduced?'':'translateY('+startY+'px)';const start=performance.now(),end=(side===2?Math.PI:0)+Math.PI*12;
  const smootherstep=v=>{const x=Math.max(0,Math.min(1,v));return x*x*x*(x*(x*6-15)+10);};
  function frame(now){const t=Math.min(1,(now-start)/3000),e=1-Math.pow(1-t,3),settle=1-smootherstep((t-.68)/.32);const rise=Math.min(1,t/.38),u=Math.max(0,(t-.38)/.62),y=t<.38?startY*Math.pow(1-rise,3):-24*64*Math.pow(u*(1-u),3);canvas.style.transform=reduced?'':'translateY('+y+'px)';draw(reduced?-.25:-.25+Math.sin(t*Math.PI)*.8*settle,reduced?end:end*e,reduced?-.12:Math.sin(t*Math.PI*3)*.14*settle-.12,0);if(t<1)raf=requestAnimationFrame(frame);else{resolvePending=null;resolve();
  // Keep the landed face readable while it gently rocks and floats.
@@ -32,4 +35,6 @@
  }}
  raf=requestAnimationFrame(frame);});}};
  draw(-.25,.35,-.12,0);
+ return renderer;
+ }
 })();
