@@ -986,31 +986,34 @@ function mount(side,video){
    v.onerror=recover;v.onloadeddata=()=>clearTimeout(readyTimer);
    readyTimer=setTimeout(()=>{if(v.readyState<2)recover()},10000);
    clean=()=>{recovering=true;clearTimeout(readyTimer);cancelAnimationFrame(timer);v.onerror=v.onloadeddata=null;v.pause();v.removeAttribute('src');v.load()};
-   v.play().catch(()=>{});
+   v.play().catch(()=>{if(!current()||recovering)return;v.muted=true;v.play().catch(()=>{})});
  }
  el.innerHTML='<div class="cb-message"><strong>در حال آماده کردن پلیر اختصاصی اینستاگرام…</strong><small>اگر منبع مستقیم در دسترس نباشد، پلیر جایگزین نمایش داده می‌شود.</small></div>';
  const sourceUrls=[];
- for(const host of ['d.ddinstagram.com','d.instagramfix.com','d.instagram7.com','kkinstagram.com']){sourceUrls.push('https://'+host+'/'+kind+'/'+shortcode);sourceUrls.push('https://'+host+'/p/'+shortcode)}
- sourceUrls.push('https://ddinstagram.com/videos/'+shortcode+'/1');
+ // Match instaQ's complete set of direct video routes.
+ for(const host of ['d.ddinstagram.com','d.instagramfix.com','d.instagram7.com','kkinstagram.com']){
+  sourceUrls.push('https://'+host+'/p/'+shortcode);
+  sourceUrls.push('https://'+host+'/reel/'+shortcode);
+ }
+ for(const host of ['ddinstagram.com','instagramfix.com'])sourceUrls.push('https://'+host+'/videos/'+shortcode+'/1');
  async function resolve(signal){
   const url='https://www.instagram.com/'+kind+'/'+shortcode+'/embed/captioned/';
-  const proxies=[url,'https://corsproxy.io/?url='+encodeURIComponent(url),'https://api.allorigins.win/raw?url='+encodeURIComponent(url)];
+  const proxies=[url,'https://corsproxy.io/?url='+encodeURIComponent(url),'https://api.allorigins.win/raw?url='+encodeURIComponent(url),'https://api.codetabs.com/v1/proxy?quest='+encodeURIComponent(url)];
   return Promise.any(proxies.map(async p=>{
-   try{
-    const r=await fetch(p,{signal,credentials:'omit',cache:'no-store'});if(!r.ok)throw Error();
-    const html=await r.text();
-    const m=html.match(/"video_url"\s*:\s*"([^"]+)"/)||html.match(/video_url\\\*"\s*:\s*\\\*"(.+?)\\\*"/);
-    if(!m)throw Error();
-    const src=m[1].replace(/\\u0026/gi,'&').replace(/\\\//g,'/').replace(/&amp;/g,'&');
-    if(!/^https:\/\/[\w.-]+\//i.test(src))throw Error();
-    if(failedSources.has(src))throw Error('source failed playback');
-    return await probe(src,signal);
-   }catch(error){throw error}
+   const r=await fetch(p,{signal,credentials:'omit',cache:'no-store'});if(!r.ok)throw Error('resolver response');
+   const html=(await r.text()).replace(/&quot;/g,'"');
+   // instaQ handles both JSON quotes and backslash-escaped quotes.
+   const m=html.match(/video_url\\*"\s*:\s*\\*"(.+?)\\*"/);
+   if(!m)throw Error('direct video URL not found');
+   const src=m[1].replace(/\\+u0026/gi,'&').replace(/\\+\//g,'/').replace(/&amp;/g,'&');
+   if(!/^https:\/\/[\w.-]+\//i.test(src)||failedSources.has(src))throw Error('invalid direct video URL');
+   // As in instaQ, let the real player load the resolved CDN URL without a second metadata request.
+   return src;
   }));
  }
  function probe(src,signal){return new Promise((yes,no)=>{
   if(signal.aborted||failedSources.has(src))return no(Error('cancelled or failed source'));
-  const v=document.createElement('video');v.preload='metadata';v.muted=true;let settled=false;const t=setTimeout(()=>done(false),5000);
+  const v=document.createElement('video');v.preload='metadata';v.muted=true;let settled=false;const t=setTimeout(()=>done(false),9000);
   function done(ok){if(settled)return;settled=true;clearTimeout(t);v.onloadedmetadata=v.onerror=null;signal.removeEventListener('abort',ab);v.removeAttribute('src');v.load();ok?yes(src):no(Error('video not available'))}
   const ab=()=>done(false);signal.addEventListener('abort',ab,{once:true});
   v.onloadedmetadata=()=>done(v.videoWidth>0);v.onerror=()=>done(false);v.src=src;
@@ -1026,7 +1029,7 @@ function mount(side,video){
   el.innerHTML='<div class="cb-message"><strong>در حال آماده کردن پلیر اختصاصی اینستاگرام…</strong><small>یک تلاش برای پخش مستقیم؛ در صورت ناموفق بودن، پلیر جایگزین نمایش داده می‌شود.</small></div>';
   const request=new AbortController(),abort=()=>request.abort();
   ctrl.signal.addEventListener('abort',abort,{once:true});
-  const deadline=setTimeout(abort,9000);
+  const deadline=setTimeout(abort,10000);
   try{
    // One bounded attempt checks all available direct sources in parallel.
    const candidates=sourceUrls;
