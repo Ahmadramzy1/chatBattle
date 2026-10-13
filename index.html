@@ -259,6 +259,7 @@
 .topbar{position:relative;height:104px;min-height:104px}
 .header-mid{display:grid;place-items:center;position:absolute;left:50%;top:0;transform:translateX(-50%);height:104px;width:132px;overflow:visible;cursor:pointer}
 .header-logo{display:block;width:104px;height:104px;object-fit:contain}
+.chat-notice{margin:14px clamp(20px,4.3vw,68px) 0;padding:10px 14px;border:1px solid #667647;border-radius:10px;display:flex;align-items:center;justify-content:space-between;gap:12px;background:#192019;font-size:12px;overflow-wrap:anywhere}.chat-notice[data-state="disconnected"]{border-color:#a85d54;background:#2b1b1b;color:#ffd0c8}.chat-notice button{flex:none;padding:7px 12px}.chat-notice[hidden]{display:none}
 @media(max-width:650px){.topbar{height:158px;min-height:158px;align-items:flex-end;padding-bottom:14px}.header-mid{height:104px;width:132px}.header-logo{width:104px;height:104px}}
 </style>
 </head>
@@ -273,6 +274,7 @@
   <a class="header-mid" href="https://kick.com/ahmad-ramzy" target="_blank" rel="noopener noreferrer" aria-label="کانال Ahmad Ramzy در Kick"><img class="header-logo" src="./assets/ahmad-ramzy-logo.png" width="1254" height="1254" alt="Ahmad Ramzy" decoding="async" fetchpriority="high"></a>
   <div class="header-actions"><span class="connection-indicator disconnected" id="connectionStatus"><i></i><span>قطع</span></span><button class="icon-btn" id="resetBtn" title="مسابقه جدید" type="button">↻ <span>مسابقه جدید</span></button></div>
  </header>
+ <div id="chatNotice" class="chat-notice" hidden><span id="chatNoticeText" role="status"></span><button id="chatReconnectBtn" type="button" class="secondary-btn">اتصال مجدد چت</button></div>
  <main>
   <section class="page active" id="page-setup" aria-label="تنظیم مسابقه">
    <div class="setup-layout">
@@ -351,7 +353,7 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="modal-backdrop hidden" id="confirmDialog"><div class="confirm-card glass" role="dialog" aria-modal="true" aria-labelledby="dialogTitle"><span class="section-number">CONFIRM ACTION</span><h2 id="dialogTitle">مسابقه جدید؟</h2><p id="dialogBody">اطلاعات مسابقه فعلی پاک می‌شه.</p><div><button id="cancelConfirm" class="secondary-btn">انصراف</button><button id="confirmReset" class="primary-btn">بله، شروع مجدد</button></div></div></div>
 <script src="./game-store.js?v=delta-undo-1"></script>
-<script src="./kick-realtime.js?v=centrifugo-1"></script>
+<script src="./kick-realtime.js?v=centrifugo-2"></script>
 <script src="./thumbnails.js?v=public-previews-2"></script>
 <script src="./coin-renderer.js?v=lazy-init-5"></script>
 <script>
@@ -447,7 +449,8 @@
  }
  function currentMatch(state){return state.current?state.rounds[state.current.round]?.[state.current.index]||null:null;}
  function startVote(state,now=Date.now()){
-  const m=currentMatch(state);if(state.phase!=='battle'||!m||!m.left||!m.right||state.matchStatus!=='preview')return false;
+  const m=currentMatch(state);if(state.phase!=='battle'||!m||!m.left||!m.right||m.winner||!['preview','closed'].includes(state.matchStatus))return false;
+  m.endedAt=null;
   state.matchStatus='voting';m.status='voting';state.votingEndsAt=now+state.settings.voteSeconds*1000;return true;
  }
  function endVote(state,now=Date.now()){
@@ -533,6 +536,7 @@
  let launching=false,game=null, ws=null, sockGeneration=0, retryTimer=0, retryAttempt=0, manuallyDisconnected=false;
  let toastTimer=0, lastBattleKey='', lastPage='', visualCounts=[0,0], animIds=[0,0], demoVoterCounter=1, fallback=false;
  const idsSeen=new Set(), recentMessageKeys=new Map();
+ let chatState='disconnected',chatError='',chatMessageCount=0;
  const shortReason={closed:'پذیرش لینک بسته شده',full:'ظرفیت مسابقه تکمیل شده',username:'نام کاربری معتبر نیست',invalid:'لینک معتبر پیدا نشد',duplicate:'این ویدیو قبلاً ارسال شده', 'per-user':'سقف لینک‌های این کاربر تکمیل شده'};
  const safeStorage={get(k){try{return localStorage.getItem(k)}catch{return null}},set(k,v){try{localStorage.setItem(k,v);return true}catch{return false}},remove(k){try{localStorage.removeItem(k)}catch{}}};
  const text=(id,val)=>{const el=$(id),next=String(val);if(el.textContent!==next)el.textContent=next};
@@ -562,7 +566,7 @@
  function thumbNode(v,klass){const holder=document.createElement('div');holder.className=klass;
   if(v.thumbnail){const img=document.createElement('img');img.loading='lazy';img.decoding='async';img.referrerPolicy='no-referrer';img.src=v.thumbnail;img.alt='تصویر بندانگشتی '+platformName(v);img.onerror=()=>{img.remove();const s=document.createElement('span');s.textContent=iconFor(v);s.className='placeholder-symbol';holder.append(s)};holder.append(img)}
   else {const symbol=document.createElement('span');symbol.textContent=iconFor(v);symbol.className='placeholder-symbol';holder.append(symbol);window.ChatBattleThumbnails?.attach(v,holder)}return holder;}
- function render(){if(!game){phasePage(null);setConnection('disconnected','آماده');return}phasePage(game.phase);
+ function render(){renderChatNotice();if(!game){phasePage(null);setConnection('disconnected','آماده');return}phasePage(game.phase);
   if(game.settings.mode==='demo'){disconnect();setConnection('connected','DEMO MODE')}else if(!ws){setConnection('disconnected','آفلاین')}
   if(game.phase==='collecting')renderCollection();if(game.phase==='battle'){renderBattleMatch();refreshBattleControls();}if(game.phase==='finished')renderResults();
  }
@@ -590,18 +594,23 @@
    const result=Core.vote(game,content,voterKey);if(result.ok){const m=Core.currentMatch(game);(m.voterNames??={})[voterKey.toLowerCase()]=username;}if(result.ok)queueVoteUpdate(result.side)
   }
  }
+ function renderChatNotice(){const notice=$('chatNotice');notice.hidden=!game||game.settings.mode!=='kick'||game.phase==='finished';if(notice.hidden)return;notice.dataset.state=chatState;
+  const channel=game.settings.channel;let message=chatState==='connected'?'کانال '+channel+' متصل است · '+number(chatMessageCount)+' پیام دریافت شده':(chatError||'در حال اتصال به چت کانال '+channel+'…');
+  if(chatState!=='connected'&&chatError)message='کانال '+channel+' — '+chatError+(chatState==='connecting'?' · تلاش دوباره…':'');
+  text('chatNoticeText',message);$('chatReconnectBtn').disabled=chatState==='connecting';}
  function disconnect(){manuallyDisconnected=true;sockGeneration++;clearTimeout(retryTimer);retryTimer=0;retryAttempt=0;if(ws){try{ws.close()}catch{}ws=null}}
  async function connectKick(){if(!game||game.settings.mode!=='kick'||game.phase==='finished')return;
-  disconnect();manuallyDisconnected=false;const generation=++sockGeneration;
+  disconnect();manuallyDisconnected=false;chatError='';const generation=++sockGeneration;
   const channel=game.settings.channel;setConnection('disconnected','در حال اتصال');
   if(!window.ChatBattleRealtime){setConnection('error','خطای بارگیری چت');updateConnectionDescription('فایل اتصال چت بارگیری نشده؛ صفحه را دوباره بارگیری کن.');return;}
   ws=window.ChatBattleRealtime.connect({channel,
    onState(state,message){if(generation!==sockGeneration||manuallyDisconnected)return;
+    chatState=state;if(state==='disconnected')chatError=message||'اتصال چت قطع است.';if(state==='connected')chatError='';renderChatNotice();
     $('connectionStatus').title=message||'';
     setConnection(state==='connected'?'connected':state==='connecting'?'disconnected':'error',state==='connected'?'Kick Live':state==='connecting'?'در حال اتصال':'خطای چت');
     fallback=state!=='connected';if(game?.phase==='collecting'){updateConnectionDescription(state==='connected'?'چت '+channel+' متصل است. فقط پیام‌های دقیق 1 و 2 هنگام رأی‌گیری شمرده می‌شوند.':message);renderCollection();}
    },
-   onMessage(message){if(generation!==sockGeneration||manuallyDisconnected)return;registerText(message.content,message.username,message.id,message.time,message.kickId);}
+   onMessage(message){if(generation!==sockGeneration||manuallyDisconnected)return;chatMessageCount++;renderChatNotice();registerText(message.content,message.username,message.id,message.time,message.kickId);}
   });
  }
  async function submitSettings(e){e.preventDefault();if(restoring)return;const form=$('setupForm');const radios=n=>q('input[name="'+n+'"]:checked',form)?.value;
@@ -690,7 +699,7 @@
   const match=Core.currentMatch(game),solo=!match.left||!match.right;$('coinBtn').hidden=false;$('coinBtn').disabled=coinPending||winPending;
   $('undoBtn').disabled=!game.history?.length||coinPending||winPending;
   const status=game.matchStatus;const voting=status==='voting',closed=status==='closed';
-  $('voteStartBtn').disabled=solo||status!=='preview';$('voteStopBtn').disabled=!voting;
+  $('voteStartBtn').disabled=solo||!['preview','closed'].includes(status);$('voteStopBtn').disabled=!voting;text('voteStartBtn',closed?'⚡ ادامهٔ رأی‌گیری':'⚡ شروع رأی‌گیری');
   qa('[data-advance]').forEach(b=>{const id=Number(b.dataset.advance)===1?match.left:match.right;b.disabled=!id||!(closed||solo&&status==='preview');b.textContent=solo?'🏆 صعود بدون حریف':'🏆 صعود ویدیوی '+b.dataset.advance;});
   text('battleInstruction',solo?'ویدیو را پخش کن، سپس دکمهٔ صعود بدون حریف را بزن.':status==='preview'?'اول ویدیوها رو ببین، بعد رأی‌گیری رو شروع کن.':voting?'رأی‌گیری بازه! فقط پیام دقیق 1 یا 2 شمرده می‌شه.':'رأی‌گیری بسته شد؛ حالا برنده رو انتخاب کن.');
   updateClock();
@@ -904,6 +913,7 @@
   finally{launching=false;if(game?.phase==='collecting')renderCollection()}
  });
  $('reconnectBtn').addEventListener('click',connectKick);
+ $('chatReconnectBtn').addEventListener('click',connectKick);
  $('voteStartBtn').addEventListener('click',startVoting);$('voteStopBtn').addEventListener('click',stopVoting);
  qa('[data-play]').forEach(btn=>btn.addEventListener('click',()=>playSide(Number(btn.dataset.play))));
  qa('[data-advance]').forEach(btn=>btn.addEventListener('click',()=>advanceSide(Number(btn.dataset.advance))));
