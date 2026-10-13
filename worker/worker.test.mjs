@@ -6,6 +6,25 @@ const {privateKey,publicKey}=generateKeyPairSync('rsa',{modulusLength:2048});
 const env={SITE_ORIGIN:'https://example.com',KICK_CLIENT_ID:'client',KICK_CLIENT_SECRET:'test-only-secret',KICK_REDIRECT_URI:'https://example.com/kick-callback.html',FIREBASE_PROJECT_ID:'test-project',FIREBASE_SERVICE_ACCOUNT:JSON.stringify({type:'service_account',project_id:'test-project',client_email:'test@test-project.iam.gserviceaccount.com',private_key:privateKey.export({type:'pkcs8',format:'pem'})})};
 const verifier='a'.repeat(43),challenge=createHash('sha256').update(verifier).digest('base64url');
 const call=(path,body,config=env,origin=env.SITE_ORIGIN)=>worker.fetch(new Request('https://worker.example/'+path,{method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},body:JSON.stringify(body)}),config);
+
+test('public Centrifugo bootstrap and token renewal need no OAuth secrets; proxy is restricted',async()=>{
+ const original=globalThis.fetch,clientId='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+ globalThis.fetch=async(url,opts)=>{
+  if(url.includes('/api/v2/channels/'))return Response.json({id:123,chatroom:{id:456}});
+  if(url.endsWith('/chat/connection')){assert.equal(JSON.parse(opts.body).client.id,clientId);return Response.json({data:{connections:[{provider:'centrifugo',credentials:{url:'wss://realtime.us-east-1.platform.kick.com/connection/websocket'}}]}});}
+  if(url.endsWith('/auth/connection'))return Response.json({data:{token:'anonymous-test-token'}});
+  assert.equal(url,'https://realtime.us-east-1.platform.kick.com/connection/websocket');assert.equal(opts.headers.Origin,'https://kick.com');assert.equal(opts.headers.Cookie,undefined);return {status:101,webSocket:{}};
+ };
+ try{
+  const config={SITE_ORIGIN:env.SITE_ORIGIN};
+  const result=await call('chat/bootstrap',{channel:'test-channel',clientId},config);assert.equal(result.status,200);assert.deepEqual(await result.json(),{provider:'centrifugo',url:'wss://realtime.us-east-1.platform.kick.com/connection/websocket',token:'anonymous-test-token',channelId:123,roomId:456});
+  assert.equal((await call('chat/token',{clientId},config)).status,200);
+  assert.equal((await call('chat/token',{clientId:'invalid'},config)).status,502);
+  const socket=host=>worker.fetch(new Request('https://worker.example/chat/socket?host='+encodeURIComponent(host),{headers:{Origin:env.SITE_ORIGIN,Upgrade:'websocket'}}),config);
+  assert.equal((await socket('evil.test')).status,400);assert.equal((await socket('realtime.us-east-1.platform.kick.com')).status,101);
+  assert.equal((await call('chat/bootstrap',{channel:'test-channel',clientId},config,'https://evil.test')).status,403);
+ }finally{globalThis.fetch=original;}
+});
 test('state integrity, PKCE, expiry, CORS, body limits and missing config',async()=>{
  assert.equal((await call('start',{challenge},env,'https://evil.example')).status,403);
  assert.equal((await call('start',{challenge},{...env,KICK_CLIENT_SECRET:''})).status,503);
