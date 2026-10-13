@@ -7,7 +7,7 @@
   const emit=(state,message)=>{if(!stopped)onState(state,message);};
   const clearTimers=()=>{clearTimeout(heartbeatTimer);clearTimeout(refreshTimer);clearTimeout(deadlineTimer);};
   async function api(path,body,signal){
-   const response=await fetch(worker+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal});
+   let response;try{response=await fetch(worker+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal});}catch(error){throw Error('دسترسی به Worker ناموفق است؛ شبکه یا CORS: '+error.message);}
    let data;try{data=await response.json();}catch{throw Error('پاسخ سرویس چت معتبر نیست.');}
    if(!response.ok)throw Error(response.status===404?'Worker چت هنوز به نسخهٔ جدید ارتقا پیدا نکرده است.':data.error||'خطای سرویس چت '+response.status);
    return data;
@@ -56,7 +56,7 @@
       else if(reply.push){const push=reply.push;if(push.disconnect||push.unsubscribe&&push.channel===roomChannel){retry(token,'اتصال چت نیاز به تمدید دارد.');return;}if(push.channel===roomChannel&&push.pub)publication(push.pub);}
      }
     };
-    ws.onerror=()=>{if(current())retry(token,'خطای شبکهٔ چت؛ اتصال دوباره…');};
+    ws.onerror=()=>{if(current())retry(token,'اتصال WebSocket روی Worker برقرار نشد ('+url.hostname+'). شبکه یا محدودیت مرورگر را بررسی کن.');};
     ws.onclose=event=>{if(current())retry(token,'اتصال چت قطع شد ('+event.code+').');};
    }catch(error){if(!stopped&&token===generation)retry(token,error.message);}
   }
