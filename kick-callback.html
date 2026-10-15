@@ -1,2 +1,5 @@
 <!doctype html>
-<html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><title>ورود با Kick</title><style>body{background:#090b0f;color:#d7ff76;font:18px/2 Tahoma,sans-serif;padding:10vh 8vw}p{max-width:650px}a{color:inherit}</style></head><body><h1>ورود با Kick</h1><p id="status" role="status">در حال تأیید حساب…</p><p>در صورت خطا، لینک دعوت مسابقه را دوباره باز کن.</p><script type="module">import {finishKickLogin} from './kick-auth.js';finishKickLogin().catch(e=>document.getElementById('status').textContent=e.message);</script></body></html>
+<html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><title>ورود با Kick</title><link rel="stylesheet" href="./redesign.css?v=slate-1">
+<script src="./translations.js?v=slate-1"></script>
+<script src="./i18n.js?v=slate-1" defer></script>
+</head><body><main class="auth-page"><h1>ورود با Kick</h1><p id="status" role="status">در حال تأیید حساب…</p><p>در صورت خطا، لینک دعوت مسابقه را دوباره باز کن.</p></main><script type="module">import {finishKickLogin} from './kick-auth.js';finishKickLogin().catch(e=>document.getElementById('status').textContent=e.message);</script></body></html>

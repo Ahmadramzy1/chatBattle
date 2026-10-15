@@ -200,7 +200,7 @@ async function boot(){
   try{
     anonymousUser=await kickUser();
     if(!anonymousUser){form.hidden=true;$('kickLogin').hidden=false;status('برای ارسال ویدیو با حساب Kick وارد شو.','info');return}
-    $('kickLogin').hidden=true;$('kickIdentity').textContent='حساب تأییدشده: @'+anonymousUser.kickName;
+    $('kickLogin').hidden=true;{const prefix=document.createElement('span');prefix.textContent='حساب تأییدشده: @';const name=document.createElement('bdi');name.dataset.noTranslate='';name.textContent=anonymousUser.kickName;$('kickIdentity').replaceChildren(prefix,name);}
     const ownRef=doc(db,'chatBattleSessions',sessionId,'submissions',anonymousUser.uid);
     const mineSnap=await getDoc(ownRef);
     if(mineSnap.exists())mine=mineSnap.data();

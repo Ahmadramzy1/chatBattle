@@ -2,12 +2,12 @@
 <html lang="fa" dir="rtl">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#0c1014">
+<meta name="theme-color" content="#142237">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title>Chat Battle — ارسال ویدیو</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;700;800&display=swap" rel="stylesheet">
+
+
+
 <style>
 :root{color-scheme:dark;--green:#d7ff76;--line:#303e43;--muted:#9aaab6;--surface:#171e24;--bg:#0b0e12}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 18% 4%,#2b3d25 0%,transparent 40%),radial-gradient(ellipse at 85% 60%,#292330 0%,transparent 44%),var(--bg);color:#f3f8fa;font:14px/1.95 Vazirmatn,Tahoma,Arial,sans-serif;min-height:100vh}button,input{font:inherit}
@@ -28,7 +28,10 @@ button:disabled{opacity:.43;cursor:not-allowed}.subtle{background:#243122;color:
 .entry.duplicate::after{content:"قبلاً ثبت شده";font-size:10px;align-self:center;color:#ff8e82;white-space:nowrap}.status.info{background:#1a2430;border-color:#42556e;color:#b9d1ff}
 .done{display:none;text-align:center;padding:45px 26px}.done strong{font-size:24px;display:block;color:var(--green)}.done p{color:#bdc6cf}footer{color:#829199;text-align:center;padding:30px 8px;font:700 10px 'Space Grotesk',sans-serif;letter-spacing:2px}a{color:var(--green)}
 @media(max-width:500px){.wrap{padding-top:22px}.card{padding:19px}.eyebrow{margin-top:32px}}
-</style></head>
+</style><link rel="stylesheet" href="./redesign.css?v=slate-1">
+<script src="./translations.js?v=slate-1"></script>
+<script src="./i18n.js?v=slate-1" defer></script>
+</head>
 <body>
 <div class="wrap">
 <div class="brand"><div class="brand-mark">✕</div> CHAT <span>BATTLE</span></div>
@@ -36,7 +39,7 @@ button:disabled{opacity:.43;cursor:not-allowed}.subtle{background:#243122;color:
 <h1>ویدیوت رو <em>وارد رقابت کن!</em></h1>
 <p class="sub">لینک ویدیوها رو ثبت کن؛ چت Kick بعداً قهرمان رو با رأی تعیین می‌کنه.</p>
 <section class="card" aria-label="مشخصات مسابقه">
- <p class="topic" id="topic">در حال بارگذاری مسابقه...</p>
+ <p class="topic" id="topic" data-user-topic>در حال بارگذاری مسابقه...</p>
  <div class="session-info"><span class="chip" id="capacity">— ظرفیت</span><span class="chip" id="perUser">— لینک برای هر نفر</span><span class="chip" id="remaining">— جای خالی</span></div>
  <p id="state" class="status info" role="status">در حال اتصال امن به Firebase...</p>
 </section>
@@ -54,5 +57,5 @@ button:disabled{opacity:.43;cursor:not-allowed}.subtle{background:#243122;color:
 <section id="success" class="card done"><span style="font-size:53px">🏆</span><strong>لینک‌هات ثبت شدن!</strong><p id="successInfo">منتظر شروع رقابت باش.</p><button class="subtle" id="editLinks" type="button" hidden>✎ ویرایش یا اضافه کردن لینک</button><p class="hint" id="editHint">ویرایش فقط تا پیش از شروع مسابقه فعال است.</p></section>
 <footer>CHAT BATTLE — THE CHAT DECIDES.</footer>
 </div>
-<script type="module" src="./firebase-invite.js?v=tiktok-short-1"></script>
+<script type="module" src="./firebase-invite.js?v=slate-1"></script>
 </body></html>
