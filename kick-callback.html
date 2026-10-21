@@ -2,4 +2,6 @@
 <html lang="fa" dir="rtl"><head><script src="./theme.js?v=organic-1"></script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><title>ورود با Kick</title><link rel="stylesheet" href="./redesign.css?v=organic-2">
 <script src="./translations.js?v=organic-1"></script>
 <script src="./i18n.js?v=slate-1" defer></script>
+<link rel="stylesheet" href="./neumorphism.css?v=neo-1">
+<script src="./presentation-motion.js?v=neo-1" defer></script>
 </head><body><main class="auth-page"><h1>ورود با Kick</h1><p id="status" role="status">در حال تأیید حساب…</p><p>در صورت خطا، لینک دعوت مسابقه را دوباره باز کن.</p></main><script type="module">import {finishKickLogin} from './kick-auth.js';finishKickLogin().catch(e=>document.getElementById('status').textContent=e.message);</script></body></html>

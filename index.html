@@ -265,6 +265,8 @@
 <link rel="stylesheet" href="./redesign.css?v=organic-2">
 <script src="./translations.js?v=organic-1"></script>
 <script src="./i18n.js?v=slate-1" defer></script><script src="./interface.js?v=slate-1" defer></script>
+<link rel="stylesheet" href="./neumorphism.css?v=neo-1">
+<script src="./presentation-motion.js?v=neo-1" defer></script>
 </head>
 <body><a class="skip-link" href="#main-content">رفتن به محتوای اصلی</a>
 <div class="ambient ambient-one" aria-hidden="true"></div><div class="ambient ambient-two" aria-hidden="true"></div>
@@ -274,7 +276,7 @@
    <span class="brand-icon"><svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="m13 8 27 27-5 5L8 13z" fill="#d7ff76"/><path d="M35 8 8 35l5 5L40 13z" fill="#fff"/><path d="m7 7 8 2-6 6zM41 7l-8 2 6 6z" fill="#ff8f80"/></svg></span>
    <span><strong>CHAT<span>BATTLE</span></strong><small>THE CHAT DECIDES.</small></span>
   </a>
-  <a class="header-mid" href="https://kick.com/ahmad-ramzy" target="_blank" rel="noopener noreferrer" aria-label="کانال Ahmad Ramzy در Kick"><img class="header-logo" src="./assets/ahmad-ramzy-logo.png" width="1254" height="1254" alt="Ahmad Ramzy" decoding="async" fetchpriority="high"></a>
+  <a class="header-mid" href="https://kick.com/ahmadramzy" target="_blank" rel="noopener noreferrer" aria-label="کانال Ahmad Ramzy در Kick"><img class="header-logo" src="./assets/ahmad-ramzy-logo.png" width="1254" height="1254" alt="Ahmad Ramzy" decoding="async" fetchpriority="high"></a>
   <div class="header-actions"><span class="connection-indicator disconnected" id="connectionStatus"><i></i><span>قطع</span></span><button class="icon-btn" id="resetBtn" title="مسابقه جدید" type="button">↻ <span>مسابقه جدید</span></button></div>
  </header>
  <div id="chatNotice" class="chat-notice" hidden><span id="chatNoticeText" role="status"></span><button id="chatReconnectBtn" type="button" class="secondary-btn">اتصال مجدد چت</button></div>
@@ -293,8 +295,8 @@
      <div class="panel-heading"><span class="section-number">01 / SETUP</span><h2>مسابقه‌ات رو بساز</h2><p>چندتا انتخاب کوچیک تا شروع یک رقابت بزرگ.</p></div>
      <div class="form-field"><label for="topicInput">عنوان مسابقه</label><input id="topicInput" name="topic" maxlength="110" placeholder="مثلاً: خنده‌دارترین ویدیوی اینترنت" value="خنده‌دارترین ویدیوی اینترنت" required></div>
      <div class="form-field"><label for="channelInput">یوزرنیم کانال Kick</label><div class="prefix-input"><span>kick.com/</span><input id="channelInput" name="channel" dir="ltr" placeholder="channel_name" spellcheck="false"></div></div>
-     <div class="form-field"><label>حالت رأی‌گیری Kick</label><div class="segment" id="modeSelector"><label><input type="radio" name="mode" value="kick" checked><span>● چت واقعی Kick</span></label><label><input type="radio" name="mode" value="demo"><span>◉ حالت آزمایشی</span></label></div><p class="hint">ارسال ویدیو از لینک دعوت انجام می‌شه؛ حالت آزمایشی فقط برای تست رأی‌گیری بدون Kick است.</p></div>
-     <div class="form-field"><label>تعداد شرکت‌کننده</label><div class="capacity-select"><label><input type="radio" name="capacity" value="16" checked><span>16</span></label><label><input type="radio" name="capacity" value="24"><span>24</span></label><label><input type="radio" name="capacity" value="32"><span>32</span></label><label><input type="radio" name="capacity" value="48"><span>48</span></label></div></div>
+     <div class="form-field"><label>حالت رأی‌گیری Kick</label><div class="segment" id="modeSelector" role="group" aria-label="حالت رأی‌گیری"><label><input type="radio" name="mode" value="kick" checked><span>● چت واقعی Kick</span></label><label><input type="radio" name="mode" value="demo"><span>◉ حالت آزمایشی</span></label></div><p class="hint">ارسال ویدیو از لینک دعوت انجام می‌شه؛ حالت آزمایشی فقط برای تست رأی‌گیری بدون Kick است.</p></div>
+     <div class="form-field"><label>تعداد شرکت‌کننده</label><div class="capacity-select" role="group" aria-label="تعداد شرکت‌کننده"><label><input type="radio" name="capacity" value="16" checked><span>16</span></label><label><input type="radio" name="capacity" value="24"><span>24</span></label><label><input type="radio" name="capacity" value="32"><span>32</span></label><label><input type="radio" name="capacity" value="48"><span>48</span></label></div></div>
      <label class="toggle-row"><span><b>نمایش نام رأی‌دهنده‌ها</b><small>زیر ویدیویی که انتخاب کرده‌اند</small></span><input type="checkbox" id="showVotersInput"><i></i></label>
      <label class="toggle-row"><span><b>نمایش نام فرستندهٔ ویدیو</b><small>در لابی و هنگام رأی‌گیری</small></span><input type="checkbox" id="showSendersInput"><i></i></label>
      <div class="form-double"><div class="form-field"><label for="perUserInput">لینک مجاز هر نفر</label><select id="perUserInput"><option value="1">۱ لینک</option><option value="2" selected>۲ لینک</option><option value="3">۳ لینک</option><option value="5">۵ لینک</option><option value="10">۱۰ لینک</option></select></div><div class="form-field"><label for="secondsInput">زمان هر رأی‌گیری</label><select id="secondsInput"><option value="15">۱۵ ثانیه</option><option value="20">۲۰ ثانیه</option><option value="30" selected>۳۰ ثانیه</option><option value="45">۴۵ ثانیه</option><option value="60">۶۰ ثانیه</option><option value="90">۹۰ ثانیه</option><option value="120">۱۲۰ ثانیه</option></select></div></div>
