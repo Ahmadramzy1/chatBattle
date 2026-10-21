@@ -361,3 +361,5 @@ Object.assign(window.ChatBattleTranslations.fa,{"SEMI FINALS":"نیمه‌نها
 
 Object.assign(window.ChatBattleTranslations.en,{"تمام‌صفحه": "Full screen", "سرعت پخش": "Playback speed", "قطع یا وصل صدا": "Mute or unmute", "پنج ثانیه جلو": "Forward five seconds", "پنج ثانیه عقب": "Back five seconds", "پخش یا توقف": "Play or pause", "بهترین ویدیوی چت": "Best video in chat"});
 Object.assign(window.ChatBattleTranslations.fa,{"Video": "ویدیو", "Short Link": "لینک کوتاه", "Share Link": "لینک اشتراکی", "Short": "ویدیوی کوتاه", "Post": "پست", "Reel": "ریلز", "WINNER!": "قهرمان مسابقه!", "WE HAVE A": "این هم", "Invalid tournament capacity": "ظرفیت مسابقه معتبر نیست", "Invalid user limit": "سقف لینک هر نفر معتبر نیست", "Invalid vote duration": "زمان رأی‌گیری معتبر نیست"});
+
+Object.assign(window.ChatBattleTranslations.en,{"رأی‌گیری زنده":"Live voting","جدول حذفی":"Knockout bracket","ارسال ویدیو":"Video submissions"});

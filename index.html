@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
-<head>
+<head><script src="./theme.js?v=organic-1"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="color-scheme" content="dark">
+<meta name="color-scheme" content="light dark">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<meta name="theme-color" content="#142237">
+<meta name="theme-color" content="#f5f0e5">
 <meta name="description" content="Chat Battle — مسابقه حذفی ویدیوهای ارسالی از طریق لینک دعوت با رأی‌گیری زنده چت Kick">
 <title>Chat Battle — Live Video Tournament</title>
 
@@ -262,8 +262,8 @@
 .chat-notice{margin:14px clamp(20px,4.3vw,68px) 0;padding:10px 14px;border:1px solid #667647;border-radius:10px;display:flex;align-items:center;justify-content:space-between;gap:12px;background:#192019;font-size:12px;overflow-wrap:anywhere}.chat-notice[data-state="disconnected"]{border-color:#a85d54;background:#2b1b1b;color:#ffd0c8}.chat-notice button{flex:none;padding:7px 12px}.chat-notice[hidden]{display:none}
 @media(max-width:650px){.topbar{height:158px;min-height:158px;align-items:flex-end;padding-bottom:14px}.header-mid{height:104px;width:132px}.header-logo{width:104px;height:104px}}
 </style>
-<link rel="stylesheet" href="./redesign.css?v=slate-1">
-<script src="./translations.js?v=slate-1"></script>
+<link rel="stylesheet" href="./redesign.css?v=organic-1">
+<script src="./translations.js?v=organic-1"></script>
 <script src="./i18n.js?v=slate-1" defer></script><script src="./interface.js?v=slate-1" defer></script>
 </head>
 <body><a class="skip-link" href="#main-content">رفتن به محتوای اصلی</a>
@@ -281,12 +281,13 @@
  <main id="main-content">
   <section class="page active" id="page-setup" aria-label="تنظیم مسابقه">
    <div class="setup-layout">
-    <div class="setup-hero">
+    <div class="setup-hero"><div class="hero-copy">
      <span class="eyebrow"><span class="eyebrow-rule"></span> INTERACTIVE STREAM EXPERIENCE <span class="eyebrow-rule"></span></span>
      <h1>ONE CHAT.<br><em>ONE CHAMPION.</em></h1>
      <p>بیننده‌ها از لینک دعوت اختصاصی ویدیو می‌فرستن و چت Kick فقط با رأی‌های 1 و 2 قهرمان رو تعیین می‌کنه.</p>
-     <div class="hero-orbit" aria-hidden="true"><div class="ring ring-one"></div><div class="ring ring-two"></div><div class="orb-card orb-one"><b>01</b><span>VIDEO A</span></div><span class="versus">VS</span><div class="orb-card orb-two"><b>02</b><span>VIDEO B</span></div></div>
-     <div class="hero-pills"><span>⚡ LIVE VOTING</span><span>🏆 KNOCKOUT FORMAT</span><span>🔒 VERIFIED SUBMISSIONS</span></div>
+
+     <div class="hero-pills"><span>رأی‌گیری زنده</span><span>جدول حذفی</span><span>ارسال ویدیو</span></div>
+</div><figure class="hero-art"><img src="./assets/kick-knight.png" width="1448" height="1086" alt="شوالیه Kick رو به قلعه در قلمرو مهتابی" fetchpriority="high" decoding="async"><figcaption data-no-translate>THE CHAT DECIDES. <span>01 / CHAT BATTLE</span></figcaption></figure>
     </div>
     <form id="setupForm" class="setup-panel glass" autocomplete="off">
      <div class="panel-heading"><span class="section-number">01 / SETUP</span><h2>مسابقه‌ات رو بساز</h2><p>چندتا انتخاب کوچیک تا شروع یک رقابت بزرگ.</p></div>

@@ -1,6 +1,7 @@
-/* Palette approximated from the two supplied slate dashboard references.
-   Typography, spacing and responsive rules are adapted for ChatBattle. */
+/* Screenshot palette approximated from the supplied cream/sage references.
+   Dark gold adaptation requested by the user. */
 @font-face{font-family:Estedad;src:url('./assets/fonts/Estedad.ttf') format('truetype');font-weight:100 900;font-display:swap}
 @font-face{font-family:Manrope;src:url('./assets/fonts/Manrope.ttf') format('truetype');font-weight:200 800;font-display:swap}
-:root{color-scheme:dark;--bg:#142237;--panel:#33475d;--panel2:#435970;--border:#8399ae66;--muted:#c1ceda;--text:#f5f9fe;--lime:#c4e4fa;--green:#c4e4fa;--salmon:#f6a9a4;--blue:#91c6f1;--r:26px;--f:Estedad,sans-serif;--latin:Manrope,Estedad,sans-serif;--glass:linear-gradient(115deg,#7ab8e04a 0%,#5c819b24 48%,#adbed914 100%);--shadow:inset 0 1px 0 #ffffff13,0 16px 40px #09162616;--focus:#c4e4fa}
+:root{color-scheme:light;--bg:#a4b59e;--canvas:#f5f0e5;--panel:#faf7ef;--panel2:#e6e9dc;--border:#ccd0be;--muted:#60695b;--text:#273426;--lime:#405e46;--green:var(--lime);--salmon:#96503e;--blue:#566b4c;--accent:#bbcab2;--on-accent:#243524;--input:#fdfaf3;--r:28px;--f:Estedad,sans-serif;--latin:Manrope,Estedad,sans-serif;--glass:var(--panel);--shadow:0 8px 24px #2734260a;--focus:#405e46;--line:var(--border);--surface:var(--panel)}
+:root[data-theme=dark]{color-scheme:dark;--bg:#11130f;--canvas:#191a17;--panel:#23251f;--panel2:#2d3027;--border:#454838;--muted:#b9bcaa;--text:#f0edde;--lime:#dccb95;--salmon:#e0a38e;--blue:#b6c4a3;--accent:#dccb95;--on-accent:#27291f;--input:#1c1f19;--shadow:0 8px 24px #0002;--focus:#dccb95}
 html[lang=en]{--f:Manrope,Estedad,sans-serif}
