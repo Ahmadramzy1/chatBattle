@@ -64,7 +64,7 @@ async function createSession(g){
     await setDoc(ref,{
       ownerUid:user.uid,topic:g.settings.topic,capacity:g.settings.capacity,
       perUser:g.settings.perUser,status:'collecting',usedCount:0,
-      schemaVersion:2,requireKick:true,reservedVideoKeys:[],createdAt:serverTimestamp()
+      schemaVersion:2,requireKick:g.settings.requireKick!==false,reservedVideoKeys:[],createdAt:serverTimestamp()
     });
     if(bridge.getGame()!==g)return;
     bridge.attachSession(g,ref.id);

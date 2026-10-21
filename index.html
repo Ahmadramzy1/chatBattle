@@ -263,7 +263,7 @@
 @media(max-width:650px){.topbar{height:158px;min-height:158px;align-items:flex-end;padding-bottom:14px}.header-mid{height:104px;width:132px}.header-logo{width:104px;height:104px}}
 </style>
 <link rel="stylesheet" href="./redesign.css?v=organic-2">
-<script src="./translations.js?v=organic-1"></script>
+<script src="./translations.js?v=entry-auth-1"></script>
 <script src="./i18n.js?v=slate-1" defer></script><script src="./interface.js?v=slate-1" defer></script>
 <link rel="stylesheet" href="./neumorphism.css?v=neo-1">
 <script src="./presentation-motion.js?v=neo-1" defer></script>
@@ -296,6 +296,7 @@
      <div class="form-field"><label for="topicInput">عنوان مسابقه</label><input id="topicInput" name="topic" maxlength="110" placeholder="مثلاً: خنده‌دارترین ویدیوی اینترنت" value="خنده‌دارترین ویدیوی اینترنت" required></div>
      <div class="form-field"><label for="channelInput">یوزرنیم کانال Kick</label><div class="prefix-input"><span>kick.com/</span><input id="channelInput" name="channel" dir="ltr" placeholder="channel_name" spellcheck="false"></div></div>
      <div class="form-field"><label>حالت رأی‌گیری Kick</label><div class="segment" id="modeSelector" role="group" aria-label="حالت رأی‌گیری"><label><input type="radio" name="mode" value="kick" checked><span>● چت واقعی Kick</span></label><label><input type="radio" name="mode" value="demo"><span>◉ حالت آزمایشی</span></label></div><p class="hint">ارسال ویدیو از لینک دعوت انجام می‌شه؛ حالت آزمایشی فقط برای تست رأی‌گیری بدون Kick است.</p></div>
+     <div class="form-field"><label>روش ورود برای ارسال ویدیو</label><div class="segment" id="submissionAuthSelector" role="group" aria-label="روش ورود برای ارسال ویدیو"><label><input type="radio" name="submissionAuth" value="kick" checked><span>ورود با Kick</span></label><label><input type="radio" name="submissionAuth" value="name"><span>فقط وارد کردن نام</span></label></div><p class="hint">در حالت نام دستی، نام تأیید نمی‌شود و سقف ارسال برای همین مرورگر اعمال می‌شود.</p></div>
      <div class="form-field"><label>تعداد شرکت‌کننده</label><div class="capacity-select" role="group" aria-label="تعداد شرکت‌کننده"><label><input type="radio" name="capacity" value="16" checked><span>16</span></label><label><input type="radio" name="capacity" value="24"><span>24</span></label><label><input type="radio" name="capacity" value="32"><span>32</span></label><label><input type="radio" name="capacity" value="48"><span>48</span></label></div></div>
      <label class="toggle-row"><span><b>نمایش نام رأی‌دهنده‌ها</b><small>زیر ویدیویی که انتخاب کرده‌اند</small></span><input type="checkbox" id="showVotersInput"><i></i></label>
      <label class="toggle-row"><span><b>نمایش نام فرستندهٔ ویدیو</b><small>در لابی و هنگام رأی‌گیری</small></span><input type="checkbox" id="showSendersInput"><i></i></label>
@@ -403,7 +404,7 @@
   }catch{return null}
  }
  function linksIn(message){const matches=safeText(message).match(rxLinks)||[];return matches.map(parseVideo).filter(Boolean);}
- function defaults(){return {channel:'',topic:'بهترین ویدیوی چت',capacity:16,perUser:1,voteSeconds:30,showVoters:false,showSenders:false,allowChange:false,mode:'demo',pusherKey:'32cbd69e4b950bf97679'};}
+ function defaults(){return {channel:'',topic:'بهترین ویدیوی چت',capacity:16,perUser:1,voteSeconds:30,showVoters:false,showSenders:false,allowChange:false,mode:'demo',requireKick:true,pusherKey:'32cbd69e4b950bf97679'};}
  function newGame(settings={}){
   const d={...defaults(),...settings};d.capacity=Number(d.capacity);d.perUser=Number(d.perUser);d.voteSeconds=Number(d.voteSeconds);
   if(!CAPACITIES.includes(d.capacity))throw Error('Invalid tournament capacity');
@@ -622,7 +623,7 @@
  async function submitSettings(e){e.preventDefault();if(restoring)return;const form=$('setupForm');const radios=n=>q('input[name="'+n+'"]:checked',form)?.value;
   const channel=$('channelInput').value.trim().replace(/^https?:\/\/(www\.)?kick\.com\//i,'').replace(/[@/?#].*$/,'').toLowerCase();
   const mode=radios('mode');if(mode==='kick'&&!channel){$('channelInput').focus();toast('نام کانال Kick را وارد کنید.');return}
-  const settings={topic:$('topicInput').value,channel,mode,capacity:Number(radios('capacity')),perUser:Number($('perUserInput').value),voteSeconds:Number($('secondsInput').value),showVoters:$('showVotersInput').checked,showSenders:$('showSendersInput').checked,allowChange:$('allowChangeInput').checked,pusherKey:$('pusherInput').value.trim()};
+  const settings={topic:$('topicInput').value,channel,mode,capacity:Number(radios('capacity')),perUser:Number($('perUserInput').value),voteSeconds:Number($('secondsInput').value),showVoters:$('showVotersInput').checked,showSenders:$('showSendersInput').checked,allowChange:$('allowChangeInput').checked,requireKick:radios('submissionAuth')!=='name',pusherKey:$('pusherInput').value.trim()};
   try{game=Core.newGame(settings)}catch(ex){toast(ex.message);return}
   fallback=false;lastBattleKey='';save();render();
   const newGame=game;
@@ -1120,6 +1121,6 @@ document.querySelectorAll('[data-fullscreen]').forEach(b=>b.addEventListener('cl
 })();
 
 </script>
-<script type="module" src="./firebase-host.js?v=20261010-controls3"></script>
+<script type="module" src="./firebase-host.js?v=entry-auth-1"></script>
 </body>
 </html>

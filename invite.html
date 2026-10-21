@@ -29,7 +29,7 @@ button:disabled{opacity:.43;cursor:not-allowed}.subtle{background:#243122;color:
 .done{display:none;text-align:center;padding:45px 26px}.done strong{font-size:24px;display:block;color:var(--green)}.done p{color:#bdc6cf}footer{color:#829199;text-align:center;padding:30px 8px;font:700 10px 'Space Grotesk',sans-serif;letter-spacing:2px}a{color:var(--green)}
 @media(max-width:500px){.wrap{padding-top:22px}.card{padding:19px}.eyebrow{margin-top:32px}}
 </style><link rel="stylesheet" href="./redesign.css?v=organic-2">
-<script src="./translations.js?v=organic-1"></script>
+<script src="./translations.js?v=entry-auth-1"></script>
 <script src="./i18n.js?v=slate-1" defer></script>
 <link rel="stylesheet" href="./neumorphism.css?v=neo-1">
 <script src="./presentation-motion.js?v=neo-1" defer></script>
@@ -45,10 +45,10 @@ button:disabled{opacity:.43;cursor:not-allowed}.subtle{background:#243122;color:
  <div class="session-info"><span class="chip" id="capacity">— ظرفیت</span><span class="chip" id="perUser">— لینک برای هر نفر</span><span class="chip" id="remaining">— جای خالی</span></div>
  <p id="state" class="status info" role="status">در حال اتصال امن به Firebase...</p>
 </section>
-<section class="card"><p id="kickIdentity">نام فرستنده از حساب Kick دریافت می‌شود.</p><button id="kickLogin" class="submit" type="button" hidden>ورود با Kick</button><p class="hint">فقط دسترسی خواندن اطلاعات حساب درخواست می‌شود. اجازهٔ ارسال پیام یا مدیریت کانال لازم نیست.</p></section>
+<section class="card"><p id="kickIdentity">نام فرستنده از حساب Kick دریافت می‌شود.</p><button id="kickLogin" class="submit" type="button" hidden>ورود با Kick</button><p class="hint" id="identityHint">فقط دسترسی خواندن اطلاعات حساب درخواست می‌شود. اجازهٔ ارسال پیام یا مدیریت کانال لازم نیست.</p></section>
 <form id="entryForm" class="card" hidden>
- <label for="username">نام کاربری Kick</label><input id="username" readonly aria-readonly="true">
- <p class="hint">این نام مستقیماً از حساب Kick دریافت شده و قابل تغییر نیست.</p>
+ <label for="username" id="usernameLabel">نام کاربری Kick</label><input id="username" readonly aria-readonly="true" maxlength="64" minlength="2" required aria-describedby="usernameHint" autocomplete="nickname" dir="auto">
+ <p class="hint" id="usernameHint">این نام مستقیماً از حساب Kick دریافت شده و قابل تغییر نیست.</p>
  <label>لینک ویدیوها</label>
  <div id="inputs" class="inputs"></div>
  <button id="addAnother" class="subtle" type="button">＋ اضافه کردن لینک دیگر</button>
@@ -59,5 +59,5 @@ button:disabled{opacity:.43;cursor:not-allowed}.subtle{background:#243122;color:
 <section id="success" class="card done"><span style="font-size:53px">🏆</span><strong>لینک‌هات ثبت شدن!</strong><p id="successInfo">منتظر شروع رقابت باش.</p><button class="subtle" id="editLinks" type="button" hidden>✎ ویرایش یا اضافه کردن لینک</button><p class="hint" id="editHint">ویرایش فقط تا پیش از شروع مسابقه فعال است.</p></section>
 <footer>CHAT BATTLE — THE CHAT DECIDES.</footer>
 </div>
-<script type="module" src="./firebase-invite.js?v=slate-1"></script>
+<script type="module" src="./firebase-invite.js?v=entry-auth-1"></script>
 </body></html>

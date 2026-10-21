@@ -1,3 +1,4 @@
+import { requiresKick, submissionName } from './submission-auth.js?v=entry-auth-1';
 import { resolveTikTokLink } from './media-links.js?v=tiktok-short-1';
 import { kickUser, loginWithKick } from './kick-auth.js';
 import {
@@ -8,7 +9,7 @@ const $=id=>document.getElementById(id);
 const sessionId=new URLSearchParams(location.search).get('s')||'';
 const sessionRef=doc(db,'chatBattleSessions',sessionId||'missing');
 const form=$('entryForm'),inputs=$('inputs');
-let current=null,anonymousUser=null,mine=null,editing=false,pending=false,unsubscribe=null;
+let current=null,viewerUser=null,mine=null,editing=false,pending=false,unsubscribe=null;
 const LEGACY='این مسابقه با نسخه قبلی ساخته شده. برای ویرایش و بررسی لینک تکراری، از استریمر بخواه مسابقه جدید بسازه.';
 function status(message,type='info'){
   $('state').className='status '+type;
@@ -87,7 +88,7 @@ function refreshControls(){
 }
 function populateForm(){
   inputs.replaceChildren();
-  $('username').value=anonymousUser?.kickName||'';
+  $('username').value=requiresKick(current)?viewerUser?.kickName||'':mine?.username||'';
   for(const link of mine?.links||[])addField(link);
   if(!inputs.children.length)addField();
   refreshControls();
@@ -103,13 +104,28 @@ function showConfirmed(){
   $('editHint').textContent=canEdit?'ویرایش لینک‌ها و اضافه کردن ویدیوی جدید تا سقف مجاز فعاله.':'مسابقه شروع شده یا ارسال‌ها بسته شده؛ ویرایش امکان‌پذیر نیست.';
   status(canEdit?'✅ لینک‌ها ثبت شدن و قابل ویرایش هستن.':'✅ ویدیوهای ثبت‌شده ذخیره شدن.','');
 }
+function identityUi(room){
+  const kick=requiresKick(room),field=$('username');
+  field.readOnly=kick;field.setAttribute('aria-readonly',String(kick));
+  $('usernameLabel').textContent=kick?'نام کاربری Kick':'نام نمایشی';
+  $('usernameHint').textContent=kick?'این نام مستقیماً از حساب Kick دریافت شده و قابل تغییر نیست.':'نامی بین ۲ تا ۶۴ کاراکتر بنویس؛ این نام تأیید نمی‌شود.';
+  $('identityHint').textContent=kick?'فقط دسترسی خواندن اطلاعات حساب درخواست می‌شود. اجازهٔ ارسال پیام یا مدیریت کانال لازم نیست.':'بدون ورود به Kick؛ سقف ارسال برای همین مرورگر است. برای ویرایش، همین مرورگر را نگه دار.';
+  $('kickLogin').hidden=!kick||!!viewerUser?.kickName||room.status!=='collecting';
+  if(kick&&viewerUser?.kickName){
+    const prefix=document.createElement('span');prefix.textContent='حساب تأییدشده: @';
+    const name=document.createElement('bdi');name.dataset.noTranslate='';name.textContent=viewerUser.kickName;$('kickIdentity').replaceChildren(prefix,name);
+    field.value=viewerUser.kickName;
+  }else $('kickIdentity').textContent=kick?'برای ارسال ویدیو با حساب Kick وارد شو.':'ارسال با نام دلخواه';
+}
 function showRoom(room){
   current=room;
+  identityUi(room);
   $('topic').textContent=room.topic||'Chat Battle';
   $('capacity').textContent=room.capacity+' ویدیو';
   $('perUser').textContent='سقف '+room.perUser+' لینک برای هر نفر';
   $('remaining').textContent=Math.max(0,room.capacity-room.usedCount)+' جای خالی';
   if(Number(room.schemaVersion)!==2){form.hidden=true;status(LEGACY,'error');return}
+  if(requiresKick(room)&&!viewerUser?.kickName){form.hidden=true;status(room.status==='collecting'?'برای ارسال ویدیو با حساب Kick وارد شو.':'ارسال لینک این مسابقه بسته شده.',room.status==='collecting'?'info':'error');return}
   if(mine&&!editing){showConfirmed();return}
   if(room.status!=='collecting'){
     form.hidden=true;
@@ -133,15 +149,15 @@ function editingMode(){
   editing=true;populateForm();showRoom(current);
 }
 function finishSave(links,username){
-  mine={uid:anonymousUser.uid,username,links:links.map(c=>c.link),videoKeys:links.map(c=>c.key)};
+  mine={uid:viewerUser.uid,username,links:links.map(c=>c.link),videoKeys:links.map(c=>c.key)};
   showConfirmed();
 }
 async function submit(event){
   event.preventDefault();
-  if(pending||!current||!anonymousUser||current.status!=='collecting')return;
+  if(pending||!current||!viewerUser||current.status!=='collecting')return;
   if(Number(current.schemaVersion)!==2){status(LEGACY,'error');return}
-  const name=anonymousUser.kickName;
-  if(!name||name.length>64){status('نام Kick باید ۲ تا ۳۲ کاراکتر انگلیسی، عدد، زیرخط یا نقطه باشه.','error');return}
+  const name=submissionName(current,viewerUser,$('username').value);
+  if(!name){status(requiresKick(current)?'برای ارسال ویدیو با حساب Kick وارد شو.':'نامی بین ۲ تا ۶۴ کاراکتر و بدون خط جدید بنویس.','error');$('username').focus();return}
   let clips;pending=true;$('confirm').disabled=true;refreshControls();
   try{status('در حال بررسی لینک‌ها و باز کردن لینک کوتاه TikTok…','info');clips=await Promise.all(linksFromForm().map(async raw=>{
    let value=raw;try{const host=new URL(raw).hostname;if(['vt.tiktok.com','vm.tiktok.com'].includes(host))value=await resolveTikTokLink(raw);}catch(error){if(/https:\/\/(vt|vm)\.tiktok\.com/i.test(raw))throw error;}
@@ -156,7 +172,7 @@ async function submit(event){
   if(clips.length>current.perUser){status('تعداد لینک‌ها از سقف مجاز بیشتره.','error');return}
   pending=true;$('confirm').disabled=true;refreshControls();status('در حال بررسی تکراری نبودن و ذخیره تغییرات...','info');
   try{
-    const subRef=doc(db,'chatBattleSessions',sessionId,'submissions',anonymousUser.uid);
+    const subRef=doc(db,'chatBattleSessions',sessionId,'submissions',viewerUser.uid);
     await runTransaction(db,async transaction=>{
       const [roomSnap,oldSnap]=await Promise.all([transaction.get(sessionRef),transaction.get(subRef)]);
       if(!roomSnap.exists())throw Error('مسابقه پیدا نشد.');
@@ -167,7 +183,7 @@ async function submit(event){
       const before=oldSnap.exists()?oldSnap.data():null;
       const beforeLinks=before?.links||[];
       const beforeKeys=before?.videoKeys||[];
-      if(before&&before.uid!==anonymousUser.uid)throw Error('اجازه ویرایش لینک این کاربر وجود نداره.');
+      if(before&&before.uid!==viewerUser.uid)throw Error('اجازه ویرایش لینک این کاربر وجود نداره.');
       const owned=new Set(beforeKeys);
       const other=(room.reservedVideoKeys||[]).filter(k=>!owned.has(k));
       if(keys.some(k=>other.includes(k)))throw Error('این ویدیو قبلاً ثبت شده. لینک دیگری بذار.');
@@ -179,7 +195,7 @@ async function submit(event){
       if(before){
         transaction.update(subRef,{username:name,links:clips.map(c=>c.link),videoKeys:keys});
       }else{
-        transaction.set(subRef,{uid:anonymousUser.uid,username:name,links:clips.map(c=>c.link),videoKeys:keys,submittedAt:serverTimestamp()});
+        transaction.set(subRef,{uid:viewerUser.uid,username:name,links:clips.map(c=>c.link),videoKeys:keys,submittedAt:serverTimestamp()});
       }
       transaction.update(sessionRef,{usedCount:newUsed,reservedVideoKeys:newRoster});
     });
@@ -198,10 +214,13 @@ form.addEventListener('submit',submit);
 async function boot(){
   if(!/^[A-Za-z0-9]{20}$/.test(sessionId)){status('لینک دعوت نامعتبره. لینک کامل رو از استریمر بگیر.','error');return}
   try{
-    anonymousUser=await kickUser();
-    if(!anonymousUser){form.hidden=true;$('kickLogin').hidden=false;status('برای ارسال ویدیو با حساب Kick وارد شو.','info');return}
-    $('kickLogin').hidden=true;{const prefix=document.createElement('span');prefix.textContent='حساب تأییدشده: @';const name=document.createElement('bdi');name.dataset.noTranslate='';name.textContent=anonymousUser.kickName;$('kickIdentity').replaceChildren(prefix,name);}
-    const ownRef=doc(db,'chatBattleSessions',sessionId,'submissions',anonymousUser.uid);
+    const reader=await authReady();
+    const initial=await getDoc(sessionRef);
+    if(!initial.exists()){form.hidden=true;status('مسابقه پیدا نشد.','error');return}
+    const room=initial.data();
+    viewerUser=requiresKick(room)?await kickUser():{uid:reader.uid};
+    if(!viewerUser){showRoom(room);return}
+    const ownRef=doc(db,'chatBattleSessions',sessionId,'submissions',viewerUser.uid);
     const mineSnap=await getDoc(ownRef);
     if(mineSnap.exists())mine=mineSnap.data();
     unsubscribe=onSnapshot(sessionRef,snapshot=>{
