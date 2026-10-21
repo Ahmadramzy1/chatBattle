@@ -117,7 +117,7 @@ html[lang=fa] .setup-hero h1{font-size:clamp(36px,4.2vw,64px);line-height:1.65;l
 .setup-hero p{color:var(--muted);text-align:start;direction:inherit;font-size:14px;line-height:2.1;max-width:440px;margin:0}
 .hero-pills{gap:0;flex-direction:row;margin-top:28px;direction:ltr}.hero-pills span{font:700 9px var(--latin);letter-spacing:.7px;background:none;color:var(--muted);border:0;border-inline-end:1px solid var(--border);border-radius:0;padding:5px 12px}.hero-pills span:first-child{padding-inline-start:0}.hero-pills span:last-child{border:0}
 .hero-art{margin:0;position:relative;min-width:0;background:var(--accent);border-radius:110px 28px 100px 28px;overflow:hidden;isolation:isolate;aspect-ratio:1.16}
-.hero-art img{display:block;width:100%;height:100%;object-fit:cover;object-position:47% center}
+.hero-art img{display:block;width:100%;height:100%;object-fit:cover;object-position:35% center;transform:scale(1.12);transform-origin:34% 45%}
 .hero-art figcaption{position:absolute;bottom:0;inset-inline:0;display:flex;justify-content:space-between;gap:12px;padding:18px 28px;background:#151a13de;color:#f1ecd8;font:700 10px var(--latin);letter-spacing:1.8px;direction:ltr}
 .hero-art figcaption span{font-size:8px;opacity:.8}
 .setup-panel{position:relative;margin-top:40px;padding:32px;background:var(--panel2);border:0;border-radius:36px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:32px;row-gap:4px;box-shadow:none}
