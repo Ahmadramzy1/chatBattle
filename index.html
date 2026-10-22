@@ -1035,10 +1035,10 @@ function mount(side,video){
     const wrapper=document.createElement('div');wrapper.className='cb-instagram';el.append(wrapper);
    const i=frame(wrapper,'https://www.instagram.com/'+kind+'/'+encodeURIComponent(shortcode)+'/embed/','Instagram embed');
    const host=document.getElementById('frame-'+side),originalHeight=host.style.height;
-   let eh=0,lastWidth=0;const fit=()=>{if(!current())return;const b=wrapper.getBoundingClientRect();if(!b.width)return;const width=Math.min(b.width,540);if(Math.abs(width-lastWidth)>1){eh=0;lastWidth=width}const height=eh||Math.ceil(width*16/9+180);i.style.width=width+'px';i.style.height=height+'px';const border=host.offsetHeight-host.clientHeight;host.style.height=(height+border)+'px'};
-   const onMessage=e=>{if(e.source!==i.contentWindow||!/^https:\/\/(www\.)?instagram\.com$/.test(e.origin))return;let d=e.data;try{if(typeof d==='string')d=JSON.parse(d)}catch{return}const h=Number(d?.details?.height);if(d?.type==='MEASURE'&&h>150&&h<3000){eh=h;fit()}};
+   let eh=0,lastWidth=0,measureTimer=0,measureSamples=[];const fit=()=>{if(!current())return;const b=wrapper.getBoundingClientRect();if(!b.width)return;const width=Math.min(b.width,540);if(Math.abs(width-lastWidth)>1){eh=0;lastWidth=width;clearTimeout(measureTimer);measureTimer=0;measureSamples=[]}const height=eh||Math.ceil(width*16/9+180);i.style.width=width+'px';i.style.height=height+'px';const border=host.offsetHeight-host.clientHeight;host.style.height=(height+border)+'px'};
+   const onMessage=e=>{if(e.source!==i.contentWindow||!/^https:\/\/(www\.)?instagram\.com$/.test(e.origin))return;let d=e.data;try{if(typeof d==='string')d=JSON.parse(d)}catch{return}const h=Number(d?.details?.height);if(d?.type!=='MEASURE'||!Number.isFinite(h)||h<=150||h>=3000||eh)return;measureSamples.push(h);if(measureSamples.length>12)measureSamples.shift();if(measureTimer)return;measureTimer=setTimeout(()=>{measureTimer=0;if(!current()||eh||!measureSamples.length)return;const a=measureSamples.splice(0).sort((x,y)=>x-y),mid=Math.floor(a.length/2);eh=Math.round(a.length%2?a[mid]:(a[mid-1]+a[mid])/2);fit()},320)};
     setPlaybackNote('پلیر اینستاگرام',true);
-    const ro=new ResizeObserver(fit);ro.observe(wrapper);addEventListener('message',onMessage);clean=()=>{ro.disconnect();removeEventListener('message',onMessage);host.style.height=originalHeight};fit();
+    const ro=new ResizeObserver(fit);ro.observe(wrapper);addEventListener('message',onMessage);clean=()=>{clearTimeout(measureTimer);ro.disconnect();removeEventListener('message',onMessage);host.style.height=originalHeight};fit();
  }
  function native(src,onFailure,onReady){
    if(!current())return;setPlaybackNote();el.replaceChildren();
