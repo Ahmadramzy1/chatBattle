@@ -35,4 +35,9 @@ test('Metadata parsing accepts public video JSON, rejects bad origins and caps u
   globalThis.fetch=async()=>new Response('x'.repeat(512*1024+1));assert.equal((await call('https://instagram.com/reel/UVWXY/')).status,422);
  }finally{globalThis.fetch=original}
 });
+test('A failed CDN stream reports the upstream status without exposing its URL',async()=>{
+ const original=globalThis.fetch;globalThis.fetch=async url=>new URL(url).hostname.endsWith('cdninstagram.com')?new Response('denied',{status:403}):new Response('<meta property="og:video" content="https://video.cdninstagram.com/diagnostic.mp4">');
+ try{const media=await (await call('https://instagram.com/reel/DIAGN/')).json();const r=await worker.fetch(new Request(media.playUrl),env);assert.equal(r.status,502);assert.equal(r.headers.get('X-Instagram-Error'),'upstream_http_403');assert.deepEqual(await r.json(),{error:'upstream_http_403'})}
+ finally{globalThis.fetch=original}
+});
 

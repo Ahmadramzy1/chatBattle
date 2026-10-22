@@ -86,10 +86,15 @@ async function instagramStream(request,env,headers){
  try{if(!env.KICK_CLIENT_SECRET)throw Error('config');src=await mediaSource(new URL(request.url).searchParams.get('ticket'),env)}catch{return new Response(null,{status:403})}
  const range=request.headers.get('Range');if(range&&!/^bytes=\d*-\d*$/.test(range))return new Response(null,{status:416});
  try{const upstream=await instagramFetch(src,{'User-Agent':'Mozilla/5.0',Referer:'https://www.instagram.com/',...(range?{Range:range}:{})},AbortSignal.timeout(90000));
-  const type=upstream.headers.get('Content-Type')||'';if(![200,206].includes(upstream.status)||!/^video\/|^application\/octet-stream/i.test(type)){await upstream.body?.cancel();throw Error('media')}
+  const type=upstream.headers.get('Content-Type')||'';
+  if(![200,206].includes(upstream.status)){await upstream.body?.cancel();throw Error('upstream_http_'+upstream.status)}
+  if(!/^video\/|^application\/octet-stream/i.test(type)){await upstream.body?.cancel();throw Error('upstream_not_video')}
   const h=new Headers({'Content-Type':type,'Cache-Control':'private, max-age=60','X-Content-Type-Options':'nosniff','Access-Control-Allow-Origin':env.SITE_ORIGIN,'Access-Control-Expose-Headers':'Content-Range, Accept-Ranges, Content-Length','Vary':'Origin'});
   for(const name of ['Content-Range','Accept-Ranges','Content-Length'])if(upstream.headers.has(name))h.set(name,upstream.headers.get(name));return new Response(upstream.body,{status:upstream.status,headers:h});
- }catch{return new Response(null,{status:502,headers})}
+ }catch(error){
+  const message=String(error?.message||''),code=/^upstream_http_\d{3}$/.test(message)||message==='upstream_not_video'?message:/timeout|abort/i.test(message)?'upstream_timeout':'upstream_connection_failed';
+  return new Response(JSON.stringify({error:code}),{status:502,headers:{...headers,'X-Instagram-Error':code,'Access-Control-Allow-Origin':env.SITE_ORIGIN,'Access-Control-Expose-Headers':'X-Instagram-Error'}});
+ }
 }
 async function instagramResolve(request,env){
  const body=await readBody(request),post=instagramPost(body.url);if(!post)return {status:400,data:{error:'invalid_instagram_url'}};
@@ -140,7 +145,7 @@ export default {
  async fetch(request,env){
   const headers={'Cache-Control':'no-store','Vary':'Origin','Content-Type':'application/json; charset=utf-8'};
   const reply=(status,data)=>new Response(JSON.stringify(data),{status,headers});
-  if(request.method==='GET'&&new URL(request.url).pathname==='/health')return reply(200,{ok:true,version:'centrifugo-1',media:'ig-media-1'});
+  if(request.method==='GET'&&new URL(request.url).pathname==='/health')return reply(200,{ok:true,version:'centrifugo-1',media:'ig-media-2'});
   if(new URL(request.url).pathname==='/media/instagram/stream'){
    const origin=request.headers.get('Origin');if(origin&&origin!==env.SITE_ORIGIN)return reply(403,{error:'Origin not allowed'});
    return instagramStream(request,env,headers);
