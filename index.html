@@ -263,9 +263,10 @@
 @media(max-width:650px){.topbar{height:158px;min-height:158px;align-items:flex-end;padding-bottom:14px}.header-mid{height:104px;width:132px}.header-logo{width:104px;height:104px}}
 </style>
 <link rel="stylesheet" href="./redesign.css?v=organic-2">
-<script src="./translations.js?v=entry-auth-1"></script>
+<script src="./translations.js?v=ig-media-1"></script>
 <script src="./i18n.js?v=slate-1" defer></script><script src="./interface.js?v=slate-1" defer></script>
 <link rel="stylesheet" href="./neumorphism.css?v=neo-1">
+<link rel="stylesheet" href="./instagram-player.css?v=ig-media-1">
 <script src="./presentation-motion.js?v=neo-1" defer></script>
 </head>
 <body><a class="skip-link" href="#main-content">رفتن به محتوای اصلی</a>
@@ -361,7 +362,7 @@
 <div class="modal-backdrop hidden" id="confirmDialog"><div class="confirm-card glass" role="dialog" aria-modal="true" aria-labelledby="dialogTitle"><span class="section-number">CONFIRM ACTION</span><h2 id="dialogTitle">مسابقه جدید؟</h2><p id="dialogBody">اطلاعات مسابقه فعلی پاک می‌شه.</p><div><button id="cancelConfirm" class="secondary-btn">انصراف</button><button id="confirmReset" class="primary-btn">بله، شروع مجدد</button></div></div></div>
 <script src="./game-store.js?v=delta-undo-1"></script>
 <script src="./kick-realtime.js?v=centrifugo-2"></script>
-<script src="./thumbnails.js?v=public-previews-2"></script>
+<script src="./thumbnails.js?v=ig-media-1"></script>
 <script src="./coin-renderer.js?v=lazy-init-5"></script>
 <script>
 /* Chat Battle tournament engine — dependency-free, browser + Node. */
@@ -990,15 +991,15 @@ function fullscreen(side){const e=document.getElementById('frame-'+side);if(!e)r
 function destroy(side){const old=active.get(side);if(old){old.stop();active.delete(side)}}
 function destroyAll(){destroy(1);destroy(2)}
 function frame(el,url,title){
- const i=document.createElement('iframe');i.src=url;i.title=title;i.referrerPolicy='strict-origin-when-cross-origin';i.allow='autoplay; encrypted-media; fullscreen; picture-in-picture; web-share';i.allowFullscreen=true;i.setAttribute('scrolling','no');i.loading='eager';i.style.border='0';el.append(i);return i;
+ const i=document.createElement('iframe');i.src=url;i.title=title;i.referrerPolicy='strict-origin-when-cross-origin';i.allow='autoplay; encrypted-media; fullscreen; picture-in-picture; web-share';i.setAttribute('scrolling','no');i.loading='eager';i.style.border='0';el.append(i);return i;
 }
 function notice(target,message,video){
  target.innerHTML='<div class="cb-message"><strong>'+esc(message)+'</strong><a target="_blank" rel="noopener noreferrer" href="'+esc(video.url)+'">↗ باز کردن در سایت اصلی</a></div>';
 }
 function mount(side,video){
  destroy(side);const el=document.getElementById('player-'+side);if(!el)return;
- const id=++ticket,ctrl=new AbortController();let dead=false,clean=()=>{};
- const item={stop(){dead=true;ctrl.abort();clean();el.replaceChildren()}};
+ const id=++ticket,ctrl=new AbortController();let dead=false,clean=()=>{},localUrl=null;
+ const item={stop(){dead=true;ctrl.abort();clean();if(localUrl)URL.revokeObjectURL(localUrl);el.replaceChildren()}};
  active.set(side,item);el.replaceChildren();
  const current=()=>!dead&&active.get(side)===item;
  if(video.platform==='youtube'){
@@ -1025,16 +1026,17 @@ function mount(side,video){
  const shortcode=video.id;
  function igEmbed(){
    if(!current())return;clean();clean=()=>{};el.replaceChildren();
-   const wrapper=document.createElement('div');wrapper.className='cb-instagram';el.append(wrapper);
+    const wrapper=document.createElement('div');wrapper.className='cb-instagram';el.append(wrapper);
    const i=frame(wrapper,'https://www.instagram.com/'+kind+'/'+encodeURIComponent(shortcode)+'/embed/','Instagram embed');
    let eh=940;const fit=()=>{if(!current())return;const b=wrapper.getBoundingClientRect();if(!b.width||!b.height)return;const scale=Math.min(b.width/540,b.height/eh,1.6);i.style.width='540px';i.style.height=eh+'px';i.style.transform='translate(-50%,-50%) scale('+scale+')'};
    const onMessage=e=>{if(e.source!==i.contentWindow||!/^https:\/\/(www\.)?instagram\.com$/.test(e.origin))return;let d=e.data;try{if(typeof d==='string')d=JSON.parse(d)}catch{return}const h=Number(d?.details?.height);if(d?.type==='MEASURE'&&h>150&&h<3000){eh=h;fit()}};
-   const ro=new ResizeObserver(fit);ro.observe(wrapper);addEventListener('message',onMessage);clean=()=>{ro.disconnect();removeEventListener('message',onMessage)};fit();
+    const bar=document.createElement('div');bar.className='cb-embed-note';const label=document.createElement('span');label.textContent='اگر اینستاگرام خطا نشان می‌دهد، از گزینه‌های جایگزین استفاده کن.';const back=document.createElement('button');back.type='button';back.textContent='گزینه‌های پخش';back.onclick=()=>unavailable();bar.append(label,back);el.append(bar);
+    const ro=new ResizeObserver(fit);ro.observe(wrapper);addEventListener('message',onMessage);clean=()=>{ro.disconnect();removeEventListener('message',onMessage)};fit();
  }
  function native(src,onFailure){
    if(!current())return;el.replaceChildren();
    const box=document.createElement('div');box.className='cb-native';el.append(box);
-   const v=document.createElement('video');v.src=src;v.playsInline=true;v.autoplay=true;v.preload='auto';v.controls=false;box.append(v);
+    const v=document.createElement('video');if(!src.startsWith('blob:'))v.crossOrigin='anonymous';v.src=src;v.playsInline=true;v.autoplay=true;v.preload='auto';v.controls=false;box.append(v);
    const d=document.createElement('div');d.className='cb-controls';
    d.innerHTML='<button type="button" data-f="play" aria-label="پخش یا توقف">❚❚</button><button type="button" data-f="back" aria-label="پنج ثانیه عقب">-5</button><span class="cb-time">00:00/00:00</span><input type="range" min="0" max="1000" value="0" aria-label="تایم‌لاین ویدیو"><button type="button" data-f="forward" aria-label="پنج ثانیه جلو">+5</button><button type="button" data-f="mute" aria-label="قطع یا وصل صدا">♫</button><button type="button" data-f="speed" aria-label="سرعت پخش">1×</button><button type="button" data-f="full" aria-label="تمام‌صفحه">⛶</button>';
    box.append(d);const $=s=>d.querySelector(s),play=$('[data-f=play]'),range=$('input'),clock=$('.cb-time'),mute=$('[data-f=mute]'),speed=$('[data-f=speed]');
@@ -1061,56 +1063,30 @@ function mount(side,video){
    clean=()=>{recovering=true;clearTimeout(readyTimer);cancelAnimationFrame(timer);events.forEach(event=>v.removeEventListener(event,wake));document.removeEventListener('visibilitychange',visibility);v.onerror=v.onloadeddata=null;v.pause();v.removeAttribute('src');v.load()};
    v.play().catch(()=>{if(!current()||recovering)return;v.muted=true;v.play().catch(()=>{})});
  }
- el.innerHTML='<div class="cb-message"><strong>در حال آماده کردن پلیر اختصاصی اینستاگرام…</strong><small>اگر منبع مستقیم در دسترس نباشد، پلیر جایگزین نمایش داده می‌شود.</small></div>';
- const sourceUrls=[];
- // Match instaQ's complete set of direct video routes.
- for(const host of ['d.ddinstagram.com','d.instagramfix.com','d.instagram7.com','kkinstagram.com']){
-  sourceUrls.push('https://'+host+'/p/'+shortcode);
-  sourceUrls.push('https://'+host+'/reel/'+shortcode);
- }
- for(const host of ['ddinstagram.com','instagramfix.com'])sourceUrls.push('https://'+host+'/videos/'+shortcode+'/1');
- async function resolve(signal){
-  const url='https://www.instagram.com/'+kind+'/'+shortcode+'/embed/captioned/';
-  const proxies=[url,'https://corsproxy.io/?url='+encodeURIComponent(url),'https://api.allorigins.win/raw?url='+encodeURIComponent(url),'https://api.codetabs.com/v1/proxy?quest='+encodeURIComponent(url)];
-  return Promise.any(proxies.map(async p=>{
-   const r=await fetch(p,{signal,credentials:'omit',cache:'no-store'});if(!r.ok)throw Error('resolver response');
-   const html=(await r.text()).replace(/&quot;/g,'"');
-   // instaQ handles both JSON quotes and backslash-escaped quotes.
-   const m=html.match(/video_url\\*"\s*:\s*\\*"(.+?)\\*"/);
-   if(!m)throw Error('direct video URL not found');
-   const src=m[1].replace(/\\+u0026/gi,'&').replace(/\\+\//g,'/').replace(/&amp;/g,'&');
-   if(!/^https:\/\/[\w.-]+\//i.test(src)||failedSources.has(src))throw Error('invalid direct video URL');
-   // As in instaQ, let the real player load the resolved CDN URL without a second metadata request.
-   return src;
-  }));
- }
- function probe(src,signal){return new Promise((yes,no)=>{
-  if(signal.aborted||failedSources.has(src))return no(Error('cancelled or failed source'));
-  const v=document.createElement('video');v.preload='metadata';v.muted=true;let settled=false;const t=setTimeout(()=>done(false),9000);
-  function done(ok){if(settled)return;settled=true;clearTimeout(t);v.onloadedmetadata=v.onerror=null;signal.removeEventListener('abort',ab);v.removeAttribute('src');v.load();ok?yes(src):no(Error('video not available'))}
-  const ab=()=>done(false);signal.addEventListener('abort',ab,{once:true});
-  v.onloadedmetadata=()=>done(v.videoWidth>0);v.onerror=()=>done(false);v.src=src;
- })}
-
- const failedSources=new Set();let recoveringSources=0;
- function retryDirect(src){
-  if(!current())return;if(src)failedSources.add(src);clean();clean=()=>{};
-  if(src&&++recoveringSources<4){attemptDirect();return;}
-  igEmbed();
- }
+  function unavailable(reason){
+   if(!current())return;clean();clean=()=>{};el.replaceChildren();
+   const box=document.createElement('div');box.className='cb-message cb-instagram-fallback';box.setAttribute('role','status');
+   const title=document.createElement('strong');title.textContent=reason==='local_file_unavailable'?'این فایل در مرورگر قابل پخش نیست؛ فایل MP4 دیگری انتخاب کن.':reason==='media_service_unavailable'?'سرویس پخش مستقیم فعلاً در دسترس نیست.':'این ویدیو برای پخش مستقیم در دسترس نیست.';
+   const hint=document.createElement('p');hint.textContent='ممکن است پست به ورود نیاز داشته باشد یا نمایش بیرون از اینستاگرام محدود شده باشد؛ این پیام به معنی حذف‌شدن پست نیست.';
+   const actions=document.createElement('div');actions.className='cb-fallback-actions';
+   const embed=document.createElement('button');embed.type='button';embed.textContent='تلاش با پلیر اینستاگرام';embed.onclick=igEmbed;
+   const original=document.createElement('a');original.href=video.url;original.target='_blank';original.rel='noopener noreferrer';original.textContent='باز کردن در اینستاگرام';
+   const label=document.createElement('label');label.className='cb-local-file';label.textContent='انتخاب فایل ویدیو از دستگاه';
+   const input=document.createElement('input');input.type='file';input.accept='video/*,.mp4,.webm,.mov';input.setAttribute('aria-label','انتخاب فایل ویدیو از دستگاه');
+   input.onchange=()=>{if(!current())return;const file=input.files?.[0];if(!file)return;if(file.type&&!file.type.startsWith('video/')){title.textContent='یک فایل ویدیویی معتبر انتخاب کن.';return}
+    if(localUrl)URL.revokeObjectURL(localUrl);localUrl=URL.createObjectURL(file);native(localUrl,()=>unavailable('local_file_unavailable'));
+    const note=document.createElement('div');note.className='cb-local-note';note.textContent='پخش فایل محلی؛ فقط در همین مرورگر';el.append(note);
+   };
+   label.append(input);const privacy=document.createElement('small');privacy.textContent='فایلی را انتخاب کن که اجازهٔ استفاده‌اش را داری. فایل آپلود نمی‌شود و پس از بارگذاری دوبارهٔ صفحه باید دوباره انتخابش کنی.';
+   actions.append(embed,original,label);box.append(title,hint,actions,privacy);el.append(box);
+  }
  async function attemptDirect(){
   if(!current())return;clean();clean=()=>{};
-  el.innerHTML='<div class="cb-message"><strong>در حال آماده کردن پلیر اختصاصی اینستاگرام…</strong><small>یک تلاش برای پخش مستقیم؛ در صورت ناموفق بودن، پلیر جایگزین نمایش داده می‌شود.</small></div>';
-  const request=new AbortController(),abort=()=>request.abort();
-  ctrl.signal.addEventListener('abort',abort,{once:true});
-  const deadline=setTimeout(abort,10000);
+   el.innerHTML='<div class="cb-message" role="status"><strong>در حال دریافت ویدیوی عمومی…</strong><small>در صورت محدودیت دسترسی، گزینه‌های دیگر نمایش داده می‌شوند.</small></div>';
   try{
-   // One bounded attempt checks all available direct sources in parallel.
-   const candidates=sourceUrls;
-   const src=await Promise.any([resolve(request.signal),...candidates.map(url=>probe(url,request.signal))]);
-   if(current())native(src,retryDirect);
-  }catch(error){if(current())retryDirect();}
-  finally{clearTimeout(deadline);ctrl.signal.removeEventListener('abort',abort);request.abort();}
+    const {resolveInstagram}=await import('./instagram-media.mjs?v=ig-media-1');const media=await resolveInstagram(video.url,{signal:ctrl.signal});
+    if(current())native(media.playUrl,()=>unavailable());
+   }catch(error){if(current())unavailable(error.message);}
  }
  attemptDirect();
 
@@ -1124,3 +1100,4 @@ document.querySelectorAll('[data-fullscreen]').forEach(b=>b.addEventListener('cl
 <script type="module" src="./firebase-host.js?v=entry-auth-1"></script>
 </body>
 </html>
+

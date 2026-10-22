@@ -16,6 +16,10 @@
   throw Error('No public preview');
  }
  async function metadata(video){
+  if(video.platform==='instagram'){
+   const {resolveInstagram}=await import('./instagram-media.mjs?v=ig-media-1');
+   const media=await resolveInstagram(video.url);if(media.poster)return media.poster;throw Error('Preview unavailable');
+  }
   let url=video.url;
   if(video.platform==='tiktok'&&['vt.tiktok.com','vm.tiktok.com'].includes(new URL(url).hostname)){
    const {resolveTikTokLink}=await import('./media-links.js?v=tiktok-short-1');url=await resolveTikTokLink(url);
@@ -53,3 +57,4 @@
  function release(image){bindings.delete(image);image.onload=image.onerror=null;const target=image.parentElement;if(waiting.get(target)?.image===image){waiting.delete(target);observer?.unobserve(target);}}
  window.ChatBattleThumbnails={attach(video,holder){const image=document.createElement('img');holder.append(image);bind(video,image,holder);},bind,release};
 })();
+

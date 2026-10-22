@@ -41,6 +41,73 @@ async function readBody(request){
   return JSON.parse(new TextDecoder().decode(bytes));
 }
 const chatRooms=new Map();
+// Public Instagram media only. Never forward a viewer's cookies or accept a proxy URL.
+const instagramCache=new Map();let instagramPending=0;
+function instagramPost(raw){
+ try{const u=new URL(raw);if(u.protocol!=='https:'||u.username||u.password||u.port||!['instagram.com','www.instagram.com','m.instagram.com'].includes(u.hostname))return null;
+  const m=u.pathname.match(/^\/(reel|reels|p|tv)\/([A-Za-z0-9_-]{5,40})\/?$/);return m?{kind:m[1]==='reels'?'reel':m[1],id:m[2]}:null;
+ }catch{return null}
+}
+function instagramCDN(raw){try{const u=new URL(raw);return u.protocol==='https:'&&!u.username&&!u.password&&!u.port&&['cdninstagram.com','fbcdn.net'].some(h=>u.hostname===h||u.hostname.endsWith('.'+h))?u.href:null}catch{return null}}
+async function instagramFetch(raw,headers,signal,metadata=false){
+ let url=new URL(raw);
+ for(let i=0;i<4;i++){
+  if(metadata?!['www.instagram.com','instagram.com','kkinstagram.com','kkclip.com','www.kkclip.com'].includes(url.hostname):!instagramCDN(url.href))throw Error('host');
+  if(url.protocol!=='https:'||url.username||url.password||url.port)throw Error('url');
+  const r=await fetch(url.href,{redirect:'manual',headers,signal});
+  if([301,302,303,307,308].includes(r.status)){const next=r.headers.get('Location');await r.body?.cancel();if(!next)throw Error('redirect');url=new URL(next,url);continue}return r;
+ }throw Error('redirect limit');
+}
+async function instagramText(r){
+ if(!r.ok)throw Error('upstream');const reader=r.body?.getReader();if(!reader)throw Error('body');let size=0,text='',decoder=new TextDecoder();
+ try{while(true){const {done,value}=await reader.read();if(done)break;size+=value.byteLength;if(size>512*1024){await reader.cancel();throw Error('metadata too large')}text+=decoder.decode(value,{stream:true})}return text+decoder.decode()}
+ finally{reader.releaseLock()}
+}
+function instagramMetadata(html){
+ const decode=s=>s.replace(/&amp;/g,'&').replace(/&quot;/g,'"').replace(/&#(?:x26|38);/gi,'&');let src=null,poster=null;
+ for(const tag of html.match(/<meta\b[^>]*>/gi)||[]){const attrs={};for(const m of tag.matchAll(/([\w:-]+)\s*=\s*(["'])(.*?)\2/g))attrs[m[1].toLowerCase()]=decode(m[3]);
+  const name=attrs.property||attrs.name;if(['og:video','og:video:url','og:video:secure_url','twitter:player:stream'].includes(name))src=src||instagramCDN(attrs.content);if(name==='og:image')poster=instagramCDN(attrs.content)||poster;
+ }
+ // Public embed JSON may escape quotes and slashes; it is data, never executed.
+ const plain=decode(html).replace(/\\+"/g,'"');
+ for(const m of plain.matchAll(/"(video_url|contentUrl|display_url|thumbnail_url)"\s*:\s*"((?:\\.|[^"\\])+)"/g)){
+  let value;try{value=JSON.parse('"'+m[2]+'"')}catch{continue}const safe=instagramCDN(value);if(!safe)continue;if(['video_url','contentUrl'].includes(m[1]))src=src||safe;else poster=poster||safe;
+ }if(!src)throw Error('unavailable');return {src,poster};
+}
+const mediaKey=secret=>stateKey('instagram-media:'+secret);
+async function mediaTicket(src,env){const data=encode({kind:'instagram-media',src,exp:Math.floor(Date.now()/1000)+600});return data+'.'+b64(await crypto.subtle.sign('HMAC',await mediaKey(env.KICK_CLIENT_SECRET),enc.encode(data)))}
+async function mediaSource(ticket,env){
+ if(typeof ticket!=='string'||ticket.length>10000||!/^[\w-]+\.[\w-]+$/.test(ticket))throw Error('ticket');const [data,sig]=ticket.split('.');
+ if(!await crypto.subtle.verify('HMAC',await mediaKey(env.KICK_CLIENT_SECRET),unb64(sig),enc.encode(data)))throw Error('signature');
+ const v=JSON.parse(new TextDecoder().decode(unb64(data))),now=Math.floor(Date.now()/1000);if(v.kind!=='instagram-media'||!Number.isInteger(v.exp)||v.exp<=now||v.exp>now+600||!instagramCDN(v.src))throw Error('expired');return v.src;
+}
+async function instagramStream(request,env,headers){
+ if(request.method!=='GET')return new Response(null,{status:405});let src;
+ try{if(!env.KICK_CLIENT_SECRET)throw Error('config');src=await mediaSource(new URL(request.url).searchParams.get('ticket'),env)}catch{return new Response(null,{status:403})}
+ const range=request.headers.get('Range');if(range&&!/^bytes=\d*-\d*$/.test(range))return new Response(null,{status:416});
+ try{const upstream=await instagramFetch(src,{'User-Agent':'Mozilla/5.0',Referer:'https://www.instagram.com/',...(range?{Range:range}:{})},AbortSignal.timeout(90000));
+  const type=upstream.headers.get('Content-Type')||'';if(![200,206].includes(upstream.status)||!/^video\/|^application\/octet-stream/i.test(type)){await upstream.body?.cancel();throw Error('media')}
+  const h=new Headers({'Content-Type':type,'Cache-Control':'private, max-age=60','X-Content-Type-Options':'nosniff','Access-Control-Allow-Origin':env.SITE_ORIGIN,'Access-Control-Expose-Headers':'Content-Range, Accept-Ranges, Content-Length','Vary':'Origin'});
+  for(const name of ['Content-Range','Accept-Ranges','Content-Length'])if(upstream.headers.has(name))h.set(name,upstream.headers.get(name));return new Response(upstream.body,{status:upstream.status,headers:h});
+ }catch{return new Response(null,{status:502,headers})}
+}
+async function instagramResolve(request,env){
+ const body=await readBody(request),post=instagramPost(body.url);if(!post)return {status:400,data:{error:'invalid_instagram_url'}};
+ if(!env.KICK_CLIENT_SECRET)return {status:503,data:{error:'media_not_configured'}};
+ const key=post.id,cached=instagramCache.get(key);let media=cached?.until>Date.now()?cached.media:null;
+ if(!media){
+  if(instagramPending>=6)return {status:429,data:{error:'media_busy'}};instagramPending++;
+  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),9000);
+  try{media=await Promise.any([
+   'https://www.instagram.com/'+post.kind+'/'+post.id+'/embed/captioned/',
+   'https://kkinstagram.com/'+post.kind+'/'+post.id+'/'
+  ].map(async url=>instagramMetadata(await instagramText(await instagramFetch(url,{'User-Agent':'Mozilla/5.0','Accept':'text/html','Referer':'https://www.instagram.com/'},controller.signal,true)))));
+   instagramCache.set(key,{media,until:Date.now()+90000});if(instagramCache.size>50)instagramCache.delete(instagramCache.keys().next().value);
+  }catch{return {status:422,data:{error:'instagram_unavailable'}}}
+  finally{clearTimeout(timer);controller.abort();instagramPending--}
+ }
+ const url=new URL('/media/instagram/stream',request.url);url.searchParams.set('ticket',await mediaTicket(media.src,env));return {status:200,data:{playUrl:url.href,poster:media.poster}};
+}
 async function chatUpstream(path,body){
  const response=await fetch('https://web.kick.com/api/v1/realtime/'+path,{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json',Origin:'https://kick.com',Referer:'https://kick.com/','User-Agent':'Mozilla/5.0'},body:JSON.stringify(body),signal:AbortSignal.timeout(10000)});
  if(!response.ok)throw Error('Kick realtime HTTP '+response.status);
@@ -73,10 +140,14 @@ export default {
  async fetch(request,env){
   const headers={'Cache-Control':'no-store','Vary':'Origin','Content-Type':'application/json; charset=utf-8'};
   const reply=(status,data)=>new Response(JSON.stringify(data),{status,headers});
-  if(request.method==='GET'&&new URL(request.url).pathname==='/health')return reply(200,{ok:true,version:'centrifugo-1'});
+  if(request.method==='GET'&&new URL(request.url).pathname==='/health')return reply(200,{ok:true,version:'centrifugo-1',media:'ig-media-1'});
+  if(new URL(request.url).pathname==='/media/instagram/stream'){
+   const origin=request.headers.get('Origin');if(origin&&origin!==env.SITE_ORIGIN)return reply(403,{error:'Origin not allowed'});
+   return instagramStream(request,env,headers);
+  }
   if(!env.SITE_ORIGIN||request.headers.get('Origin')!==env.SITE_ORIGIN)return reply(403,{error:'Origin not allowed'});
   headers['Access-Control-Allow-Origin']=env.SITE_ORIGIN;
-  headers['Access-Control-Allow-Methods']='POST, OPTIONS';headers['Access-Control-Allow-Headers']='Content-Type';
+  headers['Access-Control-Allow-Methods']='GET, POST, OPTIONS';headers['Access-Control-Allow-Headers']='Content-Type, Range';
   if(request.method==='OPTIONS')return new Response(null,{status:204,headers});
   if(new URL(request.url).pathname==='/chat/socket'){
    if(request.method!=='GET'||request.headers.get('Upgrade')?.toLowerCase()!=='websocket')return reply(426,{error:'WebSocket upgrade required'});
@@ -91,6 +162,9 @@ export default {
   }
   if(request.method!=='POST')return reply(405,{error:'Method not allowed'});
   const chatPath=new URL(request.url).pathname;
+  if(chatPath==='/media/instagram'){
+   try{const result=await instagramResolve(request,env);return reply(result.status,result.data)}catch{return reply(400,{error:'invalid_media_request'})}
+  }
   if(['/chat/bootstrap','/chat/token'].includes(chatPath)){
    try{return reply(200,await publicChat(chatPath,await readBody(request)));}
    catch(error){return reply(502,{error:'اتصال چت Kick ناموفق بود: '+String(error.message||'upstream error').slice(0,150)});}
@@ -122,3 +196,4 @@ export default {
   }catch{return reply(400,{error:'تأیید ورود ناموفق بود؛ از لینک دعوت دوباره با Kick وارد شو.'});}
  }
 };
+
