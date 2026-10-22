@@ -10,4 +10,15 @@ test('Instagram client rejects untrusted media response and gives actionable err
  await assert.rejects(resolveInstagram('https://instagram.com/reel/ABCDE/',{base:'https://media.example',fetcher:async()=>Response.json({playUrl:'https://evil.example/tracker'})}),/invalid_media_response/);
  await assert.rejects(resolveInstagram('https://instagram.com/reel/ABCDE/',{base:'https://media.example',fetcher:async()=>Response.json({error:'instagram_unavailable'},{status:422})}),/instagram_unavailable/);
 });
+test('Playback retries exactly three failed attempts before allowing embed fallback',async()=>{
+ const {tryInstagramPlayback}=await import('./instagram-media.mjs');let calls=[];
+ const result=await tryInstagramPlayback(async n=>{calls.push(n);throw Error('video load failed')});
+ assert.deepEqual(calls,[1,2,3]);assert.equal(result.ok,false);assert.equal(result.attempts,3);
+});
+test('Playback stops retries on success and never falls back after cancellation',async()=>{
+ const {tryInstagramPlayback}=await import('./instagram-media.mjs');let calls=0;
+ const result=await tryInstagramPlayback(async()=>{if(++calls===1)throw Error('temporary')});assert.equal(result.ok,true);assert.equal(calls,2);
+ const controller=new AbortController();calls=0;
+ await assert.rejects(tryInstagramPlayback(async()=>{calls++;controller.abort();throw Error('cancelled')},{signal:controller.signal}),e=>e.name==='AbortError');assert.equal(calls,1);
+});
 

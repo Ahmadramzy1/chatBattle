@@ -263,10 +263,10 @@
 @media(max-width:650px){.topbar{height:158px;min-height:158px;align-items:flex-end;padding-bottom:14px}.header-mid{height:104px;width:132px}.header-logo{width:104px;height:104px}}
 </style>
 <link rel="stylesheet" href="./redesign.css?v=organic-2">
-<script src="./translations.js?v=ig-media-1"></script>
+<script src="./translations.js?v=ig-retry-3"></script>
 <script src="./i18n.js?v=slate-1" defer></script><script src="./interface.js?v=slate-1" defer></script>
 <link rel="stylesheet" href="./neumorphism.css?v=neo-1">
-<link rel="stylesheet" href="./instagram-player.css?v=ig-media-1">
+<link rel="stylesheet" href="./instagram-player.css?v=ig-retry-3">
 <script src="./presentation-motion.js?v=neo-1" defer></script>
 </head>
 <body><a class="skip-link" href="#main-content">رفتن به محتوای اصلی</a>
@@ -362,7 +362,7 @@
 <div class="modal-backdrop hidden" id="confirmDialog"><div class="confirm-card glass" role="dialog" aria-modal="true" aria-labelledby="dialogTitle"><span class="section-number">CONFIRM ACTION</span><h2 id="dialogTitle">مسابقه جدید؟</h2><p id="dialogBody">اطلاعات مسابقه فعلی پاک می‌شه.</p><div><button id="cancelConfirm" class="secondary-btn">انصراف</button><button id="confirmReset" class="primary-btn">بله، شروع مجدد</button></div></div></div>
 <script src="./game-store.js?v=delta-undo-1"></script>
 <script src="./kick-realtime.js?v=centrifugo-2"></script>
-<script src="./thumbnails.js?v=ig-media-1"></script>
+<script src="./thumbnails.js?v=ig-retry-3"></script>
 <script src="./coin-renderer.js?v=lazy-init-5"></script>
 <script>
 /* Chat Battle tournament engine — dependency-free, browser + Node. */
@@ -998,8 +998,8 @@ function notice(target,message,video){
 }
 function mount(side,video){
  destroy(side);const el=document.getElementById('player-'+side);if(!el)return;
- const id=++ticket,ctrl=new AbortController();let dead=false,clean=()=>{},localUrl=null;
- const item={stop(){dead=true;ctrl.abort();clean();if(localUrl)URL.revokeObjectURL(localUrl);el.replaceChildren()}};
+ const id=++ticket,ctrl=new AbortController();let dead=false,clean=()=>{},localUrl=null,playbackNote=null;
+ const item={stop(){dead=true;ctrl.abort();clean();playbackNote?.remove();if(localUrl)URL.revokeObjectURL(localUrl);el.replaceChildren()}};
  active.set(side,item);el.replaceChildren();
  const current=()=>!dead&&active.get(side)===item;
  if(video.platform==='youtube'){
@@ -1024,17 +1024,23 @@ function mount(side,video){
  if(video.platform!=='instagram'||!video.id||!/^[-\w]+$/.test(video.id)){notice(el,'این لینک پلیر داخلی ندارد.',video);return}
  const kind=(video.url.match(/\/(reel|p|tv)\//)||[])[1]||'reel';
  const shortcode=video.id;
+ function setPlaybackNote(message='',options=false){
+  playbackNote?.remove();playbackNote=null;if(!current()||!message)return;
+  const note=document.createElement('div');note.className='cb-playback-note';const label=document.createElement('span');label.textContent=message;note.append(label);
+  if(options){const button=document.createElement('button');button.type='button';button.textContent='گزینه‌های پخش';button.onclick=()=>unavailable();note.append(button)}
+  document.getElementById('frame-'+side).after(note);playbackNote=note;
+ }
  function igEmbed(){
    if(!current())return;clean();clean=()=>{};el.replaceChildren();
     const wrapper=document.createElement('div');wrapper.className='cb-instagram';el.append(wrapper);
    const i=frame(wrapper,'https://www.instagram.com/'+kind+'/'+encodeURIComponent(shortcode)+'/embed/','Instagram embed');
    let eh=940;const fit=()=>{if(!current())return;const b=wrapper.getBoundingClientRect();if(!b.width||!b.height)return;const scale=Math.min(b.width/540,b.height/eh,1.6);i.style.width='540px';i.style.height=eh+'px';i.style.transform='translate(-50%,-50%) scale('+scale+')'};
    const onMessage=e=>{if(e.source!==i.contentWindow||!/^https:\/\/(www\.)?instagram\.com$/.test(e.origin))return;let d=e.data;try{if(typeof d==='string')d=JSON.parse(d)}catch{return}const h=Number(d?.details?.height);if(d?.type==='MEASURE'&&h>150&&h<3000){eh=h;fit()}};
-    const bar=document.createElement('div');bar.className='cb-embed-note';const label=document.createElement('span');label.textContent='اگر اینستاگرام خطا نشان می‌دهد، از گزینه‌های جایگزین استفاده کن.';const back=document.createElement('button');back.type='button';back.textContent='گزینه‌های پخش';back.onclick=()=>unavailable();bar.append(label,back);el.append(bar);
+    setPlaybackNote('پلیر اینستاگرام',true);
     const ro=new ResizeObserver(fit);ro.observe(wrapper);addEventListener('message',onMessage);clean=()=>{ro.disconnect();removeEventListener('message',onMessage)};fit();
  }
- function native(src,onFailure){
-   if(!current())return;el.replaceChildren();
+ function native(src,onFailure,onReady){
+   if(!current())return;setPlaybackNote();el.replaceChildren();
    const box=document.createElement('div');box.className='cb-native';el.append(box);
     const v=document.createElement('video');if(!src.startsWith('blob:'))v.crossOrigin='anonymous';v.src=src;v.playsInline=true;v.autoplay=true;v.preload='auto';v.controls=false;box.append(v);
    const d=document.createElement('div');d.className='cb-controls';
@@ -1058,13 +1064,13 @@ function mount(side,video){
    range.oninput=()=>{if(isFinite(v.duration)&&v.duration>0)v.currentTime=v.duration*range.value/1000};
    let recovering=false,readyTimer=0;
    const recover=()=>{if(!current()||recovering)return;recovering=true;clearTimeout(readyTimer);onFailure(src)};
-   v.onerror=recover;v.onloadeddata=()=>clearTimeout(readyTimer);
+   v.onerror=recover;v.onloadeddata=()=>{clearTimeout(readyTimer);onReady?.()};
    readyTimer=setTimeout(()=>{if(v.readyState<2)recover()},10000);
    clean=()=>{recovering=true;clearTimeout(readyTimer);cancelAnimationFrame(timer);events.forEach(event=>v.removeEventListener(event,wake));document.removeEventListener('visibilitychange',visibility);v.onerror=v.onloadeddata=null;v.pause();v.removeAttribute('src');v.load()};
    v.play().catch(()=>{if(!current()||recovering)return;v.muted=true;v.play().catch(()=>{})});
  }
   function unavailable(reason){
-   if(!current())return;clean();clean=()=>{};el.replaceChildren();
+   if(!current())return;clean();clean=()=>{};setPlaybackNote();el.replaceChildren();
    const box=document.createElement('div');box.className='cb-message cb-instagram-fallback';box.setAttribute('role','status');
    const title=document.createElement('strong');title.textContent=reason==='local_file_unavailable'?'این فایل در مرورگر قابل پخش نیست؛ فایل MP4 دیگری انتخاب کن.':reason==='media_service_unavailable'?'سرویس پخش مستقیم فعلاً در دسترس نیست.':'این ویدیو برای پخش مستقیم در دسترس نیست.';
    const hint=document.createElement('p');hint.textContent='ممکن است پست به ورود نیاز داشته باشد یا نمایش بیرون از اینستاگرام محدود شده باشد؛ این پیام به معنی حذف‌شدن پست نیست.';
@@ -1075,18 +1081,28 @@ function mount(side,video){
    const input=document.createElement('input');input.type='file';input.accept='video/*,.mp4,.webm,.mov';input.setAttribute('aria-label','انتخاب فایل ویدیو از دستگاه');
    input.onchange=()=>{if(!current())return;const file=input.files?.[0];if(!file)return;if(file.type&&!file.type.startsWith('video/')){title.textContent='یک فایل ویدیویی معتبر انتخاب کن.';return}
     if(localUrl)URL.revokeObjectURL(localUrl);localUrl=URL.createObjectURL(file);native(localUrl,()=>unavailable('local_file_unavailable'));
-    const note=document.createElement('div');note.className='cb-local-note';note.textContent='پخش فایل محلی؛ فقط در همین مرورگر';el.append(note);
+    setPlaybackNote('پخش فایل محلی؛ فقط در همین مرورگر');
    };
    label.append(input);const privacy=document.createElement('small');privacy.textContent='فایلی را انتخاب کن که اجازهٔ استفاده‌اش را داری. فایل آپلود نمی‌شود و پس از بارگذاری دوبارهٔ صفحه باید دوباره انتخابش کنی.';
    actions.append(embed,original,label);box.append(title,hint,actions,privacy);el.append(box);
   }
  async function attemptDirect(){
-  if(!current())return;clean();clean=()=>{};
-   el.innerHTML='<div class="cb-message" role="status"><strong>در حال دریافت ویدیوی عمومی…</strong><small>در صورت محدودیت دسترسی، گزینه‌های دیگر نمایش داده می‌شوند.</small></div>';
+  if(!current())return;
   try{
-    const {resolveInstagram}=await import('./instagram-media.mjs?v=ig-media-1');const media=await resolveInstagram(video.url,{signal:ctrl.signal});
-    if(current())native(media.playUrl,()=>unavailable());
-   }catch(error){if(current())unavailable(error.message);}
+   const {resolveInstagram,tryInstagramPlayback}=await import('./instagram-media.mjs?v=ig-retry-3');
+   const result=await tryInstagramPlayback(async number=>{
+    if(!current())throw new DOMException('Playback cancelled','AbortError');clean();clean=()=>{};setPlaybackNote();
+    el.replaceChildren();const loading=document.createElement('div');loading.className='cb-message';loading.setAttribute('role','status');const title=document.createElement('strong');title.textContent='در حال دریافت ویدیوی عمومی…';const progress=document.createElement('small');progress.textContent='تلاش برای پخش مستقیم: '+number+' / 3';loading.append(title,progress);el.append(loading);
+    const media=await resolveInstagram(video.url,{signal:ctrl.signal});if(!current())throw new DOMException('Playback cancelled','AbortError');
+    await new Promise((resolve,reject)=>{
+     let settled=false,ready=false;
+     const finish=error=>{if(settled){if(error&&ready&&current())igEmbed();return}settled=true;ctrl.signal.removeEventListener('abort',cancel);error?reject(error):resolve()};
+     const cancel=()=>finish(new DOMException('Playback cancelled','AbortError'));ctrl.signal.addEventListener('abort',cancel,{once:true});
+     native(media.playUrl,()=>finish(Error('video_load_failed')),()=>{ready=true;finish()});
+    });
+   },{signal:ctrl.signal});
+   if(current()&&!result.ok)igEmbed();
+  }catch(error){if(current()&&error.name!=='AbortError')unavailable(error.message)}
  }
  attemptDirect();
 

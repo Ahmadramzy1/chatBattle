@@ -17,7 +17,7 @@
  }
  async function metadata(video){
   if(video.platform==='instagram'){
-   const {resolveInstagram}=await import('./instagram-media.mjs?v=ig-media-1');
+   const {resolveInstagram}=await import('./instagram-media.mjs?v=ig-retry-3');
    const media=await resolveInstagram(video.url);if(media.poster)return media.poster;throw Error('Preview unavailable');
   }
   let url=video.url;

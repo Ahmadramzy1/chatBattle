@@ -1,5 +1,16 @@
 import { KICK_AUTH_API } from './kick-config.js';
 
+// One attempt includes both metadata resolution and actual video readiness.
+export async function tryInstagramPlayback(attempt,{signal}={}){
+ let error;
+ for(let number=1;number<=3;number++){
+  if(signal?.aborted)throw new DOMException('Playback cancelled','AbortError');
+  try{await attempt(number);if(signal?.aborted)throw new DOMException('Playback cancelled','AbortError');return {ok:true,attempts:number}}
+  catch(e){if(signal?.aborted)throw new DOMException('Playback cancelled','AbortError');error=e}
+ }
+ return {ok:false,attempts:3,error};
+}
+
 export async function resolveInstagram(raw,{signal,base=KICK_AUTH_API,fetcher=fetch}={}){
  const url=new URL(raw),parts=url.pathname.match(/^\/(reel|reels|p|tv)\/([A-Za-z0-9_-]{5,40})\/?$/);
  if(url.protocol!=='https:'||url.username||url.password||!['instagram.com','www.instagram.com','m.instagram.com'].includes(url.hostname)||!parts)throw Error('invalid_instagram_url');
