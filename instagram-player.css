@@ -1,7 +1,7 @@
 .cb-instagram-fallback{background:#141a16;color:#f4f1e6;box-sizing:border-box;align-content:safe center;place-content:unset;gap:12px;overflow:auto;padding:20px;font-size:13px;line-height:1.8}
 .cb-instagram-fallback strong{font-size:clamp(14px,1.5vw,18px);color:#f4f1e6}
 .cb-instagram-fallback p{margin:0;color:#d4dbd1}.cb-instagram-fallback small{font-size:11px;color:#c5cebf}
-.video-frame:has(.cb-instagram-fallback)>.number-corner{display:none}
+.video-frame:has(.cb-instagram-fallback,.cb-instagram)>.number-corner{display:none}
 .cb-fallback-actions{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:9px}
 .cb-fallback-actions button,.cb-fallback-actions a,.cb-local-file,.cb-playback-note button{position:relative;display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:9px 13px;border:1px solid #72816b;border-radius:12px;font:inherit;line-height:1.5;background:#26332b;color:#f6efd8;text-decoration:none;cursor:pointer;transition:background .18s,transform .18s}
 .cb-fallback-actions button:hover,.cb-fallback-actions a:hover,.cb-local-file:hover,.cb-playback-note button:hover{background:#364a3b;transform:translateY(-1px)}
@@ -13,4 +13,3 @@
 .cb-playback-note button{flex-shrink:0;font-size:11px;min-height:40px;padding:6px 9px}
 @media(max-width:420px){.cb-instagram-fallback{font-size:12px;padding:12px;gap:9px}.cb-fallback-actions{display:grid}.cb-fallback-actions>*{width:100%;box-sizing:border-box}.cb-playback-note{flex-wrap:wrap}}
 @media(prefers-reduced-motion:reduce){.cb-fallback-actions button,.cb-fallback-actions a,.cb-local-file{transition:none;transform:none}}
-
