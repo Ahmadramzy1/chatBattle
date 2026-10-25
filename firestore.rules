@@ -127,7 +127,7 @@ service cloud.firestore {
         request.resource.data.topic is string &&
         request.resource.data.topic.size() > 0 &&
         request.resource.data.topic.size() <= 110 &&
-        request.resource.data.capacity in [16, 24, 32, 48] &&
+        request.resource.data.capacity in [16, 32, 64] &&
         request.resource.data.perUser is int &&
         request.resource.data.perUser >= 1 &&
         request.resource.data.perUser <= 10 &&

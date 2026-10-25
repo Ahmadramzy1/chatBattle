@@ -298,7 +298,7 @@
      <div class="form-field"><label for="channelInput">یوزرنیم کانال Kick</label><div class="prefix-input"><span>kick.com/</span><input id="channelInput" name="channel" dir="ltr" placeholder="channel_name" spellcheck="false"></div></div>
      <div class="form-field"><label>حالت رأی‌گیری Kick</label><div class="segment" id="modeSelector" role="group" aria-label="حالت رأی‌گیری"><label><input type="radio" name="mode" value="kick" checked><span>● چت واقعی Kick</span></label><label><input type="radio" name="mode" value="demo"><span>◉ حالت آزمایشی</span></label></div><p class="hint">ارسال ویدیو از لینک دعوت انجام می‌شه؛ حالت آزمایشی فقط برای تست رأی‌گیری بدون Kick است.</p></div>
      <div class="form-field"><label>روش ورود برای ارسال ویدیو</label><div class="segment" id="submissionAuthSelector" role="group" aria-label="روش ورود برای ارسال ویدیو"><label><input type="radio" name="submissionAuth" value="kick" checked><span>ورود با Kick</span></label><label><input type="radio" name="submissionAuth" value="name"><span>فقط وارد کردن نام</span></label></div><p class="hint">در حالت نام دستی، نام تأیید نمی‌شود و سقف ارسال برای همین مرورگر اعمال می‌شود.</p></div>
-     <div class="form-field"><label>تعداد شرکت‌کننده</label><div class="capacity-select" role="group" aria-label="تعداد شرکت‌کننده"><label><input type="radio" name="capacity" value="16" checked><span>16</span></label><label><input type="radio" name="capacity" value="24"><span>24</span></label><label><input type="radio" name="capacity" value="32"><span>32</span></label><label><input type="radio" name="capacity" value="48"><span>48</span></label></div></div>
+     <div class="form-field"><label>تعداد شرکت‌کننده</label><div class="capacity-select" role="group" aria-label="تعداد شرکت‌کننده"><label><input type="radio" name="capacity" value="16" checked><span>16</span></label><label><input type="radio" name="capacity" value="32"><span>32</span></label><label><input type="radio" name="capacity" value="64"><span>64</span></label></div></div>
      <label class="toggle-row"><span><b>نمایش نام رأی‌دهنده‌ها</b><small>زیر ویدیویی که انتخاب کرده‌اند</small></span><input type="checkbox" id="showVotersInput"><i></i></label>
      <label class="toggle-row"><span><b>نمایش نام فرستندهٔ ویدیو</b><small>در لابی و هنگام رأی‌گیری</small></span><input type="checkbox" id="showSendersInput"><i></i></label>
      <div class="form-double"><div class="form-field"><label for="perUserInput">لینک مجاز هر نفر</label><select id="perUserInput"><option value="1">۱ لینک</option><option value="2" selected>۲ لینک</option><option value="3">۳ لینک</option><option value="5">۵ لینک</option><option value="10">۱۰ لینک</option></select></div><div class="form-field"><label for="secondsInput">زمان هر رأی‌گیری</label><select id="secondsInput"><option value="15">۱۵ ثانیه</option><option value="20">۲۰ ثانیه</option><option value="30" selected>۳۰ ثانیه</option><option value="45">۴۵ ثانیه</option><option value="60">۶۰ ثانیه</option><option value="90">۹۰ ثانیه</option><option value="120">۱۲۰ ثانیه</option></select></div></div>
@@ -368,7 +368,7 @@
 /* Chat Battle tournament engine — dependency-free, browser + Node. */
 (function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;root.ChatBattleCore=api;})(typeof window!=='undefined'?window:globalThis,function(){
  'use strict';
- const CAPACITIES=[16,24,32,48];
+ const CAPACITIES=[16,32,64];
  const safeText=x=>String(x??'').trim();
  const rxLinks=/(?:https?:\/\/)?(?:www\.|m\.)?(?:youtube\.com|youtube-nocookie\.com|youtu\.be|instagram\.com|instagr\.am|tiktok\.com|vm\.tiktok\.com|vt\.tiktok\.com)\/[^\s<>"'`]+/gi;
  const trimUrl=s=>s.replace(/[\]\[),;!?،؛.]+$/g,'');
@@ -443,17 +443,17 @@
     if(!m.left&&!m.right){m.status='empty';continue;}
     ready.push({round:r,index:i});
    }
-   if(ready.length)return ready.find(p=>{const m=state.rounds[r][p.index];return !m.left||!m.right;})||ready[0];
+   if(ready.length)return ready[0];
   }
   return null;
  }
  function startTournament(state,random=Math.random){
   if(state.phase!=='collecting'||state.entries.length<2)return {ok:false,reason:'not-enough'};
-  const n=2**Math.ceil(Math.log2(state.entries.length));const ordered=shuffle(state.entries,random);const arranged=seeds(n).map(s=>ordered[s-1]?.id||null);
-  state.rounds=[];for(let size=n,round=0;size>=2;size/=2,round++){state.rounds.push(Array.from({length:size/2},(_,i)=>makeMatch(round,i)));}
+  const n=state.entries.length;const arranged=shuffle(state.entries,random).map(e=>e.id);
+  state.rounds=[];for(let size=n,round=0;size>1;size=Math.ceil(size/2),round++){state.rounds.push(Array.from({length:Math.ceil(size/2)},(_,i)=>makeMatch(round,i)));}
   arranged.forEach((id,i)=>{const m=state.rounds[0][Math.floor(i/2)];if(i%2===0)m.left=id;else m.right=id;});
   state.current=nextMatch(state);state.phase='battle';state.matchStatus='preview';state.votingEndsAt=null;
-  return {ok:true,rounds:state.rounds.length,byes:n-state.entries.length};
+  return {ok:true,rounds:state.rounds.length,byes:n%2};
  }
  function currentMatch(state){return state.current?state.rounds[state.current.round]?.[state.current.index]||null:null;}
  function startVote(state,now=Date.now()){
