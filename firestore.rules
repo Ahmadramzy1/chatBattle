@@ -68,7 +68,8 @@ service cloud.firestore {
         get(subPath(id, request.auth.uid)).data.links.size() : 0;
     }
     function validViewerRoomUpdate(id) {
-      let after = getAfter(subPath(id, request.auth.uid)).data;
+      let remains = existsAfter(subPath(id, request.auth.uid));
+      let after = remains ? getAfter(subPath(id, request.auth.uid)).data : {'uid': request.auth.uid, 'links': [], 'videoKeys': []};
       let keys = request.resource.data.reservedVideoKeys;
       return resource.data.get('schemaVersion', 1) == 2 &&
         resource.data.status == 'collecting' &&
@@ -77,7 +78,7 @@ service cloud.firestore {
         keys.size() == keys.toSet().size() &&
         request.resource.data.usedCount >= 0 &&
         request.resource.data.usedCount <= resource.data.capacity &&
-        existsAfter(subPath(id, request.auth.uid)) &&
+        (remains || beforeCount(id) > 0) &&
         after.uid == request.auth.uid &&
         request.resource.data.usedCount ==
           resource.data.usedCount + after.links.size() - beforeCount(id) &&
@@ -111,6 +112,46 @@ service cloud.firestore {
         after.reservedVideoKeys.toSet().hasAll(request.resource.data.videoKeys);
     }
 
+    function validViewerDelete(id, uid) {
+      let before = get(roomPath(id)).data;
+      let after = getAfter(roomPath(id)).data;
+      let submission = get(subPath(id, uid)).data;
+      return signed() && request.auth.uid == uid && submission.uid == uid &&
+        before.get('schemaVersion', 1) == 2 && before.status == 'collecting' && after.status == 'collecting' &&
+        after.diff(before).affectedKeys().hasOnly(['usedCount', 'reservedVideoKeys']) &&
+        after.usedCount == before.usedCount - submission.links.size() && after.usedCount >= 0 &&
+        after.reservedVideoKeys.size() == after.usedCount &&
+        after.reservedVideoKeys.toSet() == before.reservedVideoKeys.toSet().difference(submission.videoKeys.toSet());
+    }
+
+    // The owner may remove exactly one link, together with its reservation and count.
+    function validOwnerRemoval(id, uid) {
+      let beforeRoom = get(roomPath(id)).data;
+      let afterRoom = getAfter(roomPath(id)).data;
+      let beforeSub = get(subPath(id, uid)).data;
+      let remains = existsAfter(subPath(id, uid));
+      let afterSub = remains ? getAfter(subPath(id, uid)).data : {};
+      let links = afterSub.get('links', []);
+      let keys = afterSub.get('videoKeys', []);
+      return signed() && beforeRoom.ownerUid == request.auth.uid &&
+        beforeRoom.get('schemaVersion', 1) == 2 &&
+        beforeRoom.status == 'collecting' && afterRoom.status == 'collecting' &&
+        afterRoom.diff(beforeRoom).affectedKeys()
+          .hasOnly(['usedCount', 'reservedVideoKeys', 'moderatedViewerUid']) &&
+        afterRoom.get('moderatedViewerUid', '') == uid && beforeSub.uid == uid &&
+        links is list && keys is list && keys.size() == links.size() &&
+        links.size() == beforeSub.links.size() - 1 &&
+        links.toSet().difference(beforeSub.links.toSet()).size() == 0 &&
+        keys.toSet().difference(beforeSub.videoKeys.toSet()).size() == 0 &&
+        (!remains || (afterSub.diff(beforeSub).affectedKeys().hasOnly(['links', 'videoKeys']))) &&
+        afterRoom.usedCount == beforeRoom.usedCount - 1 && afterRoom.usedCount >= 0 &&
+        afterRoom.reservedVideoKeys is list &&
+        afterRoom.reservedVideoKeys.size() == afterRoom.usedCount &&
+        afterRoom.reservedVideoKeys.toSet().size() == afterRoom.usedCount &&
+        afterRoom.reservedVideoKeys.toSet() == beforeRoom.reservedVideoKeys.toSet()
+          .difference(beforeSub.videoKeys.toSet()).union(keys.toSet());
+    }
+
     match /chatBattleSessions/{sessionId} {
       allow get: if signed();
       allow list: if false;
@@ -138,6 +179,13 @@ service cloud.firestore {
         request.resource.data.reservedVideoKeys == [] &&
         request.resource.data.createdAt == request.time;
 
+      allow update: if signed() && resource.data.ownerUid == request.auth.uid &&
+        resource.data.status == 'collecting' &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['capacity']) &&
+        request.resource.data.capacity in [16, 32, 64] &&
+        request.resource.data.capacity > resource.data.capacity &&
+        request.resource.data.capacity >= resource.data.usedCount;
+
       allow update: if signed() && (
         (resource.data.ownerUid == request.auth.uid &&
           resource.data.status == 'collecting' &&
@@ -148,6 +196,9 @@ service cloud.firestore {
           resource.data.status == 'collecting' &&
           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['perUser']) &&
           request.resource.data.perUser is int && request.resource.data.perUser >= 1 && request.resource.data.perUser <= 10)
+        ||
+        (resource.data.ownerUid == request.auth.uid &&
+          validOwnerRemoval(sessionId, request.resource.data.get('moderatedViewerUid', '')))
         ||
         validViewerRoomUpdate(sessionId)
         ||
@@ -195,6 +246,10 @@ service cloud.firestore {
                 get(roomPath(sessionId)).data.capacity)
           );
 
+        allow update: if signed() && get(roomPath(sessionId)).data.ownerUid == request.auth.uid &&
+          validOwnerRemoval(sessionId, viewerUid) &&
+          validPairs(request.resource.data.links, request.resource.data.videoKeys);
+
         allow update: if signed() && viewerUid == request.auth.uid &&
           resource.data.uid == viewerUid &&
           get(roomPath(sessionId)).data.get('schemaVersion', 1) == 2 &&
@@ -204,7 +259,10 @@ service cloud.firestore {
             .hasOnly(['username','links','videoKeys']) &&
           validSubmissionRoomTransition(sessionId, resource.data.links.size());
 
-        allow delete: if false;
+        allow delete: if validViewerDelete(sessionId, viewerUid);
+
+        allow delete: if signed() && get(roomPath(sessionId)).data.ownerUid == request.auth.uid &&
+          validOwnerRemoval(sessionId, viewerUid);
       }
     }
   }

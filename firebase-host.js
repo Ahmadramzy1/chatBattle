@@ -1,3 +1,4 @@
+import {planHostRemoval,planCapacityIncrease} from './host-removal.mjs?v=host-manage-1';
 import {
   db, doc, collection, setDoc, getDoc, getDocs, onSnapshot, query, orderBy,
   updateDoc, runTransaction, serverTimestamp, authReady, firebaseError
@@ -5,7 +6,7 @@ import {
 
 const bridge=window.ChatBattleBridge;
 const box=document.getElementById('invitePanel');
-let unsubscribe=null;
+let unsubscribe=null,unsubscribeRoom=null;
 let currentId=null;
 let creating=false;
 let lastError='';
@@ -35,11 +36,13 @@ function display(){
 }
 function stopListening(){
   if(unsubscribe){unsubscribe();unsubscribe=null}
+  unsubscribeRoom?.();unsubscribeRoom=null;
   currentId=null;
 }
 function listen(id){
   if(!id||currentId===id)return;
   stopListening();currentId=id;
+  unsubscribeRoom=onSnapshot(doc(db,'chatBattleSessions',id),snapshot=>{const g=bridge?.getGame();if(snapshot.exists()&&g?.phase==='collecting'&&g.cloudSessionId===id)bridge.syncRoomSettings(g,snapshot.data());},error=>status('خطای ارتباط با دیتابیس',firebaseError(error)));
   const ref=query(collection(db,'chatBattleSessions',id,'submissions'),orderBy('submittedAt','asc'));
   unsubscribe=onSnapshot(ref,snapshot=>{
     const g=bridge?.getGame();
@@ -112,6 +115,28 @@ async function updatePerUser(g,value){
   await authReady();
   await updateDoc(doc(db,'chatBattleSessions',g.cloudSessionId),{perUser:value});
 }
+async function updateCapacity(g,value){
+  if(g!==bridge.getGame()||g?.phase!=='collecting'||!g.cloudSessionId)throw Error('افزایش ظرفیت فقط در لابی ممکن است.');
+  const user=await authReady(),ref=doc(db,'chatBattleSessions',g.cloudSessionId);
+  try{await runTransaction(db,async tx=>{const snap=await tx.get(ref);if(!snap.exists())throw Error('room_missing');tx.update(ref,planCapacityIncrease(snap.data(),{ownerUid:user.uid,capacity:value}));});}
+  catch(error){const messages={owner_required:'فقط سازندهٔ مسابقه می‌تواند ظرفیت را تغییر دهد.',room_closed:'مسابقه شروع شده؛ تغییر ظرفیت ممکن نیست.',invalid_capacity:'یک ظرفیت بزرگ‌تر از ظرفیت فعلی انتخاب کن.'};throw Error(messages[error.message]||firebaseError(error));}
+  if(g===bridge.getGame()&&g.phase==='collecting')bridge.syncRoomSettings(g,{capacity:value});
+}
+async function removeVideo(g,entry){
+  if(g!==bridge.getGame()||g?.phase!=='collecting'||!g.cloudSessionId)throw Error('حذف فقط قبل از شروع مسابقه ممکن است.');
+  if(!entry.submissionUid||!entry.submissionLink)throw Error('اطلاعات این ورودی قدیمی است؛ صفحه را تازه‌سازی کن.');
+  const user=await authReady(),roomRef=doc(db,'chatBattleSessions',g.cloudSessionId),subRef=doc(roomRef,'submissions',entry.submissionUid);
+  try{
+    await runTransaction(db,async tx=>{
+      const [roomSnap,subSnap]=await Promise.all([tx.get(roomRef),tx.get(subRef)]);
+      if(!roomSnap.exists())throw Error('room_missing');
+      const plan=planHostRemoval(roomSnap.data(),subSnap.exists()?subSnap.data():null,{ownerUid:user.uid,viewerUid:entry.submissionUid,url:entry.submissionLink});
+      if(plan.submission)tx.update(subRef,plan.submission);else tx.delete(subRef);
+      tx.update(roomRef,plan.room);
+    });
+    if(g===bridge.getGame()&&g.phase==='collecting')bridge.removeEntry(g,entry);
+  }catch(error){const messages={owner_required:'فقط سازندهٔ مسابقه می‌تواند ویدیو را حذف کند.',room_closed:'مسابقه شروع شده؛ حذف دیگر ممکن نیست.',already_removed:'این ویدیو قبلاً حذف شده.',invalid_submission:'ورودی تغییر کرده؛ صفحه را تازه‌سازی کن.',unsupported_room:'برای حذف دستی، یک مسابقهٔ جدید بساز.'};throw Error(messages[error.message]||firebaseError(error));}
+}
 async function copyInvite(){
   const g=bridge?.getGame();if(!g?.cloudSessionId)return;
   const value=inviteUrl(g.cloudSessionId);
@@ -120,7 +145,7 @@ async function copyInvite(){
 }
 box?.querySelector('#copyInvite')?.addEventListener('click',copyInvite);
 box?.querySelector('#makeInvite')?.addEventListener('click',()=>createSession(bridge.getGame()));
-window.ChatBattleCloudHost={createSession,resume,closeSession,updatePerUser,stopListening,display,copyInvite};
+window.ChatBattleCloudHost={createSession,resume,closeSession,updatePerUser,updateCapacity,removeVideo,stopListening,display,copyInvite};
 const existing=bridge?.getGame();
 if(existing?.phase==='collecting'){
   display();

@@ -43,3 +43,9 @@ test('vote changes move one vote and special names do not modify prototypes',()=
  assert.deepEqual(Array.from(core.currentMatch(g).votes),[0,1]);assert.equal(core.vote(g,'2','__proto__',103).ok,false);
 });
 
+
+test('round header counts restart for each knockout stage',()=>{
+ const g=game(32);core.startTournament(g);let rounds=[];
+ while(g.phase==='battle'){const p=core.roundProgress(g);if(p.position===1)rounds.push([p.total,p.stage]);const m=core.currentMatch(g);core.startVote(g,100);core.endVote(g,101);core.advance(g,m.left?0:1);}
+ assert.deepEqual(JSON.parse(JSON.stringify(rounds)),[[16,'elimination'],[8,'elimination'],[4,'quarter'],[2,'semi'],[1,'final']]);
+});

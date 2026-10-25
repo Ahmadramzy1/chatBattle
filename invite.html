@@ -29,10 +29,11 @@ button:disabled{opacity:.43;cursor:not-allowed}.subtle{background:#243122;color:
 .done{display:none;text-align:center;padding:45px 26px}.done strong{font-size:24px;display:block;color:var(--green)}.done p{color:#bdc6cf}footer{color:#829199;text-align:center;padding:30px 8px;font:700 10px 'Space Grotesk',sans-serif;letter-spacing:2px}a{color:var(--green)}
 @media(max-width:500px){.wrap{padding-top:22px}.card{padding:19px}.eyebrow{margin-top:32px}}
 </style><link rel="stylesheet" href="./redesign.css?v=organic-2">
-<script src="./translations.js?v=entry-auth-1"></script>
+<script src="./translations.js?v=host-manage-1"></script>
 <script src="./i18n.js?v=slate-1" defer></script>
 <link rel="stylesheet" href="./neumorphism.css?v=neo-1">
 <script src="./presentation-motion.js?v=neo-1" defer></script>
+<link rel="stylesheet" href="./host-removal.css?v=host-manage-1">
 </head>
 <body>
 <div class="wrap">
@@ -56,8 +57,8 @@ button:disabled{opacity:.43;cursor:not-allowed}.subtle{background:#243122;color:
  <button id="confirm" type="submit" class="submit">تأیید نهایی و ثبت ویدیوها ←</button><button id="cancelEdit" class="subtle" type="button" hidden>انصراف از ویرایش</button>
  <p class="hint">تا قبل از شروع مسابقه می‌تونی لینک‌های ثبت‌شده رو ویرایش، حذف یا تا سقف مجاز لینک جدید اضافه کنی.</p>
 </form>
-<section id="success" class="card done"><span style="font-size:53px">🏆</span><strong>لینک‌هات ثبت شدن!</strong><p id="successInfo">منتظر شروع رقابت باش.</p><button class="subtle" id="editLinks" type="button" hidden>✎ ویرایش یا اضافه کردن لینک</button><p class="hint" id="editHint">ویرایش فقط تا پیش از شروع مسابقه فعال است.</p></section>
+<section id="success" class="card done"><span style="font-size:53px">🏆</span><strong>لینک‌هات ثبت شدن!</strong><p id="successInfo">منتظر شروع رقابت باش.</p><ol id="confirmedLinks" class="confirmed-links"></ol><button class="submit" id="editLinks" type="button" hidden>✎ ویرایش، حذف یا اضافه کردن ویدیو</button><p class="hint" id="editHint">تا قبل از شروع مسابقه می‌توانی ویدیوهایت را تغییر بدهی یا حذف کنی.</p><button id="deleteMine" class="subtle delete-mine" type="button" hidden>حذف ویدیوهای من</button><div id="deletePrompt" class="delete-prompt" role="group" aria-labelledby="deletePromptTitle" hidden><p id="deletePromptTitle">همهٔ ویدیوهای ثبت‌شدهٔ تو از این مسابقه حذف شوند؟</p><div><button id="confirmDeleteMine" class="subtle delete-mine" type="button">بله، حذف کن</button><button id="cancelDeleteMine" class="subtle" type="button">انصراف</button></div></div></section>
 <footer>CHAT BATTLE — THE CHAT DECIDES.</footer>
 </div>
-<script type="module" src="./firebase-invite.js?v=entry-auth-1"></script>
+<script type="module" src="./firebase-invite.js?v=host-manage-1"></script>
 </body></html>

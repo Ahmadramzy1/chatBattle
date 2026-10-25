@@ -1,3 +1,4 @@
+import {planViewerRemoval} from './host-removal.mjs?v=host-manage-1';
 import { requiresKick, submissionName } from './submission-auth.js?v=entry-auth-1';
 import { resolveTikTokLink } from './media-links.js?v=tiktok-short-1';
 import { kickUser, loginWithKick } from './kick-auth.js';
@@ -9,7 +10,7 @@ const $=id=>document.getElementById(id);
 const sessionId=new URLSearchParams(location.search).get('s')||'';
 const sessionRef=doc(db,'chatBattleSessions',sessionId||'missing');
 const form=$('entryForm'),inputs=$('inputs');
-let current=null,viewerUser=null,mine=null,editing=false,pending=false,unsubscribe=null;
+let current=null,viewerUser=null,mine=null,editing=false,pending=false,unsubscribe=null,ownUnsubscribe=null;
 const LEGACY='این مسابقه با نسخه قبلی ساخته شده. برای ویرایش و بررسی لینک تکراری، از استریمر بخواه مسابقه جدید بسازه.';
 function status(message,type='info'){
   $('state').className='status '+type;
@@ -83,6 +84,7 @@ function refreshControls(){
   if(!current)return;
   const count=inputs.children.length;
   $('addAnother').disabled=count>=Number(current.perUser)||pending;
+  for(const id of ['editLinks','deleteMine','confirmDeleteMine','cancelDeleteMine'])$(id).disabled=pending;
   $('linkHint').textContent=count+' از '+current.perUser+' لینک مجاز. قبل از ذخیره می‌تونی لینک‌ها رو حذف یا جایگزین کنی.';
   for(const el of inputs.querySelectorAll('.remove'))el.disabled=count<=1||pending;
 }
@@ -100,9 +102,12 @@ function showConfirmed(){
   $('success').style.display='block';
   $('successInfo').textContent=(mine?.links?.length||0)+' ویدیو ثبت شده. تا قبل از شروع رقابت می‌تونی ویرایش کنی.';
   const canEdit=!!current&&current.status==='collecting'&&Number(current.schemaVersion)===2;
-  $('editLinks').hidden=!canEdit;
-  $('editHint').textContent=canEdit?'ویرایش لینک‌ها و اضافه کردن ویدیوی جدید تا سقف مجاز فعاله.':'مسابقه شروع شده یا ارسال‌ها بسته شده؛ ویرایش امکان‌پذیر نیست.';
-  status(canEdit?'✅ لینک‌ها ثبت شدن و قابل ویرایش هستن.':'✅ ویدیوهای ثبت‌شده ذخیره شدن.','');
+  $('editLinks').hidden=!canEdit;$('deleteMine').hidden=!canEdit;
+  $('deleteMine').textContent=(mine?.links?.length||0)>1?'حذف همهٔ ویدیوهای من':'حذف ویدیوی من';
+  if(!canEdit)$('deletePrompt').hidden=true;
+  $('confirmedLinks').replaceChildren();for(const url of mine?.links||[]){const li=document.createElement('li'),a=document.createElement('a');a.href=url;a.target='_blank';a.rel='noopener noreferrer';a.dir='ltr';a.textContent=url;li.append(a);$('confirmedLinks').append(li);}
+  $('editHint').textContent=canEdit?'تا قبل از شروع مسابقه می‌توانی لینک‌ها را ویرایش کنی، ویدیو حذف کنی یا لینک جدید اضافه کنی.':'مسابقه شروع شده یا ارسال‌ها بسته شده؛ ویرایش امکان‌پذیر نیست.';
+  status(canEdit?'✅ ثبت شد. امکان ویرایش و حذف تا قبل از شروع مسابقه فعال است.':'✅ ویدیوهای ثبت‌شده ذخیره شدن.','');
 }
 function identityUi(room){
   const kick=requiresKick(room),field=$('username');
@@ -207,6 +212,18 @@ async function submit(event){
     pending=false;$('confirm').disabled=false;refreshControls();
   }
 }
+async function deleteOwnSubmission(){
+  if(pending||!mine||!viewerUser||current?.status!=='collecting')return;
+  pending=true;refreshControls();
+  try{const subRef=doc(db,'chatBattleSessions',sessionId,'submissions',viewerUser.uid);
+    await runTransaction(db,async tx=>{const [r,s]=await Promise.all([tx.get(sessionRef),tx.get(subRef)]);if(!r.exists())throw Error('مسابقه پیدا نشد.');const update=planViewerRemoval(r.data(),s.exists()?s.data():null,{viewerUid:viewerUser.uid});tx.delete(subRef);tx.update(sessionRef,update);});
+    mine=null;editing=false;$('deletePrompt').hidden=true;populateForm();showRoom(current);status('ویدیوهای تو حذف شدند و ظرفیت آزاد شد. تا قبل از شروع می‌توانی دوباره لینک بفرستی.','info');
+  }catch(error){status(error.message==='room_closed'?'مسابقه شروع شده؛ دیگر امکان حذف وجود ندارد.':firebaseError(error),'error');}
+  finally{pending=false;refreshControls();}
+}
+$('deleteMine').addEventListener('click',()=>{if(!mine||current?.status!=='collecting'||pending)return;$('deletePrompt').hidden=false;$('confirmDeleteMine').focus();});
+$('cancelDeleteMine').addEventListener('click',()=>{$('deletePrompt').hidden=true;$('deleteMine').focus();});
+$('confirmDeleteMine').addEventListener('click',deleteOwnSubmission);
 $('addAnother').addEventListener('click',()=>{addField();highlightDuplicates()});
 $('editLinks').addEventListener('click',editingMode);
 $('cancelEdit').addEventListener('click',()=>{if(!mine)return;editing=false;showConfirmed()});
@@ -223,6 +240,12 @@ async function boot(){
     const ownRef=doc(db,'chatBattleSessions',sessionId,'submissions',viewerUser.uid);
     const mineSnap=await getDoc(ownRef);
     if(mineSnap.exists())mine=mineSnap.data();
+    ownUnsubscribe=onSnapshot(ownRef,snapshot=>{
+      const next=snapshot.exists()?snapshot.data():null;
+      const changed=JSON.stringify(mine?.links||[])!==JSON.stringify(next?.links||[]);
+      mine=next;
+      if(changed&&!pending){editing=false;$('deletePrompt').hidden=true;populateForm();if(current)showRoom(current);}
+    },error=>status(firebaseError(error),'error'));
     unsubscribe=onSnapshot(sessionRef,snapshot=>{
       if(!snapshot.exists()){form.hidden=true;status('مسابقه پیدا نشد.','error');return}
       showRoom(snapshot.data());
@@ -231,4 +254,4 @@ async function boot(){
 }
 $('kickLogin').addEventListener('click',()=>loginWithKick().catch(e=>status(e.message,'error')));
 boot();
-window.addEventListener('pagehide',()=>unsubscribe?.());
+window.addEventListener('pagehide',()=>{unsubscribe?.();ownUnsubscribe?.();});

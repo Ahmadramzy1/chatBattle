@@ -263,11 +263,12 @@
 @media(max-width:650px){.topbar{height:158px;min-height:158px;align-items:flex-end;padding-bottom:14px}.header-mid{height:104px;width:132px}.header-logo{width:104px;height:104px}}
 </style>
 <link rel="stylesheet" href="./redesign.css?v=organic-2">
-<script src="./translations.js?v=ig-retry-3"></script>
+<script src="./translations.js?v=host-manage-1"></script>
 <script src="./i18n.js?v=slate-1" defer></script><script src="./interface.js?v=slate-1" defer></script>
 <link rel="stylesheet" href="./neumorphism.css?v=neo-1">
 <link rel="stylesheet" href="./instagram-player.css?v=ig-embed-layout-4">
 <script src="./presentation-motion.js?v=neo-1" defer></script>
+<link rel="stylesheet" href="./host-removal.css?v=host-manage-1">
 </head>
 <body><a class="skip-link" href="#main-content">رفتن به محتوای اصلی</a>
 <div class="ambient ambient-one" aria-hidden="true"></div><div class="ambient ambient-two" aria-hidden="true"></div>
@@ -330,12 +331,12 @@
      <div class="glass side-card"><span class="section-number">KICK VOTING</span><h3 id="modeTitle">اتصال رأی‌گیری</h3><button type="button" id="reconnectBtn" class="secondary-btn">↻ اتصال مجدد</button></div>
      <div id="demoPanel" class="glass side-card hidden"><span class="section-number">TEST TOOLS</span><h3>ابزار آزمایشی (فقط توسعه)</h3><form id="demoSubmissionForm"><input id="demoUsername" aria-label="نام فرستنده آزمایشی" placeholder="username" value="viewer_01" dir="ltr" required><textarea id="demoLink" aria-label="لینک ویدیوی آزمایشی" rows="2" dir="ltr" placeholder="لینک YouTube / TikTok / Instagram" required></textarea><button type="submit" class="secondary-btn">+ ارسال لینک آزمایشی</button></form><button type="button" id="fillDemoBtn" class="secondary-btn subtle-btn">پر کردن ظرفیت با نمونه‌های آزمایشی</button><p class="hint">نمونه‌های آزمایشی صرفاً برای تست منطق بازی هستند و پخش‌شدن همه ویدیوهای نمونه تضمین‌شده نیست.</p></div>
      <div class="glass side-card instruction-card"><span class="section-number">HOW IT WORKS</span><h3>قانون بازی</h3><p>هر بیننده از طریق لینک دعوت تا <b id="perUserDisplay">2</b> ویدیو ثبت می‌کنه. ویدیوی تکراری رد می‌شه و تا شروع رقابت قابل ویرایشه؛ چت Kick فقط برای رأی‌های 1 و 2 استفاده می‌شه.</p><div class="three-platforms"><span>▶ YouTube</span><span>♪ TikTok</span><span>◎ Instagram</span></div></div>
-<div class="glass side-card"><label for="livePerUser">سقف لینک هر نفر</label><input id="livePerUser" type="number" min="1" max="10" step="1"><button id="savePerUser" class="secondary-btn" type="button">اعمال سقف جدید</button><p class="hint">لینک‌های قبلی حفظ می‌شوند. سقف جدید برای ارسال و ذخیرهٔ بعدی اعمال می‌شود.</p></div>
+<div class="glass side-card"><label for="livePerUser">سقف لینک هر نفر</label><input id="livePerUser" type="number" min="1" max="10" step="1"><button id="savePerUser" class="secondary-btn" type="button">اعمال سقف جدید</button><p class="hint">لینک‌های قبلی حفظ می‌شوند. سقف جدید برای ارسال و ذخیرهٔ بعدی اعمال می‌شود.</p><div class="lobby-capacity-control"><label for="liveCapacity">افزایش ظرفیت مسابقه</label><div class="capacity-update-row"><select id="liveCapacity" aria-describedby="capacityHint"><option value="16">16</option><option value="32">32</option><option value="64">64</option></select><button id="saveCapacity" type="button" class="secondary-btn">افزایش ظرفیت</button></div><p class="hint" id="capacityHint">لینک دعوت و تمام ویدیوهای قبلی حفظ می‌شوند.</p></div></div>
      <button type="button" id="launchBtn" class="primary-btn" disabled>شروع رقابت <span>←</span></button></aside>
    </div>
   </section>
   <section class="page" id="page-battle" aria-label="مسابقه">
-   <div class="battle-intro"><div><span class="section-number" id="battleRoundLabel">ROUND 01 / MATCH 01</span><h1 data-no-translate id="battleTopic">BATTLE ARENA</h1></div><div class="battle-progress"><b id="matchFraction">01 / 15</b><span>مسابقه انجام‌شده</span></div></div>
+   <div class="battle-intro"><div><span class="section-number" id="battleRoundLabel">ROUND 01 / MATCH 01</span><h1 data-no-translate id="battleTopic">BATTLE ARENA</h1></div><div class="battle-progress"><b id="matchFraction">01 / 15</b><span>رقابت این دور</span></div></div>
    <div class="stage">
     <div class="video-card" id="card-1"><div class="card-heading"><div class="video-side-id">01<span>CONTENDER</span></div><span class="platform-tag" id="platform-1">VIDEO</span></div>
      <div class="video-frame" id="frame-1"><div class="video-cover" id="cover-1"><div class="cover-light"></div><img id="preview-1" alt="" class="cover-thumb" hidden><div class="video-lock"><span class="lock-symbol">◈</span><span>ویدیو مخفی است</span><small>برای پخش، دکمه پایین را بزنید</small></div></div><div class="frame-player" id="player-1"></div><span class="number-corner">1</span></div>
@@ -527,8 +528,9 @@
    return a.createdAt-b.createdAt;
   });
  }
+ function roundProgress(state){if(!state.current)return null;const {round,index}=state.current,remaining=state.rounds.length-round;return {round,position:index+1,total:state.rounds[round].length,stage:remaining===1?'final':remaining===2?'semi':remaining===3?'quarter':'elimination'};}
  function matchProgress(state){const total=state.rounds.flat().filter(m=>m.status!=='empty').length;const done=state.rounds.flat().filter(m=>m.winner).length;return {done,total};}
- return {CAPACITIES,defaults,newGame,parseVideo,linksIn,submitLink,startTournament,currentMatch,startVote,endVote,maybeExpire,vote,advance,undo,compactHistory,rankings,matchProgress,seeds};
+ return {CAPACITIES,defaults,newGame,parseVideo,linksIn,submitLink,startTournament,currentMatch,startVote,endVote,maybeExpire,vote,advance,undo,compactHistory,rankings,roundProgress,matchProgress,seeds};
 });
 
 </script>
@@ -540,6 +542,7 @@
  const $=id=>document.getElementById(id);
  const q=(s,scope=document)=>scope.querySelector(s);
  const qa=(s,scope=document)=>[...scope.querySelectorAll(s)];
+ const removingEntries=new Set();let capacityPending=false;
  const STORE='chatbattle:game:v1',ROOM_CACHE='chatbattle:room:',MAX_MSG_IDS=1500;
  let launching=false,game=null, ws=null, sockGeneration=0, retryTimer=0, retryAttempt=0, manuallyDisconnected=false;
  let toastTimer=0, lastBattleKey='', lastPage='', visualCounts=[0,0], animIds=[0,0], demoVoterCounter=1, fallback=false;
@@ -580,7 +583,10 @@
  }
  function renderCollection(){const count=game.entries.length,cap=game.settings.capacity;
   text('lobbyTopicTitle',game.settings.topic);text('lobbyCount',pad(count));text('lobbyCapacity',cap);text('lobbyAvailable',count>=cap?'ظرفیت تکمیل':number(cap-count)+' جای خالی');text('perUserDisplay',game.settings.perUser);
-  $('collectionProgress').style.width=(count/cap*100)+'%';$('launchBtn').disabled=launching||count<2; if(document.activeElement!==$('livePerUser'))$('livePerUser').value=game.settings.perUser;
+  $('collectionProgress').style.width=(count/cap*100)+'%';$('launchBtn').disabled=launching||capacityPending||removingEntries.size>0||count<2; if(document.activeElement!==$('livePerUser'))$('livePerUser').value=game.settings.perUser;
+  const capacitySelect=$('liveCapacity');for(const option of capacitySelect.options)option.disabled=Number(option.value)<=cap;
+  if(Number(capacitySelect.value)<=cap)capacitySelect.value=String(Core.CAPACITIES.find(n=>n>cap)||cap);
+  capacitySelect.disabled=capacityPending||cap>=64||launching;$('saveCapacity').disabled=capacityPending||cap>=64||launching;text('saveCapacity',capacityPending?'در حال افزایش…':cap>=64?'حداکثر ظرفیت':'افزایش ظرفیت');
   const demo=game.settings.mode==='demo'||fallback;
   $('demoPanel').classList.add('hidden');text('modeTitle',game.settings.mode==='demo'?'شبیه‌ساز رأی Kick':'اتصال به چت Kick (فقط رأی)');
   $('reconnectBtn').classList.toggle('hidden',game.settings.mode==='demo');
@@ -590,8 +596,17 @@
    const tile=document.createElement('div');tile.className='entry-tile';const pic=thumbNode(e.video,'entry-photo');
    const tag=document.createElement('span');tag.textContent=platformName(e.video);pic.append(tag);
    const meta=document.createElement('div');meta.className='entry-details';const idx=document.createElement('b');idx.textContent='VIDEO '+pad(i+1);
-   const kind=document.createElement('small');kind.toggleAttribute('data-no-translate',game.settings.showSenders);kind.textContent=game.settings.showSenders?'@'+e.sender:e.video.kind;meta.append(kind,idx);tile.append(pic,meta);list.append(tile);
+   const kind=document.createElement('small');kind.toggleAttribute('data-no-translate',game.settings.showSenders);kind.textContent=game.settings.showSenders?'@'+e.sender:e.video.kind;meta.append(kind,idx);tile.append(pic,meta);
+   if(e.submissionUid){const remove=document.createElement('button');remove.type='button';remove.className='entry-remove';remove.textContent=removingEntries.has(e.submissionLink)?'در حال حذف…':'حذف از صف';remove.setAttribute('aria-label',document.documentElement.lang==='en'?'Remove video '+(i+1)+' from queue':'حذف ویدیوی '+(i+1)+' از صف');remove.disabled=launching||removingEntries.size>0;remove.onclick=()=>removeLobbyEntry(e);tile.append(remove);}
+   list.append(tile);
   });$('emptyEntries').classList.toggle('hidden',count>0);
+ }
+ async function removeLobbyEntry(entry){
+  const state=game;if(!state||state.phase!=='collecting'||launching||removingEntries.size)return;
+  removingEntries.add(entry.submissionLink);renderCollection();
+  try{if(!window.ChatBattleCloudHost?.removeVideo)throw Error('ماژول مدیریت صف آماده نیست؛ صفحه را تازه‌سازی کن.');await window.ChatBattleCloudHost.removeVideo(state,entry);if(state===game)toast('ویدیو از صف حذف شد؛ یک جای خالی آزاد شد.');}
+  catch(error){toast(error.message||'حذف ویدیو ناموفق بود.');}
+  finally{removingEntries.delete(entry.submissionLink);if(state===game&&state.phase==='collecting')renderCollection();}
  }
  function registerText(content,username,id,time,kickId){if(!game)return;
   if(id){const normalized=String(id);if(idsSeen.has(normalized))return;idsSeen.add(normalized);if(idsSeen.size>MAX_MSG_IDS){const old=idsSeen.values().next().value;idsSeen.delete(old)}}
@@ -648,7 +663,7 @@
   save();renderCollection();toast(added+' لینک نمونه اضافه شد (صرفاً جهت تست).');
  }
  function getEntry(id){return game.entries.find(e=>e.id===id)||null}
- function formatRound(r){const total=game.rounds.length;return r===total-1?'GRAND FINAL':r===total-2?'SEMI FINALS':r===total-3?'QUARTER FINALS':'ROUND '+pad(r+1)}
+ function formatRound(r){const total=game.rounds.length;return r===total-1?'فینال':r===total-2?'نیمه‌نهایی':r===total-3?'یک‌چهارم نهایی':'مرحلهٔ حذفی'}
  function loadBattleSlot(side,entry){window.ChatBattlePlayer?.destroy(side);
   window.ChatBattleThumbnails?.release($('preview-'+side));
   $('card-'+side).classList.toggle('empty-contender',!entry);
@@ -664,8 +679,8 @@
   if(game.revealed?.[entry.id]){ $('frame-'+side).classList.add('is-open'); const preview=thumbNode(v,'revealed-preview');$('player-'+side).append(preview);}
  }
  function renderBattleMatch(){const m=Core.currentMatch(game);if(!m)return;const key=m.id;
-  const round=game.current.round;const position=game.current.index+1;const progress=Core.matchProgress(game);
-  text('battleTopic',game.settings.topic);text('battleRoundLabel',formatRound(round)+' / MATCH '+pad(position));text('matchFraction',pad(progress.done+1)+' / '+pad(progress.total));
+  const round=game.current.round;const position=game.current.index+1;const progress=Core.roundProgress(game);
+  text('battleTopic',game.settings.topic);text('battleRoundLabel',formatRound(round));text('matchFraction',number(progress.position)+' / '+number(progress.total));
   if(lastBattleKey!==key){lastBattleKey=key;loadBattleSlot(1,getEntry(m.left));loadBattleSlot(2,getEntry(m.right));visualCounts=[0,0];renderBracket();}
   const demo=game.settings.mode==='demo';$('demoVoting').classList.toggle('hidden',!demo);refreshVotes();
  }
@@ -902,10 +917,11 @@
  }
  $('coinBtn').addEventListener('click',flipCoin);$('coinClose').addEventListener('click',cancelCoin);
  $('undoBtn').addEventListener('click',undoWinner);$('undoFinalBtn').addEventListener('click',undoWinner);
+ $('saveCapacity').addEventListener('click',async()=>{const state=game,value=Number($('liveCapacity').value);if(!state||state.phase!=='collecting'||capacityPending||launching||removingEntries.size)return;capacityPending=true;renderCollection();try{await window.ChatBattleCloudHost.updateCapacity(state,value);if(state===game)toast('ظرفیت افزایش یافت؛ لینک دعوت و ویدیوها حفظ شدند.');}catch(error){toast(error.message||'افزایش ظرفیت ناموفق بود.');}finally{capacityPending=false;if(state===game&&state.phase==='collecting')renderCollection();}});
  $('savePerUser').addEventListener('click',async()=>{const g=game,value=Number($('livePerUser').value);if(!g||g.phase!=='collecting'||!Number.isInteger(value)||value<1||value>10){toast('سقف باید عدد صحیح بین ۱ و ۱۰ باشد.');return}const b=$('savePerUser');b.disabled=true;try{await window.ChatBattleCloudHost.updatePerUser(g,value);if(game===g){g.settings.perUser=value;save();renderCollection();toast('سقف جدید اعمال شد.')}}catch(e){toast(e.message)}finally{b.disabled=false}});
  $('setupForm').addEventListener('submit',submitSettings);$('demoSubmissionForm').addEventListener('submit',demoSubmit);
  $('fillDemoBtn').addEventListener('click',fillDemo);$('launchBtn').addEventListener('click',async()=>{
-  if(!game||launching||game.phase!=='collecting')return;
+  if(!game||launching||capacityPending||removingEntries.size||game.phase!=='collecting')return;
   if(game.entries.length<2){toast('حداقل دو ویدیو برای شروع لازم است.');return}
   const startingGame=game;launching=true;const btn=$('launchBtn');btn.disabled=true;
   try{
@@ -947,6 +963,8 @@
 // Public bridge between the local tournament engine and Firestore host adapter.
  window.ChatBattleBridge={
   getGame:()=>game,
+  syncRoomSettings(state,room){if(game!==state||game.phase!=='collecting')return;let changed=false;if(Core.CAPACITIES.includes(room.capacity)&&game.settings.capacity!==room.capacity){game.settings.capacity=room.capacity;changed=true}if(Number.isInteger(room.perUser)&&room.perUser>=1&&room.perUser<=10&&game.settings.perUser!==room.perUser){game.settings.perUser=room.perUser;changed=true}if(changed){save();renderCollection();}},
+  removeEntry(state,entry){if(game!==state||game.phase!=='collecting')return;game.entries=game.entries.filter(e=>!(e.submissionUid===entry.submissionUid&&e.submissionLink===entry.submissionLink));save();renderCollection();},
   toast,
   attachSession(state,id){
    if(game!==state||game.phase!=='collecting')return;
@@ -955,7 +973,7 @@
   syncSubmissions(roomId,records){
    if(!game||game.phase!=='collecting'||game.cloudSessionId!==roomId)return;
    const next=[];
-   const max=game.settings.capacity;
+   const max=64; // Cloud Rules enforce capacity; do not truncate a snapshot while the room resize arrives.
    for(const record of records){
     const sender=String(record.username||'viewer').slice(0,64);
     if(!Array.isArray(record.links))continue;
@@ -964,7 +982,7 @@
      if(!video)continue;
      next.push({
       id:'cb_'+String(record.uid||'').slice(0,25)+'_'+i,
-      sender,senderKey:String(record.uid||''),
+      sender,senderKey:String(record.uid||''),submissionUid:String(record.uid||''),submissionLink:record.links[i],
       video,createdAt:Number(record.when)||Date.now(),
       eliminatedRound:null,lastShare:0,lastVotes:0
      });
@@ -1114,6 +1132,6 @@ document.querySelectorAll('[data-fullscreen]').forEach(b=>b.addEventListener('cl
 })();
 
 </script>
-<script type="module" src="./firebase-host.js?v=entry-auth-1"></script>
+<script type="module" src="./firebase-host.js?v=host-manage-1"></script>
 </body>
 </html>

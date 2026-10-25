@@ -1,5 +1,8 @@
 window.ChatBattleTranslations={
   "en": {
+    "حذف از صف": "Remove from queue",
+    "در حال حذف…": "Removing…",
+    "ویدیو از صف حذف شد؛ یک جای خالی آزاد شد.": "Video removed; one slot is available.",
     "مسابقه‌ات رو بساز": "Create your tournament",
     "چندتا انتخاب کوچیک تا شروع یک رقابت بزرگ.": "A few settings. Then let your chat decide.",
     "عنوان مسابقه": "Tournament title",
@@ -371,3 +374,9 @@ Object.assign(window.ChatBattleTranslations.fa,{"If Instagram shows an error, us
 Object.assign(window.ChatBattleTranslations.en,{"تلاش برای پخش مستقیم: ":"Direct playback attempt: ","پلیر اینستاگرام":"Instagram player"});
 Object.assign(window.ChatBattleTranslations.fa,{"Direct playback attempt: ":"تلاش برای پخش مستقیم: ","Instagram player":"پلیر اینستاگرام"});
 
+Object.assign(window.ChatBattleTranslations.fa,{"Remove from queue":"حذف از صف","Removing…":"در حال حذف…","Video removed; one slot is available.":"ویدیو از صف حذف شد؛ یک جای خالی آزاد شد."});
+
+(()=>{const en={
+"افزایش ظرفیت مسابقه":"Increase tournament capacity","افزایش ظرفیت":"Increase capacity","در حال افزایش…":"Increasing…","حداکثر ظرفیت":"Maximum capacity","لینک دعوت و تمام ویدیوهای قبلی حفظ می‌شوند.":"Your invitation link and all existing videos stay the same.","ظرفیت افزایش یافت؛ لینک دعوت و ویدیوها حفظ شدند.":"Capacity increased. Your invitation link and videos were kept.","رقابت این دور":"Match in this round","مرحلهٔ حذفی":"Knockout round","یک‌چهارم نهایی":"Quarter-final","نیمه‌نهایی":"Semi-final","فینال":"Final",
+"✎ ویرایش، حذف یا اضافه کردن ویدیو":"Edit, remove or add videos","تا قبل از شروع مسابقه می‌توانی ویدیوهایت را تغییر بدهی یا حذف کنی.":"You can change or remove your videos until the tournament starts.","تا قبل از شروع مسابقه می‌توانی لینک‌ها را ویرایش کنی، ویدیو حذف کنی یا لینک جدید اضافه کنی.":"Until the tournament starts, you can edit, remove or add videos using these buttons.","✅ ثبت شد. امکان ویرایش و حذف تا قبل از شروع مسابقه فعال است.":"Saved. You can edit or remove videos until the tournament starts.","حذف همهٔ ویدیوهای من":"Remove all my videos","حذف ویدیوی من":"Remove my video","حذف ویدیوهای من":"Remove my videos","همهٔ ویدیوهای ثبت‌شدهٔ تو از این مسابقه حذف شوند؟":"Remove all your submitted videos from this tournament?","بله، حذف کن":"Yes, remove","انصراف":"Cancel","ویدیوهای تو حذف شدند و ظرفیت آزاد شد. تا قبل از شروع می‌توانی دوباره لینک بفرستی.":"Your videos were removed and space was freed. You can submit again before the tournament starts."
+};Object.assign(window.ChatBattleTranslations.en,en);Object.assign(window.ChatBattleTranslations.fa,Object.fromEntries(Object.entries(en).map(([fa,en])=>[en,fa])));})();
