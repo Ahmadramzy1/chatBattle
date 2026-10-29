@@ -1,0 +1,32 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+const html=fs.readFileSync(__dirname+'/index.html','utf8');const local=fs.readFileSync(__dirname+'/index.html','utf8');
+const scripts=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m=>m[1]);
+let now=100000;class Clock extends Date{static now(){return now}}
+const ctx={module:{exports:{}},console,URL,Date:Clock};vm.runInNewContext(scripts[0],ctx);const Core=ctx.module.exports;
+const start=html.indexOf(' function registerText('),end=html.indexOf(' function renderChatNotice',start);assert(start>0&&end>start);
+const registerSource=html.slice(start,end);let results=[];
+function harness(change=false,n=4){const g=Core.newGame({mode:'kick',capacity:16,perUser:10,allowChange:change,voteSeconds:30});for(let i=0;i<n;i++)assert(Core.submitLink(g,'https://youtu.be/'+String(i).padStart(11,'a'),'sender'+i).ok);assert(Core.startTournament(g).ok);now=100000;Core.startVote(g,now);const c={game:g,Core,Date:Clock,idsSeen:new Set(),recentMessageKeys:new Map(),MAX_MSG_IDS:1500,queueVoteUpdate:()=>{}};vm.createContext(c);vm.runInContext(registerSource+';this.receive=registerText;',c);return {g,c,send:(v,user=1,id=crypto.randomUUID(),time=new Date(now).toISOString(),name='user'+user)=>c.receive(v,name,id,time,user),votes:()=>Array.from(Core.currentMatch(g).votes)}}
+function test(name,fn){try{fn();results.push({name,status:'PASS'})}catch(e){results.push({name,status:'FAIL',detail:e.message})}}
+test('same vote spam 10000 messages, changes OFF',()=>{const h=harness();for(let i=0;i<10000;i++)h.send('1');assert.deepEqual(h.votes(),[1,0])});
+test('alternating spam 10000 messages, changes OFF',()=>{const h=harness();for(let i=0;i<10000;i++)h.send(i%2?'2':'1');assert.deepEqual(h.votes(),[1,0])});
+test('alternating spam 10000 messages, changes ON',()=>{const h=harness(true);for(let i=0;i<10000;i++)h.send(i%2?'2':'1');assert.deepEqual(h.votes(),[0,1])});
+test('1000 voters x 10 changes: exactly 1000 votes',()=>{const h=harness(true);for(let i=0;i<10;i++)for(let u=1;u<=1000;u++)h.send(i%2?'2':'1',u);assert.deepEqual(h.votes(),[0,1000]);assert.equal(Object.keys(Core.currentMatch(h.g).voters).length,1000)});
+test('same message ID replay cannot undo latest vote',()=>{const h=harness(true);h.send('1',1,'a');h.send('2',1,'b');h.send('1',1,'a');assert.deepEqual(h.votes(),[0,1])});
+test('same Kick ID with changed username remains one voter',()=>{const h=harness();h.send('1',7,'a',new Date(now).toISOString(),'alice');h.send('2',7,'b',new Date(now).toISOString(),'bob');assert.deepEqual(h.votes(),[1,0])});
+test('different Kick IDs with same username are separate',()=>{const h=harness();h.send('1',7,'a',new Date(now).toISOString(),'same');h.send('2',8,'b',new Date(now).toISOString(),'same');assert.deepEqual(h.votes(),[1,1])});
+test('missing Kick ID cannot vote',()=>{const h=harness();h.send('1',null);assert.deepEqual(h.votes(),[0,0])});
+test('only exact ASCII 1 or 2 is accepted',()=>{const h=harness();for(const v of ['۱','۲',' 1','2 ','12','1\n','١','۲۲','one','<b>1</b>',''])h.send(v);assert.deepEqual(h.votes(),[0,0])});
+test('preview and closed phases reject messages',()=>{const h=harness();Core.endVote(h.g,now);h.send('1');Core.advance(h.g,0,now);h.send('2');assert.deepEqual(h.votes(),[0,0])});
+test('deadline minus 1ms accepted, exact deadline rejected',()=>{const h=harness();now=129999;h.send('1');now=130000;h.send('2',2);assert.deepEqual(h.votes(),[1,0]);assert.equal(h.g.matchStatus,'closed')});
+test('reopening same match preserves previous voters and totals',()=>{const h=harness();h.send('1');Core.endVote(h.g,now);Core.startVote(h.g,now);h.send('2');assert.deepEqual(h.votes(),[1,0])});
+test('new match allows same voter again',()=>{const h=harness();h.send('1');Core.endVote(h.g,now);Core.advance(h.g,0,now);Core.startVote(h.g,now);h.send('2');assert.deepEqual(h.votes(),[0,1])});
+test('saved and restored match retains spam protection',()=>{const h=harness();h.send('1');h.c.game=JSON.parse(JSON.stringify(h.g));h.c.receive('2','user1','restore',null,1);assert.deepEqual(Array.from(Core.currentMatch(h.c.game).votes),[1,0])});
+test('late message from BEFORE voting must not count',()=>{const h=harness();h.send('1',1,'old',new Date(now-5000).toISOString());assert.deepEqual(h.votes(),[0,0])});
+test('delayed previous-match vote must not enter next match',()=>{const h=harness();const old=new Date(now).toISOString();Core.endVote(h.g,now+1000);Core.advance(h.g,0,now+1000);now+=2000;Core.startVote(h.g,now);h.send('1',1,'delayed',old);assert.deepEqual(h.votes(),[0,0])});
+test('out of order delivery must preserve latest SENT vote',()=>{const h=harness(true);now+=10;h.send('2',1,'new',new Date(now-2).toISOString());h.send('1',1,'old',new Date(now-3).toISOString());assert.deepEqual(h.votes(),[0,1])});
+test('missing invalid and future message timestamps are rejected',()=>{const h=harness(true);for(const t of [null,'','invalid',new Date(now+10000).toISOString()])h.send('1',1,crypto.randomUUID(),t);assert.deepEqual(h.votes(),[0,0])});
+test('repeated same-choice message still prevents older change',()=>{const h=harness(true);h.send('1');now+=100;h.send('1');h.send('2',1,'delayed-change',new Date(now-50).toISOString());assert.deepEqual(h.votes(),[1,0])});
+test('watermark survives reload and reopening rejects older-window messages',()=>{const h=harness(true);h.send('1');now+=100;h.send('2');h.c.game=JSON.parse(JSON.stringify(h.g));h.c.receive('1','user1','old-restore',new Date(now-50).toISOString(),1);assert.deepEqual(Array.from(Core.currentMatch(h.c.game).votes),[0,1]);Core.endVote(h.c.game,now);now+=100;Core.startVote(h.c.game,now);h.c.receive('1','user1','old-window',new Date(now-50).toISOString(),1);assert.deepEqual(Array.from(Core.currentMatch(h.c.game).votes),[0,1])});
+const localScripts=[...local.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m=>m[1]);console.log(JSON.stringify({source: 'working tree index.html',sameCoreAsWorkspace:scripts[0].replace(/\r/g,'')===localScripts[0].replace(/\r/g,''),sameRegisterAsWorkspace:registerSource.replace(/\r/g,'')===local.slice(local.indexOf(' function registerText('),local.indexOf(' function renderChatNotice',local.indexOf(' function registerText('))).replace(/\r/g,''),pass:results.filter(x=>x.status==='PASS').length,fail:results.filter(x=>x.status==='FAIL').length,results},null,2));
+
+if(results.some(r=>r.status==='FAIL'))process.exitCode=1;
