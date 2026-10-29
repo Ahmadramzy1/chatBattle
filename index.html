@@ -459,7 +459,7 @@
  function currentMatch(state){return state.current?state.rounds[state.current.round]?.[state.current.index]||null:null;}
  function startVote(state,now=Date.now()){
   const m=currentMatch(state);if(state.phase!=='battle'||!m||!m.left||!m.right||m.winner||!['preview','closed'].includes(state.matchStatus))return false;
-  m.endedAt=null;m.votingStartedAt=now;
+  m.endedAt=null;
   state.matchStatus='voting';m.status='voting';state.votingEndsAt=now+state.settings.voteSeconds*1000;return true;
  }
  function endVote(state,now=Date.now()){
@@ -467,20 +467,12 @@
   state.matchStatus='closed';state.votingEndsAt=null;m.status='closed';m.endedAt=now;return true;
  }
  function maybeExpire(state,now=Date.now()){return state.matchStatus==='voting'&&state.votingEndsAt!==null&&now>=state.votingEndsAt?endVote(state,now):false;}
- function vote(state,choice,user,now=Date.now(),sentAt){
+ function vote(state,choice,user,now=Date.now()){
   if(state.phase!=='battle'||state.matchStatus!=='voting')return {ok:false,reason:'not-voting'};
   if(!['1','2'].includes(String(choice)))return {ok:false,reason:'invalid-choice'};
   if(state.votingEndsAt===null||now>=state.votingEndsAt){maybeExpire(state,now);return {ok:false,reason:'expired'};}
   const key=safeText(user).toLowerCase();if(!key)return {ok:false,reason:'username'};
   const m=currentMatch(state),next=Number(choice)-1,old=Object.hasOwn(m.voters,key)?m.voters[key]:undefined;
-  if(sentAt!==undefined){
-   const startedAt=m.votingStartedAt??state.votingEndsAt-state.settings.voteSeconds*1000;
-   if(!Number.isFinite(sentAt)||sentAt<startedAt||sentAt>=state.votingEndsAt||sentAt>now)return {ok:false,reason:'message-time'};
-   const times=m.voterMessageTimes??={},previous=Object.hasOwn(times,key)?times[key]:undefined;
-   if(previous!==undefined&&sentAt<previous)return {ok:false,reason:'stale-message'};
-   // Advance the watermark even when the newest message repeats the same choice.
-   Object.defineProperty(times,key,{value:sentAt,writable:true,enumerable:true,configurable:true});m.voterMessageTimes=times;
-  }
   if(old!==undefined){if(!state.settings.allowChange||old===next)return {ok:false,reason:'already-voted'};m.votes[old]--;}
   Object.defineProperty(m.voters,key,{value:next,writable:true,enumerable:true,configurable:true});m.votes[next]++;return {ok:true,side:next,changed:old!==undefined};
  }
@@ -622,8 +614,7 @@
   if(game.phase==='battle'&&(content==='1'||content==='2')){
    if(game.settings.mode==='kick'&&!kickId)return;
    const voterKey=game.settings.mode==='kick'?'kick:'+kickId:String(username);
-   const sentAt=game.settings.mode==='kick'?(typeof time==='string'&&time.trim()?Date.parse(time):NaN):undefined;
-   const result=Core.vote(game,content,voterKey,Date.now(),sentAt);if(result.ok){const m=Core.currentMatch(game);(m.voterNames??={})[voterKey.toLowerCase()]=username;}if(result.ok)queueVoteUpdate(result.side)
+   const result=Core.vote(game,content,voterKey);if(result.ok){const m=Core.currentMatch(game);(m.voterNames??={})[voterKey.toLowerCase()]=username;}if(result.ok)queueVoteUpdate(result.side)
   }
  }
  function renderChatNotice(){const notice=$('chatNotice');notice.hidden=!game||game.settings.mode!=='kick'||game.phase==='finished';if(notice.hidden)return;notice.dataset.state=chatState;
