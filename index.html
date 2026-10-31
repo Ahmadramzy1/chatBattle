@@ -270,6 +270,8 @@
 <script src="./presentation-motion.js?v=premium-2" defer></script>
 <link rel="stylesheet" href="./host-removal.css?v=host-manage-1">
 <link rel="stylesheet" href="./premium-motion.css?v=2">
+<link rel="stylesheet" href="./custom-select.css?v=1">
+<script src="./custom-select.js?v=1" defer></script>
 </head>
 <body><a class="skip-link" href="#main-content">رفتن به محتوای اصلی</a>
 <div class="ambient ambient-one" aria-hidden="true"></div><div class="ambient ambient-two" aria-hidden="true"></div>
@@ -577,10 +579,10 @@
  }
  function renderCollection(){const count=game.entries.length,cap=game.settings.capacity;
   text('lobbyTopicTitle',game.settings.topic);text('lobbyCount',pad(count));text('lobbyCapacity',cap);text('lobbyAvailable',count>=cap?'ظرفیت تکمیل':number(cap-count)+' جای خالی');text('perUserDisplay',game.settings.perUser);
-  $('collectionProgress').style.width=(count/cap*100)+'%';$('launchBtn').disabled=launching||capacityPending||removingEntries.size>0||count<2; if(document.activeElement!==$('livePerUser'))$('livePerUser').value=game.settings.perUser;
+  $('collectionProgress').style.width=(count/cap*100)+'%';$('launchBtn').disabled=launching||capacityPending||removingEntries.size>0||count<2; if(!$('livePerUser').closest('.cb-select')?.contains(document.activeElement)&&document.activeElement!==$('livePerUser'))$('livePerUser').value=game.settings.perUser;
   const capacitySelect=$('liveCapacity');for(const option of capacitySelect.options)option.disabled=Number(option.value)<=cap;
   if(Number(capacitySelect.value)<=cap)capacitySelect.value=String(Core.CAPACITIES.find(n=>n>cap)||cap);
-  capacitySelect.disabled=capacityPending||cap>=64||launching;$('saveCapacity').disabled=capacityPending||cap>=64||launching;text('saveCapacity',capacityPending?'در حال افزایش…':cap>=64?'حداکثر ظرفیت':'افزایش ظرفیت');
+  capacitySelect.disabled=capacityPending||cap>=64||launching;window.ChatBattleSelect?.refresh($('livePerUser'));window.ChatBattleSelect?.refresh(capacitySelect);$('saveCapacity').disabled=capacityPending||cap>=64||launching;text('saveCapacity',capacityPending?'در حال افزایش…':cap>=64?'حداکثر ظرفیت':'افزایش ظرفیت');
   const demo=game.settings.mode==='demo'||fallback;
   $('demoPanel').classList.add('hidden');text('modeTitle',game.settings.mode==='demo'?'شبیه‌ساز رأی Kick':'اتصال به چت Kick (فقط رأی)');
   $('reconnectBtn').classList.toggle('hidden',game.settings.mode==='demo');
