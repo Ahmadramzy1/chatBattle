@@ -70,3 +70,18 @@ body:after{content:"";position:fixed;z-index:-1;inset:0;pointer-events:none;opac
 /* Language morph: blend the outgoing and incoming page while controls gently pop in. */
 @media(prefers-reduced-motion:no-preference){::view-transition-old(root){animation:language-fade-out 260ms ease both}::view-transition-new(root){animation:language-fade-in 520ms cubic-bezier(.22,1,.36,1) both}::view-transition-group(*){animation-duration:.55s;animation-timing-function:cubic-bezier(.22,1,.36,1)}@keyframes language-fade-out{to{opacity:0;filter:blur(2px)}}@keyframes language-fade-in{from{opacity:0;filter:blur(2px)}to{opacity:1;filter:blur(0)}}}
 @media(prefers-reduced-motion:reduce){::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}}
+/* Full-viewport layout and inexpensive translucent surfaces. */
+html,body{width:100%;min-height:100%;margin:0}
+body{padding:0!important}
+.app-shell{width:100%;max-width:none!important;min-height:100vh;margin:0!important;border:0!important;border-radius:0!important;overflow:visible;box-shadow:none!important;background:transparent!important}
+.topbar{padding-inline:clamp(20px,3vw,56px)}
+.page{padding-inline:clamp(20px,3vw,56px)}
+.site-footer{padding-inline:clamp(20px,3vw,56px)}
+.topbar,.glass,.setup-panel.glass,.video-card,.video-card.right-card,.winner-card,.ranking-row,.side-card,.entry-tile,.icon-btn,.secondary-btn,.language-switch,.segment span,.capacity-select span,input,select,.prefix-input,.battle-art-title img{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;filter:none!important}
+.topbar{background:var(--panel)}
+.glass,.setup-panel.glass,.video-card,.video-card.right-card,.winner-card,.ranking-row,.side-card{background:linear-gradient(145deg,color-mix(in srgb,var(--panel) 86%,var(--accent)),var(--panel) 58%);box-shadow:0 9px 24px #0002,inset 0 1px 0 var(--glass-light)}
+.entry-tile,.secondary-btn,.icon-btn,.segment span,.capacity-select span{box-shadow:0 3px 10px #0002,inset 0 1px 0 var(--glass-light)}
+body:before{animation:none!important;transform:none!important}
+.battle-art-title img{animation:none!important}
+.reveal-ready,.reveal-ready.revealed{filter:none!important}
+@media(prefers-reduced-motion:no-preference){::view-transition-old(root){animation:premium-fade-out .2s ease both}::view-transition-new(root){animation:premium-fade-in .35s ease both}@keyframes premium-fade-out{to{opacity:0}}@keyframes premium-fade-in{from{opacity:0}to{opacity:1}}}
